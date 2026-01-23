@@ -41,15 +41,20 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    // Protect admin routes - require authentication
+    // Allow access to admin login page without authentication
+    if (request.nextUrl.pathname === '/admin/login') {
+        return supabaseResponse
+    }
+
+    // Protect other admin routes - redirect to admin login if not authenticated
     if (!user && request.nextUrl.pathname.startsWith('/admin')) {
         const url = request.nextUrl.clone()
-        url.pathname = '/login'
+        url.pathname = '/admin/login'
         return NextResponse.redirect(url)
     }
 
-    // Check admin status for /admin routes
-    if (user && request.nextUrl.pathname.startsWith('/admin')) {
+    // Check admin status for /admin routes (excluding /admin/login)
+    if (user && request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin/login') {
         const { data: profile } = await supabase
             .from('profiles')
             .select('is_admin')
