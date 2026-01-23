@@ -95,8 +95,13 @@ export async function GET() {
 
         if (error) {
             console.error('Error fetching applications:', error)
+            // If table doesn't exist or other DB error, return empty array
+            // This allows the dashboard to load gracefully
+            if (error.code === '42P01' || error.message?.includes('does not exist')) {
+                return NextResponse.json({ applications: [] })
+            }
             return NextResponse.json(
-                { error: 'Failed to fetch applications' },
+                { error: 'Failed to fetch applications', details: error.message },
                 { status: 500 }
             )
         }

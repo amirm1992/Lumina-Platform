@@ -24,15 +24,37 @@ export async function isUserAdmin(): Promise<boolean> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return false
+    if (!user) {
+        console.log('isUserAdmin: No authenticated user')
+        return false
+    }
 
-    const { data: profile } = await supabase
+    // First try by user ID
+    const { data: profileById } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', user.id)
         .single()
 
-    return profile?.is_admin ?? false
+    if (profileById?.is_admin) {
+        return true
+    }
+
+    // Fallback: check by email
+    if (user.email) {
+        const { data: profileByEmail } = await supabase
+            .from('profiles')
+            .select('id, is_admin')
+            .eq('email', user.email)
+            .single()
+
+        if (profileByEmail?.is_admin) {
+            return true
+        }
+    }
+
+    console.log('isUserAdmin: User is not admin', { userId: user.id, email: user.email })
+    return false
 }
 
 export async function getProfile(userId: string): Promise<Profile | null> {
