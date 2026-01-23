@@ -33,12 +33,14 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                     </div>
                     <div>
                         <h3 className="font-bold text-black text-lg">{lender.name}</h3>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">30 Year Fixed</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">
+                            {lender.loanTerm || 30} Year {lender.loanType || 'Fixed'}
+                        </p>
                     </div>
                 </div>
-                {lender.bestMatch && (
+                {(lender.bestMatch || lender.isRecommended) && (
                     <span className="px-3 py-1 rounded-md bg-purple-600 text-[10px] font-bold text-white uppercase tracking-widest shadow-lg shadow-purple-500/30">
-                        Best Match
+                        ⭐ Recommended
                     </span>
                 )}
             </div>
@@ -61,10 +63,12 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                     <span className="text-gray-500">Monthly P&I</span>
                     <span className="font-semibold text-black">${lender.monthlyPayment.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Lender Fees</span>
-                    <span className="font-semibold text-black">${lender.fees.toLocaleString()}</span>
-                </div>
+                {lender.closingCosts && (
+                    <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Closing Costs</span>
+                        <span className="font-semibold text-black">${lender.closingCosts.toLocaleString()}</span>
+                    </div>
+                )}
                 <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Points</span>
                     <span className="font-semibold text-black">{lender.points}</span>

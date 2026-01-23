@@ -13,10 +13,14 @@ export interface Lender {
     rate: number;
     apr: number;
     monthlyPayment: number;
-    fees: number;
+    fees?: number;
     points: number;
-    logo?: string; // Optional URL or helper identifier
+    logo?: string;
     bestMatch?: boolean;
+    loanTerm?: number;
+    loanType?: 'CONVENTIONAL' | 'FHA' | 'VA' | 'JUMBO' | 'USDA';
+    closingCosts?: number;
+    isRecommended?: boolean;
 }
 
 export interface RateTrend {

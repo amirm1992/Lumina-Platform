@@ -71,6 +71,37 @@ export function CreateAccount() {
             return
         }
 
+        // Get full application state to submit
+        const applicationState = useApplicationStore.getState()
+
+        // Submit application to database
+        try {
+            const response = await fetch('/api/applications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productType: applicationState.productType,
+                    propertyType: applicationState.propertyType,
+                    propertyUsage: applicationState.propertyUsage,
+                    zipCode: applicationState.zipCode,
+                    estimatedValue: applicationState.estimatedValue,
+                    loanAmount: applicationState.loanAmount,
+                    firstName: applicationState.firstName,
+                    lastName: applicationState.lastName,
+                    phone: applicationState.phone,
+                    employmentStatus: applicationState.employmentStatus,
+                    annualIncome: applicationState.annualIncome,
+                    liquidAssets: applicationState.liquidAssets,
+                })
+            })
+
+            if (!response.ok) {
+                console.error('Failed to submit application')
+            }
+        } catch (err) {
+            console.error('Error submitting application:', err)
+        }
+
         setEmail(localEmail)
         setPassword(localPassword)
         completeApplication()
