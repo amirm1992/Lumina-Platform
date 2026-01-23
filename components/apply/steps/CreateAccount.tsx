@@ -116,25 +116,67 @@ export function CreateAccount() {
 
     if (success) {
         return (
-            <div className="space-y-6 text-center">
-                <div className="w-16 h-16 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-green-400">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            <div className="space-y-8 text-center py-8">
+                {/* Success Icon */}
+                <div className="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-green-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h1 className="text-3xl font-bold text-white">Check Your Email</h1>
-                <p className="text-gray-400 max-w-md mx-auto">
-                    We've sent a confirmation link to <span className="text-purple-400 font-medium">{localEmail}</span>.
-                    Click the link to verify your email and access your personalized rates.
-                </p>
-                <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm text-blue-300">
-                    💡 Don't see the email? Check your spam folder or wait a few minutes.
+
+                {/* Congratulations Header */}
+                <div>
+                    <h1 className="text-3xl font-bold text-black mb-3">Congratulations! 🎉</h1>
+                    <p className="text-xl text-gray-600">Your application has been submitted successfully.</p>
                 </div>
+
+                {/* Email Verification Card */}
+                <div className="p-6 rounded-2xl bg-purple-50 border border-purple-100 max-w-md mx-auto">
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-purple-600">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        <h2 className="text-lg font-semibold text-purple-900">Verify Your Email</h2>
+                    </div>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        We've sent a verification link to<br />
+                        <span className="font-semibold text-purple-700">{localEmail}</span>
+                    </p>
+                    <p className="text-gray-500 text-sm mt-3">
+                        Please check your inbox and click the link to activate your account and view your personalized mortgage rates.
+                    </p>
+                </div>
+
+                {/* What's Next Section */}
+                <div className="max-w-md mx-auto text-left">
+                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">What happens next?</h3>
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                            <p className="text-gray-600 text-sm">Click the verification link in your email</p>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                            <p className="text-gray-600 text-sm">Log in to your secure dashboard</p>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                            <p className="text-gray-600 text-sm">View your personalized rates from top lenders</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Help Text */}
+                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-500 max-w-md mx-auto">
+                    💡 Didn't receive the email? Check your spam folder or wait a few minutes.
+                </div>
+
+                {/* Sign In Link */}
                 <button
                     onClick={() => router.push('/login')}
-                    className="text-purple-400 hover:text-purple-300 text-sm underline"
+                    className="px-8 py-3 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-all shadow-md"
                 >
-                    Already confirmed? Sign in here
+                    Already verified? Sign In →
                 </button>
             </div>
         )
