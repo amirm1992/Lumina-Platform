@@ -109,12 +109,10 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
 export async function getApplications(status?: ApplicationStatus): Promise<Application[]> {
     const supabase = await createClient()
 
+    // First try without profile join (more reliable with RLS)
     let query = supabase
         .from('applications')
-        .select(`
-            *,
-            profile:profiles(id, email, full_name, phone)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
     if (status) {
