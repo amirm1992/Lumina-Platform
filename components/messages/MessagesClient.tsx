@@ -70,8 +70,6 @@ export function MessagesClient({ user }: MessagesClientProps) {
     const handleSend = (to: string, subject: string, body: string) => {
         // Mock sending - just add to list for feedback loop or show toast
         // ideally we would likely show a "Sent" success toast.
-        // For now, let's just log it.
-        // console.log('Sending message to:', to, subject)
         setIsComposeOpen(false)
     }
 

@@ -24,27 +24,22 @@ export function CreateAccount() {
             e.preventDefault()
             e.stopPropagation()
         }
-        console.log('handleSubmit called', { email: localEmail, passwordLength: localPassword.length })
 
         // Validation
         if (!localEmail || !localPassword) {
-            console.log('Validation failed: missing fields')
             setError('Please fill in all fields')
             return
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(localEmail)) {
-            console.log('Validation failed: invalid email')
             setError('Please enter a valid email address')
             return
         }
         if (localPassword.length < 6) {
-            console.log('Validation failed: password too short')
             setError('Password must be at least 6 characters')
             return
         }
         if (localPassword !== confirmPassword) {
-            console.log('Validation failed: passwords do not match')
             setError('Passwords do not match')
             return
         }
@@ -53,7 +48,6 @@ export function CreateAccount() {
         setError('')
         setShowExistingAccount(false)
 
-        console.log('Calling supabase.auth.signUp...')
         const { data, error: signUpError } = await supabase.auth.signUp({
             email: localEmail,
             password: localPassword,
@@ -61,7 +55,6 @@ export function CreateAccount() {
                 emailRedirectTo: `${window.location.origin}/auth/callback`,
             },
         })
-        console.log('Supabase response:', { data, error: signUpError })
 
         if (signUpError) {
             // Check if user already exists
@@ -77,7 +70,6 @@ export function CreateAccount() {
 
         // Check if email confirmation is required (identities array is empty means waiting for confirmation)
         if (data.user && data.user.identities && data.user.identities.length === 0) {
-            console.log('User created but requires confirmation (existing user case?)')
             setShowExistingAccount(true)
             setError('An account with this email already exists.')
             setLoading(false)
@@ -87,7 +79,6 @@ export function CreateAccount() {
         // Get full application state to submit
         const applicationState = useApplicationStore.getState()
 
-        console.log('Submitting application to API...')
         // Submit application to database
         try {
             const response = await fetch('/api/applications', {
@@ -109,7 +100,6 @@ export function CreateAccount() {
                 })
             })
 
-            console.log('API Response status:', response.status)
             if (!response.ok) {
                 console.error('Failed to submit application')
             }
@@ -204,7 +194,7 @@ export function CreateAccount() {
                 <p className="text-gray-400">Your personalized rates are almost ready.</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-sm text-purple-300">
+            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-sm text-purple-700">
                 🔒 Your data is encrypted. We are not a lead generator—your info stays with us.
             </div>
 

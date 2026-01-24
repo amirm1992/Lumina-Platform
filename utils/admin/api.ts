@@ -26,7 +26,6 @@ export async function isUserAdmin(): Promise<boolean> {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        console.log('isUserAdmin: No authenticated user')
         return false
     }
 
@@ -54,7 +53,6 @@ export async function isUserAdmin(): Promise<boolean> {
         }
     }
 
-    console.log('isUserAdmin: User is not admin', { userId: user.id, email: user.email })
     return false
 }
 

@@ -52,7 +52,7 @@ export function Hero() {
             <div className="absolute inset-0 z-0">
                 <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-blue-50/50 rounded-full blur-[100px]" />
                 <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-50/50 rounded-full blur-[100px]" />
-                <div className="absolute inset-0 bg-[url('/grid-light.svg')] bg-center opacity-30 [mask-image:linear-gradient(180deg,black,transparent)]" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-30 [mask-image:linear-gradient(180deg,black,transparent)]" />
             </div>
 
             <div className="relative z-10 container mx-auto px-4">
@@ -99,7 +99,9 @@ export function Hero() {
                                 <h3 className="font-bold text-gray-900 mb-1">Finance.</h3>
                                 <div className="text-sm text-gray-500 mb-4">Today's Rate</div>
                                 {loading ? (
-                                    <div className="text-4xl font-bold text-gray-900 mb-4 animate-pulse">--.--%</div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
+                                    </div>
                                 ) : (
                                     <div className="text-4xl font-bold text-gray-900 mb-4">{rateData?.rate.toFixed(3)}%</div>
                                 )}

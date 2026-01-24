@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { isUserAdmin } from '@/utils/admin/api'
+import { sendStatusUpdateEmail, EmailStatus } from '@/utils/email/send-email'
 
 export async function POST(
     request: NextRequest,
@@ -16,6 +17,13 @@ export async function POST(
     const body = await request.json()
 
     const supabase = await createClient()
+
+    // Fetch application and profile data for email notification
+    const { data: application } = await supabase
+        .from('applications')
+        .select('user_id')
+        .eq('id', id)
+        .single()
 
     const updateData: Record<string, unknown> = {
         status: body.status,
@@ -49,8 +57,23 @@ export async function POST(
         })
     }
 
-    // TODO: If notify_client is true, send email notification
-    // This would integrate with a service like Resend, SendGrid, etc.
+    // Send email notification if requested and user has profile
+    if (body.notify_client && application?.user_id) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', application.user_id)
+            .single()
+
+        if (profile?.email) {
+            await sendStatusUpdateEmail({
+                to: profile.email,
+                name: profile.full_name || 'Valued Client',
+                status: body.status as EmailStatus,
+                applicationId: id,
+            })
+        }
+    }
 
     return NextResponse.json({ success: true })
 }
