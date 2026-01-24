@@ -198,9 +198,10 @@ export function CreateAccount() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 border-4 border-red-500 p-4 rounded-xl relative">
+            <div className="absolute -top-4 left-4 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">DEBUG MODE: v3</div>
             <div>
-                <h1 className="text-3xl font-bold mb-2" style={{ color: 'black' }}>Create your dashboard</h1>
+                <h1 className="text-3xl font-bold mb-2 text-black" style={{ color: 'black', opacity: 1, visibility: 'visible' }}>Create your dashboard (UPDATED)</h1>
                 <p className="text-gray-400">Your personalized rates are almost ready.</p>
             </div>
 
