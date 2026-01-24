@@ -200,7 +200,7 @@ export function CreateAccount() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold !text-black mb-2">Create your dashboard</h1>
+                <h1 className="text-3xl font-bold mb-2" style={{ color: 'black' }}>Create your dashboard</h1>
                 <p className="text-gray-400">Your personalized rates are almost ready.</p>
             </div>
 
