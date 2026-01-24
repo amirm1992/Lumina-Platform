@@ -30,7 +30,8 @@ export default async function DocHubPage() {
         size: doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown',
         type: doc.file_type === 'pdf' ? 'pdf' : 'image',
         status: doc.status as any,
-        downloadUrl: doc.file_path // We'll handle signing this URL in the client or generating a signed URL here
+        path: doc.file_path,
+        downloadUrl: doc.file_path // Legacy support
     }));
 
     return <DocHubClient user={user} initialFiles={initialFiles} />;

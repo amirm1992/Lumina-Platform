@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { User } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
 import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
 import { DocGroup } from './DocGroup'
 import { UploadZone } from './UploadZone'
@@ -19,14 +20,57 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
         setFiles(prev => [...newFiles, ...prev])
     }
 
-    const handleDelete = (id: string) => {
-        if (confirm('Are you sure you want to delete this file?')) {
-            setFiles(prev => prev.filter(f => f.id !== id))
+    const supabase = createClient()
+
+    const handleDelete = async (id: string) => {
+        const fileToDelete = files.find(f => f.id === id)
+        if (!fileToDelete) return
+
+        if (!confirm('Are you sure you want to delete this file?')) return
+
+        // Optimistic UI update
+        const previousFiles = [...files]
+        setFiles(prev => prev.filter(f => f.id !== id))
+
+        try {
+            // 1. Delete from Storage
+            if (fileToDelete.path) {
+                const { error: storageError } = await supabase.storage
+                    .from('documents')
+                    .remove([fileToDelete.path])
+                if (storageError) console.error('Storage delete error:', storageError)
+            }
+
+            // 2. Delete from Database
+            const { error: dbError } = await supabase
+                .from('documents')
+                .delete()
+                .eq('id', id)
+
+            if (dbError) throw dbError
+        } catch (error) {
+            console.error('Delete failed:', error)
+            alert('Failed to delete file')
+            setFiles(previousFiles) // Revert
         }
     }
 
-    const handleDownload = (file: DocFile) => {
-        alert(`Simulating download for: ${file.name}`)
+    const handleDownload = async (file: DocFile) => {
+        if (!file.path) return
+
+        try {
+            const { data, error } = await supabase.storage
+                .from('documents')
+                .createSignedUrl(file.path, 300) // 5 minutes expiry
+
+            if (error) throw error
+            if (data?.signedUrl) {
+                window.open(data.signedUrl, '_blank')
+            }
+        } catch (error) {
+            console.error('Download failed:', error)
+            alert('Failed to access document')
+        }
     }
 
     // Categorize files
@@ -46,7 +90,7 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
 
                 {/* Upload Section */}
                 <div className="mb-16">
-                    <UploadZone onUpload={handleUpload} />
+                    <UploadZone onUpload={handleUpload} userId={user?.id || ''} />
                 </div>
 
                 {/* Document Groups */}

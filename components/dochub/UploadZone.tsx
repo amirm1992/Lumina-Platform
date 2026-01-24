@@ -3,15 +3,17 @@
 import React, { useState, useRef } from 'react'
 import { UploadCloud, ShieldCheck } from 'lucide-react'
 import { DocFile } from './types'
+import { createClient } from '@/utils/supabase/client'
 
 interface UploadZoneProps {
     onUpload: (newFiles: DocFile[]) => void
 }
 
-export function UploadZone({ onUpload }: UploadZoneProps) {
+export function UploadZone({ onUpload, userId }: UploadZoneProps & { userId: string }) {
     const [isDragging, setIsDragging] = useState(false)
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const supabase = createClient()
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault()
@@ -22,27 +24,67 @@ export function UploadZone({ onUpload }: UploadZoneProps) {
         setIsDragging(false)
     }
 
-    const processFiles = (files: FileList | null) => {
+    const processFiles = async (files: FileList | null) => {
         if (!files || files.length === 0) return
 
         setIsUploading(true)
+        const uploadedDocs: DocFile[] = []
 
-        // Simulate upload delay
-        setTimeout(() => {
-            const newDocs: DocFile[] = Array.from(files).map((f, i) => ({
-                id: `new-${Date.now()}-${i}`,
-                name: f.name,
-                category: 'client_upload',
-                size: (f.size / 1024 / 1024).toFixed(2) + ' MB',
-                type: f.name.endsWith('.pdf') ? 'pdf' : 'image',
-                status: 'pending',
-                uploadDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            }))
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i]
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`
+                const filePath = `${userId}/${fileName}`
 
-            onUpload(newDocs)
+                // 1. Upload to Storage
+                const { error: uploadError } = await supabase.storage
+                    .from('documents')
+                    .upload(filePath, file)
+
+                if (uploadError) throw uploadError
+
+                // 2. Insert into Database
+                const { data: newDoc, error: insertError } = await supabase
+                    .from('documents')
+                    .insert({
+                        user_id: userId,
+                        file_name: file.name,
+                        file_path: filePath,
+                        file_size: file.size,
+                        file_type: fileExt,
+                        category: 'client_upload',
+                        status: 'pending'
+                    })
+                    .select()
+                    .single()
+
+                if (insertError) throw insertError
+
+                if (newDoc) {
+                    uploadedDocs.push({
+                        id: newDoc.id,
+                        name: newDoc.file_name,
+                        category: 'client_upload',
+                        size: (newDoc.file_size / 1024 / 1024).toFixed(2) + ' MB',
+                        type: newDoc.file_type === 'pdf' ? 'pdf' : 'image',
+                        status: 'pending',
+                        path: newDoc.file_path,
+                        uploadDate: new Date(newDoc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    })
+                }
+            }
+
+            if (uploadedDocs.length > 0) {
+                onUpload(uploadedDocs)
+            }
+        } catch (error) {
+            console.error('Upload failed:', error)
+            alert('Failed to upload one or more files. Please try again.')
+        } finally {
             setIsUploading(false)
             setIsDragging(false)
-        }, 1500)
+        }
     }
 
     const handleDrop = (e: React.DragEvent) => {
@@ -71,6 +113,7 @@ export function UploadZone({ onUpload }: UploadZoneProps) {
                 className="hidden"
                 multiple
                 onChange={handleFileSelect}
+                disabled={isUploading}
             />
 
             {isUploading ? (

@@ -9,4 +9,5 @@ export interface DocFile {
     type: 'pdf' | 'image' | 'doc'
     status?: 'pending' | 'verified' | 'rejected'
     downloadUrl?: string
+    path?: string
 }
