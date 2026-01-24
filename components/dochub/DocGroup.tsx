@@ -13,7 +13,7 @@ interface DocGroupProps {
 }
 
 export function DocGroup({ title, description, files, onDelete, onDownload }: DocGroupProps) {
-    if (files.length === 0) return null
+    // if (files.length === 0) return null -- Render even if empty
 
     return (
         <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -27,16 +27,22 @@ export function DocGroup({ title, description, files, onDelete, onDownload }: Do
                 {description && <p className="text-sm text-gray-500">{description}</p>}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {files.map(file => (
-                    <FileTile
-                        key={file.id}
-                        file={file}
-                        onDelete={onDelete}
-                        onDownload={onDownload}
-                    />
-                ))}
-            </div>
+            {files.length === 0 ? (
+                <div className="py-8 text-center bg-gray-100/50 rounded-xl border border-dashed border-gray-200">
+                    <p className="text-sm text-gray-400 italic">No documents in this section</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {files.map(file => (
+                        <FileTile
+                            key={file.id}
+                            file={file}
+                            onDelete={onDelete}
+                            onDownload={onDownload}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

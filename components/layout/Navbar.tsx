@@ -7,7 +7,7 @@ export function Navbar() {
             {/* Logo - Top Left */}
             <div className="pointer-events-auto">
                 <Link href="/" className="flex items-center -ml-2 group">
-                    <div className="relative w-28 h-28 -mt-4 transition-transform group-hover:scale-105">
+                    <div className="relative w-20 h-20 -mt-2 transition-transform group-hover:scale-105">
                         <Image
                             src="/logo-transparent.png"
                             alt="Lumina Logo"
@@ -15,7 +15,7 @@ export function Navbar() {
                             className="object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.05)]"
                         />
                     </div>
-                    <div className="relative w-80 h-32 -mt-4 -ml-20 transition-transform group-hover:scale-105">
+                    <div className="relative w-48 h-20 -mt-2 -ml-16 transition-transform group-hover:scale-105">
                         <Image
                             src="/lumina-text.png"
                             alt="Lumina"

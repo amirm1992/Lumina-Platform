@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Protect admin routes - redirect to admin-login if not authenticated
-    if (!user && request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user && request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin-login') {
         const url = request.nextUrl.clone()
         url.pathname = '/admin-login'
         return NextResponse.redirect(url)

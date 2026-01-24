@@ -7,7 +7,8 @@ import type {
     CreditScoreFormData,
     LenderOfferFormData,
     ApplicationStatusFormData,
-    ApplicationStatus
+    ApplicationStatus,
+    Document
 } from '@/types/database'
 
 // ============================================
@@ -132,11 +133,11 @@ export async function getApplications(status?: ApplicationStatus): Promise<Appli
 export async function getApplicationById(id: string): Promise<Application | null> {
     const supabase = await createClient()
 
-    const { data, error } = await supabase
+    // 1. Fetch Application + Lender Offers (RLS safe usually)
+    const { data: application, error } = await supabase
         .from('applications')
         .select(`
             *,
-            profile:profiles(id, email, full_name, phone),
             lender_offers(*)
         `)
         .eq('id', id)
@@ -147,7 +148,28 @@ export async function getApplicationById(id: string): Promise<Application | null
         return null
     }
 
-    return data
+    if (!application) return null
+
+    // 2. Fetch Profile separately (to avoid Join RLS issues)
+    // Even if this fails, we return the application
+    let profile: any = undefined
+    if (application.user_id) {
+        const { data: profileData } = await supabase
+            .from('profiles')
+            .select('id, email, full_name, phone')
+            .eq('id', application.user_id)
+            .single()
+
+        if (profileData) {
+            profile = profileData
+        }
+    }
+
+    // Return combined object
+    return {
+        ...application,
+        profile
+    }
 }
 
 export async function updateApplicationCreditScore(
@@ -302,7 +324,103 @@ export async function deleteLenderOffer(offerId: string): Promise<boolean> {
 }
 
 // ============================================
-// ACTIVITY LOG
+// DOCUMENTS
+// ============================================
+
+export async function getDocuments(applicationId: string): Promise<Document[]> {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('application_id', applicationId)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching documents:', error)
+        return []
+    }
+
+    return data ?? []
+}
+
+export async function uploadDocument(
+    applicationId: string,
+    userId: string,
+    file: File,
+    category: 'lender_doc' | 'client_upload' | 'disclosure' = 'lender_doc'
+): Promise<Document | null> {
+    const supabase = await createClient()
+
+    // 1. Upload to Storage
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`
+    const filePath = `${userId}/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file)
+
+    if (uploadError) {
+        console.error('Error uploading file:', uploadError)
+        return null
+    }
+
+    // 2. Insert into Database
+    const { data, error: insertError } = await supabase
+        .from('documents')
+        .insert({
+            application_id: applicationId,
+            user_id: userId,
+            file_name: file.name,
+            file_path: filePath,
+            file_size: file.size,
+            file_type: fileExt,
+            category,
+            uploaded_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .select()
+        .single()
+
+    if (insertError) {
+        console.error('Error saving document record:', insertError)
+        return null
+    }
+
+    // Log activity
+    await logAdminActivity('upload_document', 'application', applicationId, { fileName: file.name })
+
+    return data
+}
+
+export async function deleteDocument(documentId: string, filePath: string): Promise<boolean> {
+    const supabase = await createClient()
+
+    // 1. Delete from Storage
+    const { error: storageError } = await supabase.storage
+        .from('documents')
+        .remove([filePath])
+
+    if (storageError) {
+        console.error('Error deleting file from storage:', storageError)
+    }
+
+    // 2. Delete from Database
+    const { error: dbError } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId)
+
+    if (dbError) {
+        console.error('Error deleting document record:', dbError)
+        return false
+    }
+
+    return true
+}
+
+// ============================================
+// ADMIN LOGS
 // ============================================
 
 async function logAdminActivity(

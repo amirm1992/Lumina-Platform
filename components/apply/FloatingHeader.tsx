@@ -8,7 +8,7 @@ export function FloatingHeader() {
         <header className="fixed top-0 left-0 right-0 z-50 flex items-start justify-between px-6 py-6 bg-transparent pointer-events-none">
             <div className="pointer-events-auto">
                 <Link href="/" className="block group">
-                    <div className="relative w-32 h-32 -mt-4 transition-transform group-hover:scale-105">
+                    <div className="relative w-20 h-20 -mt-2 transition-transform group-hover:scale-105">
                         <Image
                             src="/logo-transparent.png"
                             alt="Lumina Logo"

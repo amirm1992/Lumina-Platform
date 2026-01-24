@@ -9,67 +9,11 @@ import { DocFile } from './types'
 
 interface DocHubClientProps {
     user: User | null
+    initialFiles: DocFile[]
 }
 
-const INITIAL_FILES: DocFile[] = [
-    {
-        id: '1',
-        name: 'Pre-Approval Letter - 2024.pdf',
-        category: 'lender_doc',
-        uploadDate: 'Jan 20, 2025',
-        size: '1.2 MB',
-        type: 'pdf',
-        status: 'verified'
-    },
-    {
-        id: '2',
-        name: 'Initial Loan Estimate (LE).pdf',
-        category: 'lender_doc',
-        uploadDate: 'Jan 21, 2025',
-        size: '845 KB',
-        type: 'pdf',
-        status: 'pending'
-    },
-    {
-        id: '3',
-        name: 'Lumina Privacy Policy.pdf',
-        category: 'disclosure',
-        uploadDate: 'Jan 15, 2025',
-        size: '2.4 MB',
-        type: 'pdf',
-        status: 'verified'
-    },
-    {
-        id: '4',
-        name: 'Terms of Service.pdf',
-        category: 'disclosure',
-        uploadDate: 'Jan 15, 2025',
-        size: '1.8 MB',
-        type: 'pdf',
-        status: 'verified'
-    },
-    {
-        id: 'upload-1',
-        name: 'W-2 Form 2023.pdf',
-        category: 'client_upload',
-        uploadDate: 'Jan 18, 2025',
-        size: '540 KB',
-        type: 'pdf',
-        status: 'verified'
-    },
-    {
-        id: 'upload-2',
-        name: 'Bank Statement - Dec 2023.pdf',
-        category: 'client_upload',
-        uploadDate: 'Jan 18, 2025',
-        size: '3.1 MB',
-        type: 'pdf',
-        status: 'pending'
-    }
-]
-
-export function DocHubClient({ user }: DocHubClientProps) {
-    const [files, setFiles] = useState<DocFile[]>(INITIAL_FILES)
+export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
+    const [files, setFiles] = useState<DocFile[]>(initialFiles)
 
     const handleUpload = (newFiles: DocFile[]) => {
         setFiles(prev => [...newFiles, ...prev])

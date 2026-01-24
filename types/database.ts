@@ -143,3 +143,19 @@ export interface AdminDashboardStats {
     offers_ready_count: number
     completed_today: number
 }
+
+// Documents
+export interface Document {
+    id: string
+    application_id: string
+    user_id: string
+    file_name: string
+    file_path: string
+    file_size: number | null
+    file_type: string | null
+    category: 'lender_doc' | 'client_upload' | 'disclosure'
+    status: 'pending' | 'verified'
+    uploaded_by: string
+    created_at: string
+    updated_at: string
+}

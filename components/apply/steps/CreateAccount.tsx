@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 
 export function CreateAccount() {
     const router = useRouter()
-    const { email, setEmail, setPassword, completeApplication, prevStep } = useApplicationStore()
+    const { email, setEmail, setPassword, completeApplication, prevStep, isCompleted } = useApplicationStore()
     const [localEmail, setLocalEmail] = useState(email)
     const [localPassword, setLocalPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
@@ -15,26 +15,36 @@ export function CreateAccount() {
     const [showPassword, setShowPassword] = useState(false)
     const [showExistingAccount, setShowExistingAccount] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
+    const [success, setSuccess] = useState(isCompleted)
 
     const supabase = createClient()
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault()
+            e.stopPropagation()
+        }
+        console.log('handleSubmit called', { email: localEmail, passwordLength: localPassword.length })
+
         // Validation
         if (!localEmail || !localPassword) {
+            console.log('Validation failed: missing fields')
             setError('Please fill in all fields')
             return
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(localEmail)) {
+            console.log('Validation failed: invalid email')
             setError('Please enter a valid email address')
             return
         }
         if (localPassword.length < 6) {
+            console.log('Validation failed: password too short')
             setError('Password must be at least 6 characters')
             return
         }
         if (localPassword !== confirmPassword) {
+            console.log('Validation failed: passwords do not match')
             setError('Passwords do not match')
             return
         }
@@ -43,6 +53,7 @@ export function CreateAccount() {
         setError('')
         setShowExistingAccount(false)
 
+        console.log('Calling supabase.auth.signUp...')
         const { data, error: signUpError } = await supabase.auth.signUp({
             email: localEmail,
             password: localPassword,
@@ -50,6 +61,7 @@ export function CreateAccount() {
                 emailRedirectTo: `${window.location.origin}/auth/callback`,
             },
         })
+        console.log('Supabase response:', { data, error: signUpError })
 
         if (signUpError) {
             // Check if user already exists
@@ -65,6 +77,7 @@ export function CreateAccount() {
 
         // Check if email confirmation is required (identities array is empty means waiting for confirmation)
         if (data.user && data.user.identities && data.user.identities.length === 0) {
+            console.log('User created but requires confirmation (existing user case?)')
             setShowExistingAccount(true)
             setError('An account with this email already exists.')
             setLoading(false)
@@ -74,6 +87,7 @@ export function CreateAccount() {
         // Get full application state to submit
         const applicationState = useApplicationStore.getState()
 
+        console.log('Submitting application to API...')
         // Submit application to database
         try {
             const response = await fetch('/api/applications', {
@@ -95,6 +109,7 @@ export function CreateAccount() {
                 })
             })
 
+            console.log('API Response status:', response.status)
             if (!response.ok) {
                 console.error('Failed to submit application')
             }
@@ -114,7 +129,7 @@ export function CreateAccount() {
         router.push('/apply/step/11')
     }
 
-    if (success) {
+    if (success || isCompleted) {
         return (
             <div className="space-y-8 text-center py-8">
                 {/* Success Icon */}
@@ -185,7 +200,7 @@ export function CreateAccount() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Create your dashboard</h1>
+                <h1 className="text-3xl font-bold !text-black mb-2">Create your dashboard</h1>
                 <p className="text-gray-400">Your personalized rates are almost ready.</p>
             </div>
 
@@ -194,11 +209,11 @@ export function CreateAccount() {
             </div>
 
             <div className="space-y-4">
-                <h1 className="text-3xl font-bold text-black mb-2">Create your account</h1>
+                <h1 className="text-3xl font-bold !text-black mb-2">Create your account</h1>
                 <p className="text-gray-500">Save your progress and see your rates instantly.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4" onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}>
                 {/* Email */}
                 <div>
                     <label className="block text-sm text-gray-500 mb-2">Email Address</label>
@@ -232,7 +247,7 @@ export function CreateAccount() {
                     </div>
                 </div>
 
-                {/* Confirm Password - kept for logic but hidden if not needed or add back if requested, sticking to previous UI replacement which removed it visually but logic remains. Wait, previous replacement removed Confirm Password UI. The logic uses it. I should verify if I need to keep it. The previous dark mode code had it. My light mode replacement REMOVED it. I should add it back to match functionality. */}
+                {/* Confirm Password */}
                 <div>
                     <label className="block text-sm text-gray-500 mb-2">Confirm Password</label>
                     <input
@@ -251,14 +266,15 @@ export function CreateAccount() {
                         ← Back
                     </button>
                     <button
-                        type="submit"
+                        type="button"
+                        onClick={() => handleSubmit()}
                         disabled={loading}
                         className="px-8 py-4 rounded-full bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all"
                     >
                         {loading ? 'Creating Account...' : 'Complete & View Rates'}
                     </button>
                 </div>
-            </form>
+            </div>
 
             <p className="text-center text-xs text-gray-400 mt-4">
                 By creating an account, you agree to our Terms of Service and Privacy Policy.
