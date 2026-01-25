@@ -68,13 +68,16 @@ export function CreateAccount() {
             return
         }
 
-        // Check if email confirmation is required (identities array is empty means waiting for confirmation)
-        if (data.user && data.user.identities && data.user.identities.length === 0) {
-            setShowExistingAccount(true)
-            setError('An account with this email already exists.')
+        // If we have a user object, signup was successful
+        // Note: When email confirmation is enabled, identities may be empty until verified
+        // We should NOT treat this as an error - it means signup succeeded and email was sent
+        if (!data.user) {
+            setError('Something went wrong. Please try again.')
             setLoading(false)
             return
         }
+
+        console.log('Signup successful, user:', data.user.id, 'email:', data.user.email)
 
         // Get full application state to submit
         const applicationState = useApplicationStore.getState()
