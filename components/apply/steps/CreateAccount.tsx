@@ -190,17 +190,12 @@ export function CreateAccount() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold mb-2" style={{ color: 'black' }}>Create your dashboard</h1>
-                <p className="text-gray-400">Your personalized rates are almost ready.</p>
+                <h1 className="text-3xl font-bold text-black mb-2" style={{ color: '#000000' }}>Create your dashboard</h1>
+                <p className="text-gray-600">Your personalized rates are almost ready. Create an account to save your progress.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-sm text-purple-700">
                 🔒 Your data is encrypted. We are not a lead generator—your info stays with us.
-            </div>
-
-            <div className="space-y-4">
-                <h1 className="text-3xl font-bold !text-black mb-2">Create your account</h1>
-                <p className="text-gray-500">Save your progress and see your rates instantly.</p>
             </div>
 
             <div className="space-y-4" onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}>
