@@ -9,7 +9,7 @@ interface ComplianceFooterProps {
 export function ComplianceFooter({ variant = 'compact' }: ComplianceFooterProps) {
     // Compact variant for application flow and other pages
     return (
-        <footer className="bg-[#0D3B25] py-6">
+        <footer className="bg-[#1E3A5F] py-6">
             <div className="container mx-auto px-4">
                 <div className="text-center space-y-2 text-white/50 text-[10px] leading-relaxed">
                     <div className="flex flex-wrap justify-center gap-3">

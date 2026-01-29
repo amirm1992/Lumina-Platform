@@ -24,7 +24,7 @@ export function Navbar() {
                                     className="object-contain"
                                 />
                             </div>
-                            <span className="ml-2 text-xl font-bold text-[#0D3B25]">Lumina</span>
+                            <span className="ml-2 text-xl font-bold text-[#1E3A5F]">Lumina</span>
                         </Link>
 
                         {/* Personal/Business Tabs */}
@@ -32,8 +32,8 @@ export function Navbar() {
                             <button
                                 onClick={() => setActiveTab('personal')}
                                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${activeTab === 'personal'
-                                        ? 'bg-white text-[#0D3B25] shadow-sm'
-                                        : 'text-gray-600 hover:text-[#0D3B25]'
+                                        ? 'bg-white text-[#1E3A5F] shadow-sm'
+                                        : 'text-gray-600 hover:text-[#1E3A5F]'
                                     }`}
                             >
                                 Personal
@@ -41,8 +41,8 @@ export function Navbar() {
                             <button
                                 onClick={() => setActiveTab('business')}
                                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${activeTab === 'business'
-                                        ? 'bg-white text-[#0D3B25] shadow-sm'
-                                        : 'text-gray-600 hover:text-[#0D3B25]'
+                                        ? 'bg-white text-[#1E3A5F] shadow-sm'
+                                        : 'text-gray-600 hover:text-[#1E3A5F]'
                                     }`}
                             >
                                 Business
@@ -52,16 +52,16 @@ export function Navbar() {
 
                     {/* Center: Nav Links */}
                     <div className="hidden lg:flex items-center gap-6">
-                        <Link href="#loan-products" className="text-sm text-gray-700 hover:text-[#0D3B25] transition-colors">
+                        <Link href="#loan-products" className="text-sm text-gray-700 hover:text-[#2563EB] transition-colors">
                             Loan Products
                         </Link>
-                        <Link href="#calculator" className="text-sm text-gray-700 hover:text-[#0D3B25] transition-colors">
+                        <Link href="#calculator" className="text-sm text-gray-700 hover:text-[#2563EB] transition-colors">
                             Calculator
                         </Link>
-                        <Link href="#how-it-works" className="text-sm text-gray-700 hover:text-[#0D3B25] transition-colors">
+                        <Link href="#how-it-works" className="text-sm text-gray-700 hover:text-[#2563EB] transition-colors">
                             How It Works
                         </Link>
-                        <Link href="/disclosures" className="text-sm text-gray-700 hover:text-[#0D3B25] transition-colors">
+                        <Link href="/disclosures" className="text-sm text-gray-700 hover:text-[#2563EB] transition-colors">
                             Resources
                         </Link>
                     </div>
@@ -70,12 +70,12 @@ export function Navbar() {
                     <div className="flex items-center gap-3">
                         <Link
                             href="/login"
-                            className="hidden sm:flex items-center px-4 py-2 text-sm font-medium text-[#0D3B25] hover:bg-gray-50 rounded-full transition-colors"
+                            className="hidden sm:flex items-center px-4 py-2 text-sm font-medium text-[#1E3A5F] hover:bg-gray-50 rounded-full transition-colors"
                         >
                             Log in
                         </Link>
                         <Link href="/apply">
-                            <button className="px-5 py-2.5 rounded-full text-sm font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-all shadow-sm hover:shadow-md">
+                            <button className="px-5 py-2.5 rounded-full text-sm font-semibold bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all shadow-sm hover:shadow-md">
                                 Get Started
                             </button>
                         </Link>

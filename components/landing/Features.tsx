@@ -47,8 +47,8 @@ export function Features() {
             <section id="features" className="py-20 bg-white">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
-                        <div className="text-[#22C55E] font-medium mb-4">Why Choose Us</div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-4">Why Lumina?</h2>
+                        <div className="text-[#2563EB] font-medium mb-4">Why Choose Us</div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-4">Why Lumina?</h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
                             Traditional mortgages are broken. We fixed them with technology.
                         </p>
@@ -57,12 +57,12 @@ export function Features() {
                         {features.map((feature, i) => (
                             <div
                                 key={i}
-                                className="p-8 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-[#22C55E]/30 transition-all group cursor-pointer"
+                                className="p-8 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-[#3B82F6]/30 transition-all group cursor-pointer"
                             >
-                                <div className="w-14 h-14 rounded-2xl bg-[#E8F5E9] text-[#22C55E] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#22C55E] group-hover:text-white transition-all">
+                                <div className="w-14 h-14 rounded-2xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#2563EB] group-hover:text-white transition-all">
                                     {feature.icon}
                                 </div>
-                                <h3 className="text-xl font-bold text-[#0D3B25] mb-3">{feature.title}</h3>
+                                <h3 className="text-xl font-bold text-[#1E3A5F] mb-3">{feature.title}</h3>
                                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
                             </div>
                         ))}
@@ -74,8 +74,8 @@ export function Features() {
             <section id="loan-products" className="py-20 bg-[#F5F3FF]">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
-                        <div className="text-[#22C55E] font-medium mb-4">Our Products</div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-4">
+                        <div className="text-[#2563EB] font-medium mb-4">Our Products</div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-4">
                             Loan products for every situation
                         </h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -87,16 +87,16 @@ export function Features() {
                         {loanProducts.map((product, i) => (
                             <div
                                 key={i}
-                                className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#22C55E]/30 transition-all group"
+                                className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#3B82F6]/30 transition-all group"
                             >
                                 <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-[#E8F5E9] text-[#22C55E] flex items-center justify-center flex-shrink-0 group-hover:bg-[#22C55E] group-hover:text-white transition-all">
+                                    <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center flex-shrink-0 group-hover:bg-[#2563EB] group-hover:text-white transition-all">
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-[#0D3B25] mb-1">{product.name}</h3>
+                                        <h3 className="font-semibold text-[#1E3A5F] mb-1">{product.name}</h3>
                                         <p className="text-sm text-gray-500">{product.description}</p>
                                     </div>
                                 </div>
@@ -105,7 +105,7 @@ export function Features() {
                     </div>
                     <div className="text-center mt-12">
                         <Link href="/apply">
-                            <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all shadow-lg">
+                            <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#1E3A5F] text-white hover:bg-[#162D4A] transition-all shadow-lg">
                                 Find Your Perfect Loan
                             </button>
                         </Link>
@@ -114,11 +114,11 @@ export function Features() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-br from-[#0D3B25] via-[#0A2E1D] to-[#061912] relative overflow-hidden">
+            <section className="py-20 bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A] relative overflow-hidden">
                 {/* Decorative */}
                 <div className="absolute inset-0 z-0">
-                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#22C55E]/10 rounded-full blur-[120px]" />
-                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#22C55E]/5 rounded-full blur-[80px]" />
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#3B82F6]/10 rounded-full blur-[120px]" />
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#60A5FA]/5 rounded-full blur-[80px]" />
                 </div>
 
                 <div className="relative z-10 container mx-auto px-6">
@@ -132,7 +132,7 @@ export function Features() {
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link href="/apply">
-                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-all shadow-lg shadow-[#22C55E]/25 min-w-[200px]">
+                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all shadow-lg shadow-[#2563EB]/25 min-w-[200px]">
                                     Get Started Now
                                 </button>
                             </Link>

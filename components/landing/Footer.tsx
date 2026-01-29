@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export function Footer() {
     return (
-        <footer className="relative bg-[#0D3B25] text-white overflow-hidden">
+        <footer className="relative bg-[#1E3A5F] text-white overflow-hidden">
             {/* Large Watermark Text */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
                 <span className="text-[20rem] font-bold text-white/[0.03] tracking-tighter whitespace-nowrap select-none">
@@ -82,7 +82,7 @@ export function Footer() {
                             Ready to find your perfect mortgage? Apply in minutes.
                         </p>
                         <Link href="/apply">
-                            <button className="px-6 py-3 rounded-full text-sm font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-all">
+                            <button className="px-6 py-3 rounded-full text-sm font-semibold bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all">
                                 Apply Now
                             </button>
                         </Link>
@@ -150,7 +150,7 @@ export function Footer() {
                                     href="https://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/135622"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-[#22C55E] hover:underline"
+                                    className="text-[#60A5FA] hover:underline"
                                 >
                                     NMLS Consumer Access
                                 </a>.

@@ -69,17 +69,17 @@ export function Hero() {
 
     return (
         <>
-            {/* Hero Section with Dark Green Background */}
-            <section className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-br from-[#0D3B25] via-[#0A2E1D] to-[#061912]">
+            {/* Hero Section with Dark Navy Blue Background */}
+            <section className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A]">
                 {/* Decorative Elements */}
                 <div className="absolute inset-0 z-0 overflow-hidden">
-                    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#22C55E]/10 rounded-full blur-[150px]" />
-                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#22C55E]/5 rounded-full blur-[100px]" />
+                    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#3B82F6]/10 rounded-full blur-[150px]" />
+                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#60A5FA]/5 rounded-full blur-[100px]" />
                     {/* Animated line graph */}
                     <svg className="absolute bottom-20 left-0 right-0 w-full h-32 opacity-30" viewBox="0 0 1200 100" preserveAspectRatio="none">
                         <path
                             d="M0,80 Q150,60 300,70 T600,50 T900,60 T1200,40"
-                            stroke="#22C55E"
+                            stroke="#3B82F6"
                             strokeWidth="2"
                             fill="none"
                             className="animate-pulse"
@@ -91,7 +91,7 @@ export function Hero() {
                     <div className="text-center max-w-4xl mx-auto">
                         {/* Badge */}
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-white/90 mb-8">
-                            <span className="flex h-2 w-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+                            <span className="flex h-2 w-2 rounded-full bg-[#3B82F6] animate-pulse"></span>
                             AI-Powered Mortgage Platform
                         </div>
 
@@ -99,7 +99,7 @@ export function Hero() {
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
                             A smarter way to find
                             <br />
-                            <span className="text-[#22C55E]">your perfect mortgage</span>
+                            <span className="text-[#60A5FA]">your perfect mortgage</span>
                         </h1>
 
                         {/* Subtitle */}
@@ -111,7 +111,7 @@ export function Hero() {
                         {/* CTAs */}
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
                             <Link href="/apply">
-                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-all duration-300 shadow-lg shadow-[#22C55E]/25 hover:shadow-xl hover:shadow-[#22C55E]/30 min-w-[200px]">
+                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all duration-300 shadow-lg shadow-[#2563EB]/25 hover:shadow-xl hover:shadow-[#2563EB]/30 min-w-[200px]">
                                     Get Started
                                 </button>
                             </Link>
@@ -143,11 +143,11 @@ export function Hero() {
                 </div>
             </section>
 
-            {/* Calculator Section with Light Mint Background */}
-            <section id="calculator" className="py-20 bg-[#E8F5E9]">
+            {/* Calculator Section with Light Blue Background */}
+            <section id="calculator" className="py-20 bg-[#EFF6FF]">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-4">
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-4">
                             Stay on budget — calculate your monthly loan easily
                         </h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -165,7 +165,7 @@ export function Hero() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Total Principal Paid
                                         </label>
-                                        <div className="text-2xl font-bold text-[#0D3B25] mb-3">
+                                        <div className="text-2xl font-bold text-[#1E3A5F] mb-3">
                                             ${loanAmount.toLocaleString()}
                                         </div>
                                         <div className="flex flex-wrap gap-2">
@@ -174,7 +174,7 @@ export function Hero() {
                                                     key={amount}
                                                     onClick={() => setLoanAmount(amount)}
                                                     className={`px-3 py-1.5 text-sm rounded-full transition-all ${loanAmount === amount
-                                                            ? 'bg-[#0D3B25] text-white'
+                                                            ? 'bg-[#1E3A5F] text-white'
                                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                         }`}
                                                 >
@@ -196,11 +196,11 @@ export function Hero() {
                                             step="5"
                                             value={loanTerm}
                                             onChange={(e) => setLoanTerm(Number(e.target.value))}
-                                            className="w-full h-2 bg-[#22C55E] rounded-lg appearance-none cursor-pointer accent-[#0D3B25]"
+                                            className="w-full h-2 bg-[#3B82F6] rounded-lg appearance-none cursor-pointer accent-[#1E3A5F]"
                                         />
                                         <div className="flex justify-between text-sm text-gray-500 mt-2">
                                             <span>10 yrs</span>
-                                            <span className="font-semibold text-[#0D3B25]">{loanTerm} years</span>
+                                            <span className="font-semibold text-[#1E3A5F]">{loanTerm} years</span>
                                             <span>30 yrs</span>
                                         </div>
                                     </div>
@@ -217,11 +217,11 @@ export function Hero() {
                                             step="0.125"
                                             value={interestRate}
                                             onChange={(e) => setInterestRate(Number(e.target.value))}
-                                            className="w-full h-2 bg-[#22C55E] rounded-lg appearance-none cursor-pointer accent-[#0D3B25]"
+                                            className="w-full h-2 bg-[#3B82F6] rounded-lg appearance-none cursor-pointer accent-[#1E3A5F]"
                                         />
                                         <div className="flex justify-between text-sm text-gray-500 mt-2">
                                             <span>3%</span>
-                                            <span className="font-semibold text-[#0D3B25]">{interestRate.toFixed(2)}%</span>
+                                            <span className="font-semibold text-[#1E3A5F]">{interestRate.toFixed(2)}%</span>
                                             <span>10%</span>
                                         </div>
                                     </div>
@@ -229,26 +229,26 @@ export function Hero() {
                             </div>
 
                             {/* Results Card */}
-                            <div className="bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-3xl p-8 shadow-sm border border-[#BBF7D0] flex flex-col justify-center">
+                            <div className="bg-gradient-to-br from-[#DBEAFE] to-[#BFDBFE] rounded-3xl p-8 shadow-sm border border-[#93C5FD] flex flex-col justify-center">
                                 <div className="text-center">
-                                    <div className="text-5xl md:text-6xl font-bold text-[#0D3B25] mb-2">
+                                    <div className="text-5xl md:text-6xl font-bold text-[#1E3A5F] mb-2">
                                         ${monthlyPayment.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                                     </div>
                                     <div className="text-gray-600 mb-8">Monthly Payments</div>
 
-                                    <div className="border-t border-[#BBF7D0] pt-6 space-y-4">
+                                    <div className="border-t border-[#93C5FD] pt-6 space-y-4">
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-600">Total Principal Paid</span>
-                                            <span className="font-semibold text-[#0D3B25]">${loanAmount.toLocaleString()}</span>
+                                            <span className="font-semibold text-[#1E3A5F]">${loanAmount.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-600">Total Interest Paid</span>
-                                            <span className="font-semibold text-[#0D3B25]">${totalInterest.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
+                                            <span className="font-semibold text-[#1E3A5F]">${totalInterest.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
                                         </div>
                                     </div>
 
                                     <Link href="/apply">
-                                        <button className="w-full mt-8 px-6 py-4 rounded-full text-lg font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all shadow-lg">
+                                        <button className="w-full mt-8 px-6 py-4 rounded-full text-lg font-semibold bg-[#1E3A5F] text-white hover:bg-[#162D4A] transition-all shadow-lg">
                                             Apply Now
                                         </button>
                                     </Link>
@@ -268,7 +268,7 @@ export function Hero() {
                             <div className="mb-8">
                                 <span className="text-6xl">🏠</span>
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-6">
+                            <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-6">
                                 Power your home purchase with smarter financing
                             </h2>
                             <p className="text-gray-600 text-lg mb-8">
@@ -276,7 +276,7 @@ export function Hero() {
                                 save more, and stay in control of your mortgage journey.
                             </p>
                             <Link href="/apply">
-                                <button className="px-6 py-3 rounded-full text-base font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all">
+                                <button className="px-6 py-3 rounded-full text-base font-semibold bg-[#1E3A5F] text-white hover:bg-[#162D4A] transition-all">
                                     Get Pre-Approved
                                 </button>
                             </Link>
@@ -284,7 +284,7 @@ export function Hero() {
 
                         {/* Right Image Placeholder */}
                         <div className="relative">
-                            <div className="aspect-[4/3] bg-gradient-to-br from-[#22C55E]/20 to-[#0D3B25]/20 rounded-3xl flex items-center justify-center">
+                            <div className="aspect-[4/3] bg-gradient-to-br from-[#3B82F6]/20 to-[#1E3A5F]/20 rounded-3xl flex items-center justify-center">
                                 <div className="text-center text-gray-400">
                                     <div className="text-8xl mb-4">🏡</div>
                                     <div className="text-sm">Happy Homeowners</div>
@@ -301,8 +301,8 @@ export function Hero() {
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         {/* Left Content */}
                         <div>
-                            <div className="text-[#22C55E] font-medium mb-4">Smart Loan Products</div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-6">
+                            <div className="text-[#2563EB] font-medium mb-4">Smart Loan Products</div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-6">
                                 Unlock a mortgage experience that adapts to your lifestyle.
                             </h2>
                             <p className="text-gray-600 text-lg mb-8">
@@ -310,7 +310,7 @@ export function Hero() {
                                 you unlock — with built-in flexibility at every stage.
                             </p>
                             <Link href="#loan-products">
-                                <button className="px-6 py-3 rounded-full text-base font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all">
+                                <button className="px-6 py-3 rounded-full text-base font-semibold bg-[#1E3A5F] text-white hover:bg-[#162D4A] transition-all">
                                     Learn More
                                 </button>
                             </Link>
@@ -318,7 +318,7 @@ export function Hero() {
 
                         {/* Right - Placeholder */}
                         <div className="relative">
-                            <div className="aspect-video bg-gradient-to-br from-[#E8F5E9] to-[#DCFCE7] rounded-3xl flex items-center justify-center">
+                            <div className="aspect-video bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-3xl flex items-center justify-center">
                                 <div className="text-center text-gray-400">
                                     <div className="text-8xl mb-4">🤝</div>
                                     <div className="text-sm">Personalized Experience</div>
