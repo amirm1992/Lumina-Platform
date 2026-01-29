@@ -16,13 +16,13 @@ export function ProgressBar({ currentStep, totalSteps = 12 }: { currentStep: num
         <div className="w-full mb-8">
             <div className="flex justify-between mb-2">
                 {phases.map((phase, index) => (
-                    <div key={phase.name} className={`text-xs font-medium transition-colors ${index <= currentPhaseIndex ? 'text-purple-600' : 'text-gray-400'}`}>
+                    <div key={phase.name} className={`text-xs font-medium transition-colors ${index <= currentPhaseIndex ? 'text-[#2563EB]' : 'text-gray-400'}`}>
                         {phase.name}
                     </div>
                 ))}
             </div>
             <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-blue-600 transition-all duration-500 ease-out" style={{ width: `${(currentStep / totalSteps) * 100}%` }} />
+                <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#1E3A5F] to-[#3B82F6] transition-all duration-500 ease-out" style={{ width: `${(currentStep / totalSteps) * 100}%` }} />
             </div>
             <div className="text-right mt-2 text-xs text-gray-500">Step {currentStep} of {totalSteps}</div>
         </div>

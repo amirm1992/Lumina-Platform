@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 
 export default function ResetPasswordPage() {
@@ -44,11 +45,24 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
+        <div className="min-h-screen bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A] flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl">
+                {/* Logo */}
+                <div className="flex items-center justify-center gap-2 mb-8">
+                    <div className="relative w-10 h-10">
+                        <Image
+                            src="/logo-transparent.png"
+                            alt="Lumina Logo"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                    <span className="text-xl font-bold text-[#1E3A5F]">Lumina</span>
+                </div>
+
                 <div className="space-y-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-black mb-2">Reset Password</h1>
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold text-[#1E3A5F] mb-2">Reset Password</h1>
                         <p className="text-gray-500">Enter your new password below.</p>
                     </div>
 
@@ -60,7 +74,7 @@ export default function ResetPasswordPage() {
                                 value={password}
                                 onChange={(e) => { setPassword(e.target.value); setError('') }}
                                 placeholder="At least 6 characters"
-                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 transition-all"
                             />
                         </div>
                         <div>
@@ -70,7 +84,7 @@ export default function ResetPasswordPage() {
                                 value={confirmPassword}
                                 onChange={(e) => { setConfirmPassword(e.target.value); setError('') }}
                                 placeholder="Confirm your password"
-                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 transition-all"
                             />
                         </div>
 
@@ -79,14 +93,14 @@ export default function ResetPasswordPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full px-6 py-4 rounded-xl bg-black text-white font-bold hover:bg-gray-800 transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
+                            className="w-full px-6 py-4 rounded-xl bg-[#2563EB] text-white font-semibold hover:bg-[#1D4ED8] hover:shadow-lg hover:shadow-[#2563EB]/20 transition-all disabled:opacity-50"
                         >
                             {loading ? 'Updating...' : 'Update Password'}
                         </button>
                     </form>
 
                     <p className="text-center text-sm text-gray-500">
-                        <Link href="/login" className="text-purple-600 font-semibold hover:text-purple-500 transition-colors">Back to Sign In</Link>
+                        <Link href="/login" className="text-[#2563EB] font-semibold hover:text-[#1D4ED8] transition-colors">Back to Sign In</Link>
                     </p>
                 </div>
             </div>

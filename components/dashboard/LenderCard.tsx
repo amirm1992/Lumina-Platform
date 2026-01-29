@@ -17,7 +17,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
             className={`
                 relative p-6 rounded-2xl border cursor-pointer transition-all duration-300 group
                 ${isSelected
-                    ? 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200 shadow-[0_0_30px_rgba(168,85,247,0.15)]'
+                    ? 'bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] border-[#3B82F6] shadow-[0_0_30px_rgba(37,99,235,0.15)]'
                     : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-lg'
                 }
             `}
@@ -27,7 +27,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                 <div className="flex items-center gap-3">
                     {/* Placeholder Logo Avatar */}
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold
-                        ${isSelected ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-500'}
+                        ${isSelected ? 'bg-[#2563EB] text-white' : 'bg-gray-100 text-gray-500'}
                     `}>
                         {lender.name[0]}
                     </div>
@@ -39,7 +39,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                     </div>
                 </div>
                 {(lender.bestMatch || lender.isRecommended) && (
-                    <span className="px-3 py-1 rounded-md bg-purple-600 text-[10px] font-bold text-white uppercase tracking-widest shadow-lg shadow-purple-500/30">
+                    <span className="px-3 py-1 rounded-md bg-[#2563EB] text-[10px] font-bold text-white uppercase tracking-widest shadow-lg shadow-[#2563EB]/30">
                         ⭐ Recommended
                     </span>
                 )}
@@ -79,7 +79,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
             <button
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all
                     ${isSelected
-                        ? 'bg-black text-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:bg-gray-800'
+                        ? 'bg-[#1E3A5F] text-white shadow-[0_4px_20px_rgba(30,58,95,0.25)] hover:bg-[#162D4A]'
                         : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black'
                     }
                 `}
@@ -89,7 +89,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
 
             {/* Selection Ring (Visual Polish) */}
             {isSelected && (
-                <div className="absolute inset-0 rounded-2xl border-2 border-purple-500/30 pointer-events-none animate-pulse" />
+                <div className="absolute inset-0 rounded-2xl border-2 border-[#3B82F6]/30 pointer-events-none animate-pulse" />
             )}
         </div>
     )

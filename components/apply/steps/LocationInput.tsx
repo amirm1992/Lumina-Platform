@@ -25,7 +25,7 @@ export function LocationInput() {
                     value={localZip}
                     onChange={(e) => { setLocalZip(e.target.value.replace(/\D/g, '').slice(0, 5)); setError('') }}
                     placeholder="e.g. 78701"
-                    className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm text-2xl text-center tracking-widest"
+                    className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm text-2xl text-center tracking-widest"
                     maxLength={5}
                     autoFocus
                 />

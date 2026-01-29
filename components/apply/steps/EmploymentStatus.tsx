@@ -22,7 +22,7 @@ export function EmploymentStatus() {
             <div><h1 className="text-3xl font-bold text-black mb-2">What's your employment status?</h1></div>
             <div className="grid gap-4">
                 {options.map((o) => (
-                    <button key={o.value} onClick={() => handleSelect(o.value)} className={`p-5 rounded-xl border transition-all cursor-pointer text-left ${employmentStatus === o.value ? 'bg-purple-50 border-purple-600 text-black shadow-md shadow-purple-100' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-black'}`}>
+                    <button key={o.value} onClick={() => handleSelect(o.value)} className={`p-5 rounded-xl border transition-all cursor-pointer text-left ${employmentStatus === o.value ? 'bg-[#EFF6FF] border-[#2563EB] text-black shadow-md shadow-[#DBEAFE]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-black'}`}>
                         <div className="font-medium">{o.label}</div>
                     </button>
                 ))}

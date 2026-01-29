@@ -70,7 +70,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Client Info Card */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <User className="w-5 h-5 text-purple-600" />
+                            <User className="w-5 h-5 text-[#2563EB]" />
                             Client Information
                         </h2>
                         <div className="space-y-3">
@@ -92,7 +92,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Loan Details Card */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <Home className="w-5 h-5 text-purple-600" />
+                            <Home className="w-5 h-5 text-[#2563EB]" />
                             Property & Loan Details
                         </h2>
                         <div className="space-y-3">
@@ -118,7 +118,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Financial Details Card */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <DollarSign className="w-5 h-5 text-purple-600" />
+                            <DollarSign className="w-5 h-5 text-[#2563EB]" />
                             Financial Details
                         </h2>
                         <div className="space-y-3">
@@ -163,7 +163,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Employment & Income Card */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <Briefcase className="w-5 h-5 text-purple-600" />
+                            <Briefcase className="w-5 h-5 text-[#2563EB]" />
                             Employment & Income
                         </h2>
                         <div className="space-y-3">
@@ -185,7 +185,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Assets Card */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <PiggyBank className="w-5 h-5 text-purple-600" />
+                            <PiggyBank className="w-5 h-5 text-[#2563EB]" />
                             Assets
                         </h2>
                         <div className="space-y-3">
@@ -212,7 +212,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Pre-Approval / Documents */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-purple-600" />
+                            <FileText className="w-5 h-5 text-[#2563EB]" />
                             Documents & Pre-Approval
                         </h2>
                         <PreApprovalUpload
@@ -225,7 +225,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     {/* Credit Score Entry */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <CreditCard className="w-5 h-5 text-purple-600" />
+                            <CreditCard className="w-5 h-5 text-[#2563EB]" />
                             Credit Score
                         </h2>
                         <CreditScoreEntry

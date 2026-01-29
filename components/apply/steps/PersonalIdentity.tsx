@@ -56,7 +56,7 @@ export function PersonalIdentity() {
                         value={localFirst}
                         onChange={(e) => { setLocalFirst(e.target.value); setError('') }}
                         placeholder="John"
-                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm"
+                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                 </div>
                 <div>
@@ -66,7 +66,7 @@ export function PersonalIdentity() {
                         value={localLast}
                         onChange={(e) => { setLocalLast(e.target.value); setError('') }}
                         placeholder="Smith"
-                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm"
+                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                 </div>
             </div>
@@ -78,7 +78,7 @@ export function PersonalIdentity() {
                     value={localPhone}
                     onChange={(e) => { setLocalPhone(formatPhone(e.target.value)); setError('') }}
                     placeholder="(555) 123-4567"
-                    className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm"
+                    className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1">For important updates about your application only</p>
             </div>

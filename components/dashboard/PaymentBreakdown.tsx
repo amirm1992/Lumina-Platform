@@ -28,14 +28,14 @@ export function PaymentBreakdown({ monthlyPayment, propertyTax, homeInsurance }:
                     <AreaChart data={data}>
                         <defs>
                             <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#7e22ce" stopOpacity={0.5} />
-                                <stop offset="95%" stopColor="#7e22ce" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#2563EB" stopOpacity={0.5} />
+                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <Area
                             type="monotone"
                             dataKey="value"
-                            stroke="#7e22ce"
+                            stroke="#2563EB"
                             strokeWidth={2}
                             fill="url(#chartGradient)"
                         />
@@ -48,13 +48,13 @@ export function PaymentBreakdown({ monthlyPayment, propertyTax, homeInsurance }:
             <div className="flex flex-col items-center justify-center py-8 relative z-10">
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Total Monthly</p>
                 <p className="text-5xl font-bold text-black mb-1">{formatCurrency(totalMonthly)}</p>
-                <div className="h-1 w-24 bg-gradient-to-r from-transparent via-purple-500 to-transparent mt-4 opacity-50" />
+                <div className="h-1 w-24 bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent mt-4 opacity-50" />
             </div>
 
             <div className="space-y-4 mt-8 relative z-10">
                 <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full bg-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#2563EB] shadow-[0_0_8px_rgba(37,99,235,0.6)]" />
                         <span className="text-gray-500 font-medium">Principal & Interest</span>
                     </div>
                     <span className="text-black font-semibold">{formatCurrency(monthlyPayment)}</span>

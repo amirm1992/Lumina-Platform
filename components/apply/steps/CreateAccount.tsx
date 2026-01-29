@@ -139,16 +139,16 @@ export function CreateAccount() {
                 </div>
 
                 {/* Email Verification Card */}
-                <div className="p-6 rounded-2xl bg-purple-50 border border-purple-100 max-w-md mx-auto">
+                <div className="p-6 rounded-2xl bg-[#EFF6FF] border border-[#DBEAFE] max-w-md mx-auto">
                     <div className="flex items-center justify-center gap-2 mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-purple-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-[#2563EB]">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                         </svg>
-                        <h2 className="text-lg font-semibold text-purple-900">Verify Your Email</h2>
+                        <h2 className="text-lg font-semibold text-[#1E3A5F]">Verify Your Email</h2>
                     </div>
                     <p className="text-gray-600 text-sm leading-relaxed">
                         We've sent a verification link to<br />
-                        <span className="font-semibold text-purple-700">{localEmail}</span>
+                        <span className="font-semibold text-[#1D4ED8]">{localEmail}</span>
                     </p>
                     <p className="text-gray-500 text-sm mt-3">
                         Please check your inbox and click the link to activate your account and view your personalized mortgage rates.
@@ -160,15 +160,15 @@ export function CreateAccount() {
                     <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">What happens next?</h3>
                     <div className="space-y-3">
                         <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                            <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
                             <p className="text-gray-600 text-sm">Click the verification link in your email</p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                            <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
                             <p className="text-gray-600 text-sm">Log in to your secure dashboard</p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                            <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
                             <p className="text-gray-600 text-sm">View your personalized rates from top lenders</p>
                         </div>
                     </div>
@@ -197,7 +197,7 @@ export function CreateAccount() {
                 <p className="text-gray-600">Your personalized rates are almost ready. Create an account to save your progress.</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-sm text-purple-700">
+            <div className="p-4 rounded-xl bg-[#EFF6FF]0/10 border border-[#EFF6FF]0/20 text-sm text-[#1D4ED8]">
                 🔒 Your data is encrypted. We are not a lead generator—your info stays with us.
             </div>
 
@@ -210,7 +210,7 @@ export function CreateAccount() {
                         value={localEmail}
                         onChange={(e) => { setLocalEmail(e.target.value); setError(''); setShowExistingAccount(false) }}
                         placeholder="you@example.com"
-                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm"
+                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                 </div>
 
@@ -223,7 +223,7 @@ export function CreateAccount() {
                             value={localPassword}
                             onChange={(e) => { setLocalPassword(e.target.value); setError('') }}
                             placeholder="At least 8 characters"
-                            className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm"
+                            className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                         />
                         <button
                             type="button"
@@ -243,7 +243,7 @@ export function CreateAccount() {
                         value={confirmPassword}
                         onChange={(e) => { setConfirmPassword(e.target.value); setError('') }}
                         placeholder="Confirm your password"
-                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm"
+                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                 </div>
 

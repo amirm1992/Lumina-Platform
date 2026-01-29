@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
@@ -47,18 +48,31 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A] flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <Link href="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-black mb-8 text-sm transition-colors">
+                <Link href="/" className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-8 text-sm transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                     Back to Home
                 </Link>
 
-                <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-8 border border-gray-100">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-black mb-2">Welcome Back</h1>
+                <div className="bg-white rounded-2xl shadow-2xl p-8">
+                    {/* Logo */}
+                    <div className="flex items-center justify-center gap-2 mb-8">
+                        <div className="relative w-10 h-10">
+                            <Image
+                                src="/logo-transparent.png"
+                                alt="Lumina Logo"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                        <span className="text-xl font-bold text-[#1E3A5F]">Lumina</span>
+                    </div>
+
+                    <div className="mb-8 text-center">
+                        <h1 className="text-2xl font-bold text-[#1E3A5F] mb-2">Welcome Back</h1>
                         <p className="text-gray-500">Sign in to access your mortgage dashboard</p>
                     </div>
 
@@ -70,13 +84,13 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => { setEmail(e.target.value); setError('') }}
                                 placeholder="you@example.com"
-                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all"
+                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 transition-all"
                             />
                         </div>
                         <div>
                             <div className="flex justify-between items-center mb-2">
                                 <label className="text-sm font-medium text-gray-700">Password</label>
-                                <Link href="/forgot-password" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                <Link href="/forgot-password" className="text-sm text-[#2563EB] hover:text-[#1D4ED8] font-medium">
                                     Forgot password?
                                 </Link>
                             </div>
@@ -85,7 +99,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => { setPassword(e.target.value); setError('') }}
                                 placeholder="••••••••"
-                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all"
+                                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 transition-all"
                             />
                         </div>
 
@@ -94,7 +108,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full px-6 py-4 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 hover:shadow-lg hover:shadow-black/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full px-6 py-4 rounded-xl bg-[#2563EB] text-white font-semibold hover:bg-[#1D4ED8] hover:shadow-lg hover:shadow-[#2563EB]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Signing In...' : 'Sign In'}
                         </button>
@@ -102,7 +116,7 @@ export default function LoginPage() {
 
                     <div className="text-center text-sm text-gray-500 mt-6">
                         Don't have an account?{' '}
-                        <Link href="/apply" className="text-purple-600 font-medium hover:underline">
+                        <Link href="/apply" className="text-[#2563EB] font-medium hover:underline">
                             Get Your Rates
                         </Link>
                     </div>

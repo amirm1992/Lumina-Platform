@@ -29,7 +29,7 @@ export function ValueLoanSliders() {
                         type="range" min={100000} max={2000000} step={5000}
                         value={estimatedValue}
                         onChange={(e) => setEstimatedValue(Number(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2563EB]"
                     />
                 </div>
 
@@ -43,13 +43,13 @@ export function ValueLoanSliders() {
                         type="range" min={50000} max={estimatedValue} step={5000}
                         value={loanAmount}
                         onChange={(e) => setLoanAmount(Number(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2563EB]"
                     />
                 </div>
 
                 {/* LTV */}
-                <div className="p-4 rounded-xl bg-purple-50 border border-purple-100 flex justify-between items-center">
-                    <span className="text-purple-800 font-medium">Loan-to-Value (LTV)</span>
+                <div className="p-4 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] flex justify-between items-center">
+                    <span className="text-[#1E3A5F] font-medium">Loan-to-Value (LTV)</span>
                     <span className={`font-bold ${ltv > 80 ? 'text-amber-600' : 'text-green-600'}`}>{ltv.toFixed(0)}%</span>
                 </div>
             </div>

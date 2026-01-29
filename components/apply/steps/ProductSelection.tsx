@@ -27,7 +27,7 @@ export function ProductSelection() {
             </div>
             <div className="grid gap-4">
                 {options.map((option) => (
-                    <button key={option.value} onClick={() => handleSelect(option.value)} className={`flex items-center gap-4 p-6 rounded-xl border transition-all cursor-pointer text-left ${productType === option.value ? 'bg-purple-50 border-purple-600 text-black shadow-md shadow-purple-100' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-black'}`}>
+                    <button key={option.value} onClick={() => handleSelect(option.value)} className={`flex items-center gap-4 p-6 rounded-xl border transition-all cursor-pointer text-left ${productType === option.value ? 'bg-[#EFF6FF] border-[#2563EB] text-black shadow-md shadow-[#DBEAFE]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-black'}`}>
                         <div><div className="font-semibold text-lg">{option.label}</div><div className="text-sm text-gray-500">{option.desc}</div></div>
                     </button>
                 ))}

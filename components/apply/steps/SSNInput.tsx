@@ -23,7 +23,7 @@ export function SSNInput() {
         <div className="space-y-6">
             <div><h1 className="text-3xl font-bold text-black mb-2">Unlock precise rates (optional)</h1><p className="text-gray-500">Soft credit inquiry that does NOT affect your score.</p></div>
             <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-sm text-green-700 shadow-sm">🔒 Bank-level encryption. Your SSN is never stored in plain text.</div>
-            <input type="password" value={localSSN} onChange={(e) => setLocalSSN(formatSSN(e.target.value))} placeholder="XXX-XX-XXXX" className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-all shadow-sm text-xl text-center tracking-widest" maxLength={11} />
+            <input type="password" value={localSSN} onChange={(e) => setLocalSSN(formatSSN(e.target.value))} placeholder="XXX-XX-XXXX" className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm text-xl text-center tracking-widest" maxLength={11} />
             <div className="flex justify-between items-center">
                 <button onClick={handleBack} className="text-gray-500 hover:text-black text-sm flex items-center gap-1 font-medium transition-colors">← Back</button>
                 <div className="flex gap-3">

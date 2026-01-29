@@ -51,11 +51,11 @@ export function EditDetailsModal({ isOpen, onClose, currentValues, onSave }: Edi
             {/* Modal Content */}
             <div className="relative w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
-                    <h2 className="text-xl font-bold text-black">Edit Loan Details</h2>
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-[#EFF6FF]">
+                    <h2 className="text-xl font-bold text-[#1E3A5F]">Edit Loan Details</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-200 text-gray-500 hover:text-black transition-colors"
+                        className="p-2 rounded-full hover:bg-[#DBEAFE] text-gray-500 hover:text-[#1E3A5F] transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -73,7 +73,7 @@ export function EditDetailsModal({ isOpen, onClose, currentValues, onSave }: Edi
                                 type="text"
                                 value={formData.homeValue.toLocaleString()}
                                 onChange={(e) => handleChange('homeValue', e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pl-8 py-3 text-black font-bold text-lg focus:outline-none focus:border-purple-500 focus:bg-white transition-all shadow-sm"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pl-8 py-3 text-black font-bold text-lg focus:outline-none focus:border-[#2563EB] focus:bg-white transition-all shadow-sm"
                             />
                         </div>
                     </div>
@@ -88,7 +88,7 @@ export function EditDetailsModal({ isOpen, onClose, currentValues, onSave }: Edi
                                 type="text"
                                 value={formData.loanAmount.toLocaleString()}
                                 onChange={(e) => handleChange('loanAmount', e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pl-8 py-3 text-black font-bold text-lg focus:outline-none focus:border-purple-500 focus:bg-white transition-all shadow-sm"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pl-8 py-3 text-black font-bold text-lg focus:outline-none focus:border-[#2563EB] focus:bg-white transition-all shadow-sm"
                             />
                         </div>
                     </div>
@@ -103,7 +103,7 @@ export function EditDetailsModal({ isOpen, onClose, currentValues, onSave }: Edi
                                 type="text"
                                 value={formData.downPayment.toLocaleString()}
                                 onChange={(e) => handleChange('downPayment', e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pl-8 py-3 text-black font-bold text-lg focus:outline-none focus:border-purple-500 focus:bg-white transition-all shadow-sm"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 pl-8 py-3 text-black font-bold text-lg focus:outline-none focus:border-[#2563EB] focus:bg-white transition-all shadow-sm"
                             />
                         </div>
                     </div>
@@ -118,7 +118,7 @@ export function EditDetailsModal({ isOpen, onClose, currentValues, onSave }: Edi
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-3 rounded-xl font-bold text-sm bg-black text-white hover:bg-gray-800 shadow-lg shadow-black/10 transition-all"
+                            className="flex-1 py-3 rounded-xl font-bold text-sm bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-lg shadow-[#2563EB]/20 transition-all"
                         >
                             Save Changes
                         </button>

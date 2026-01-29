@@ -54,24 +54,24 @@ const steps = [
 
 export default function HowItWorksPage() {
     return (
-        <main className="min-h-screen bg-gray-50 selection:bg-purple-100">
+        <main className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE]">
             <Navbar />
 
             {/* Background effects */}
             <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#BFDBFE]/30 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-200/30 rounded-full blur-[120px]" />
             </div>
 
             {/* Hero Section */}
             <section className="relative z-10 pt-32 pb-16 px-6">
                 <div className="max-w-4xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-purple-600 mb-8 shadow-sm">
-                        <span className="flex h-2 w-2 rounded-full bg-purple-600 animate-pulse"></span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-[#2563EB] mb-8 shadow-sm">
+                        <span className="flex h-2 w-2 rounded-full bg-[#2563EB] animate-pulse"></span>
                         Simple 4-Step Process
                     </div>
                     <h1 className="text-5xl md:text-6xl font-bold text-black mb-6">
-                        How <Link href="/" className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-500 hover:via-blue-500 hover:to-purple-500 transition-all cursor-pointer">Lumina</Link> Works
+                        How <Link href="/" className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] via-blue-600 to-[#2563EB] hover:from-[#EFF6FF]0 hover:via-blue-500 hover:to-[#EFF6FF]0 transition-all cursor-pointer">Lumina</Link> Works
                     </h1>
                     <p className="text-xl text-gray-500 max-w-2xl mx-auto">
                         Your mortgage journey, simplified. No lead selling. No broker referrals. Just you and your dream home.
@@ -83,7 +83,7 @@ export default function HowItWorksPage() {
             <section className="relative z-10 py-12 px-6">
                 <div className="max-w-5xl mx-auto">
                     {/* Vertical line connector */}
-                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-purple-200/0 via-purple-200 to-purple-200/0 hidden md:block" />
+                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#BFDBFE]/0 via-[#BFDBFE] to-[#BFDBFE]/0 hidden md:block" />
 
                     {steps.map((step, index) => (
                         <div
@@ -94,23 +94,23 @@ export default function HowItWorksPage() {
                             {/* Step Content */}
                             <div className={`flex-1 ${index % 2 === 0 ? 'md:text-right md:pr-16' : 'md:text-left md:pl-16'}`}>
                                 <div className={`inline-block ${index % 2 === 0 ? 'md:float-right md:clear-right' : ''}`}>
-                                    <div className="p-6 md:p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300 max-w-md">
+                                    <div className="p-6 md:p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#BFDBFE] transition-all duration-300 max-w-md">
                                         {/* Icon */}
-                                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-purple-50 text-purple-600 mb-4">
+                                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#EFF6FF] text-[#2563EB] mb-4">
                                             {step.icon}
                                         </div>
 
                                         {/* Content */}
-                                        <p className="text-purple-600 text-xs font-semibold uppercase tracking-wider mb-2">{step.subtitle}</p>
+                                        <p className="text-[#2563EB] text-xs font-semibold uppercase tracking-wider mb-2">{step.subtitle}</p>
                                         <h3 className="text-xl md:text-2xl font-bold text-black mb-3">{step.title}</h3>
                                         <p className="text-gray-500 mb-4 text-sm md:text-base">{step.description}</p>
 
                                         {/* Highlight */}
-                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-50 border border-purple-100">
-                                            <svg className="w-3.5 h-3.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] border border-[#DBEAFE]">
+                                            <svg className="w-3.5 h-3.5 text-[#2563EB]" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
-                                            <span className="text-purple-700 text-xs font-medium">{step.highlight}</span>
+                                            <span className="text-[#1D4ED8] text-xs font-medium">{step.highlight}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -118,7 +118,7 @@ export default function HowItWorksPage() {
 
                             {/* Center Step Number */}
                             <div className="relative z-10 flex-shrink-0 order-first md:order-none">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/30 border-4 border-gray-50">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#2563EB] to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[#EFF6FF]0/30 border-4 border-gray-50">
                                     {step.number}
                                 </div>
                             </div>
@@ -135,14 +135,14 @@ export default function HowItWorksPage() {
                 <div className="max-w-4xl mx-auto">
                     <div className="p-8 md:p-12 rounded-3xl bg-white border border-gray-200 shadow-xl shadow-gray-200/50">
                         <div className="text-center mb-10">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 border border-purple-100 mb-6">
-                                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] mb-6">
+                                <svg className="w-8 h-8 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
 
                             <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">
-                                Your Privacy is <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">Non-Negotiable</span>
+                                Your Privacy is <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] to-blue-600">Non-Negotiable</span>
                             </h2>
                             <p className="text-gray-500 max-w-xl mx-auto">
                                 Unlike lead aggregators, we keep your information secure and never share it.
@@ -171,7 +171,7 @@ export default function HowItWorksPage() {
                             </div>
 
                             <div className="text-center p-5 rounded-xl bg-gray-50 border border-gray-100">
-                                <div className="text-purple-600 mb-3">
+                                <div className="text-[#2563EB] mb-3">
                                     <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>

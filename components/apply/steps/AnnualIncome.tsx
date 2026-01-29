@@ -18,7 +18,7 @@ export function AnnualIncome() {
             <div><h1 className="text-3xl font-bold text-black mb-2">What is your annual income?</h1><p className="text-gray-500">Combined gross household income.</p></div>
             <div className="text-center">
                 <div className="text-5xl font-bold text-black mb-6">{fmt(localIncome)}</div>
-                <input type="range" min={25000} max={1000000} step={5000} value={localIncome} onChange={(e) => setLocalIncome(Number(e.target.value))} className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-purple-600" />
+                <input type="range" min={25000} max={1000000} step={5000} value={localIncome} onChange={(e) => setLocalIncome(Number(e.target.value))} className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#2563EB]" />
                 <div className="flex justify-between text-xs text-gray-500 mt-2"><span>$25K</span><span>$1M+</span></div>
             </div>
             <div className="flex justify-between items-center">

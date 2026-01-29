@@ -57,7 +57,7 @@ export default function AdminLoginPage() {
             <div className="max-w-md w-full">
                 {/* Admin Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-600 mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#2563EB] mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
@@ -77,7 +77,7 @@ export default function AdminLoginPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="admin@lumina.com"
                                 required
-                                className="w-full p-4 rounded-xl bg-gray-700 border border-gray-600 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                                className="w-full p-4 rounded-xl bg-gray-700 border border-gray-600 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#EFF6FF]0 focus:ring-1 focus:ring-[#EFF6FF]0 transition-all"
                             />
                         </div>
 
@@ -89,7 +89,7 @@ export default function AdminLoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="w-full p-4 rounded-xl bg-gray-700 border border-gray-600 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                                className="w-full p-4 rounded-xl bg-gray-700 border border-gray-600 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#EFF6FF]0 focus:ring-1 focus:ring-[#EFF6FF]0 transition-all"
                             />
                         </div>
 
@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-4 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-600/30"
+                            className="w-full py-4 rounded-xl bg-[#2563EB] text-white font-bold hover:bg-[#EFF6FF]0 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#2563EB]/30"
                         >
                             {loading ? 'Signing in...' : 'Sign In to Admin Portal'}
                         </button>

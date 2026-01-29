@@ -162,7 +162,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-12 h-12 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-gray-500">Loading your dashboard...</p>
                 </div>
             </div>
@@ -170,7 +170,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 selection:bg-purple-100 font-sans text-gray-900">
+        <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
             <DashboardNavbar user={user} />
 
             <main className="container mx-auto px-6 py-10">
@@ -208,7 +208,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                 </div>
                                 <div className="px-5 py-3 bg-white border border-gray-200 rounded-2xl text-center min-w-[120px] shadow-sm">
                                     <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 font-bold">LTV Ratio</p>
-                                    <p className="text-2xl font-bold text-purple-600">{ltv}%</p>
+                                    <p className="text-2xl font-bold text-[#2563EB]">{ltv}%</p>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +230,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                 {offers.length > 0 && (
                                     <div className="flex gap-2 text-xs">
                                         <span className="text-gray-500">Sort by:</span>
-                                        <button className="text-purple-600 font-bold hover:text-purple-500 transition-colors">Lowest Rate</button>
+                                        <button className="text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors">Lowest Rate</button>
                                     </div>
                                 )}
                             </div>
@@ -293,7 +293,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                     <strong className="text-black">${(selectedLender.closingCosts || 12450).toLocaleString()}</strong>.
                                     This includes lender fees, appraisal, and title insurance.
                                 </p>
-                                <button className="text-sm text-purple-600 font-bold hover:text-purple-500 transition-colors uppercase tracking-wide">
+                                <button className="text-sm text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors uppercase tracking-wide">
                                     View detailed cost breakdown &rarr;
                                 </button>
                             </div>
