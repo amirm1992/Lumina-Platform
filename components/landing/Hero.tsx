@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface MortgageRate {
     rate: number
@@ -15,6 +14,9 @@ interface MortgageRate {
 export function Hero() {
     const [rateData, setRateData] = useState<MortgageRate | null>(null)
     const [loading, setLoading] = useState(true)
+    const [loanAmount, setLoanAmount] = useState(350000)
+    const [loanTerm, setLoanTerm] = useState(30)
+    const [interestRate, setInterestRate] = useState(6.5)
 
     useEffect(() => {
         async function fetchRate() {
@@ -22,6 +24,9 @@ export function Hero() {
                 const response = await fetch('/api/mortgage-rate')
                 const data = await response.json()
                 setRateData(data)
+                if (data.rate) {
+                    setInterestRate(data.rate)
+                }
             } catch (error) {
                 console.error('Failed to fetch rate:', error)
                 setRateData({
@@ -37,6 +42,22 @@ export function Hero() {
         fetchRate()
     }, [])
 
+    // Calculate monthly payment
+    const calculateMonthlyPayment = () => {
+        const principal = loanAmount
+        const monthlyRate = interestRate / 100 / 12
+        const numberOfPayments = loanTerm * 12
+
+        if (monthlyRate === 0) return principal / numberOfPayments
+
+        const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+            (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
+        return payment
+    }
+
+    const monthlyPayment = calculateMonthlyPayment()
+    const totalInterest = (monthlyPayment * loanTerm * 12) - loanAmount
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString + 'T00:00:00')
         return date.toLocaleDateString('en-US', {
@@ -47,158 +68,266 @@ export function Hero() {
     }
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden bg-white selection:bg-purple-100">
-            {/* Modern Mesh Gradient Background - Subtle & Clean */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-blue-50/50 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-50/50 rounded-full blur-[100px]" />
-                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-30 [mask-image:linear-gradient(180deg,black,transparent)]" />
-            </div>
-
-            <div className="relative z-10 container mx-auto px-4">
-                <div className="max-w-5xl mx-auto text-center">
-                    {/* Badge */}
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-sm font-medium text-blue-700 mb-8 mx-auto hover:bg-blue-100 transition-colors cursor-default">
-                        <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        Simplifying Home Financing
-                    </div>
-
-                    {/* Headline */}
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 leading-[1.1]">
-                        Smart Mortgage Solutions
-                        <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">for Every Dream</span>
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p className="max-w-2xl mx-auto text-xl text-gray-500 mb-12 leading-relaxed">
-                        AI-Powered Mortgage Guidance for Every Borrower.
-                        Experience the new standard in digital lending.
-                    </p>
-
-                    {/* CTAs */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24">
-                        <Link href="/apply">
-                            <button className="px-10 py-5 rounded-full text-lg font-semibold bg-black text-white hover:bg-gray-800 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 shadow-lg min-w-[200px]">
-                                Get Started
-                            </button>
-                        </Link>
-                        <Link href="/how-it-works">
-                            <button className="px-10 py-5 rounded-full text-lg font-semibold bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 transition-all min-w-[200px]">
-                                How it Works
-                            </button>
-                        </Link>
-                    </div>
-
-                    {/* Floating Cards Section - Enhanced Spacing */}
-                    <div className="relative w-full max-w-[1400px] mx-auto h-[600px] hidden lg:block">
-
-                        {/* Card 1: Rate & Finance (Far Left) */}
-                        <div className="absolute top-20 left-4 xl:left-12 animate-float-slow z-20">
-                            <div className="p-6 rounded-3xl bg-white/80 border border-white backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-[300px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-500">
-                                <h3 className="font-bold text-gray-900 mb-1">Finance.</h3>
-                                <div className="text-sm text-gray-500 mb-4">Today's Rate</div>
-                                {loading ? (
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
-                                    </div>
-                                ) : (
-                                    <div className="text-4xl font-bold text-gray-900 mb-4">{rateData?.rate.toFixed(3)}%</div>
-                                )}
-
-                                {/* Source Attribution */}
-                                {!loading && rateData && (
-                                    <div className="text-[10px] text-gray-400 mb-6 border-l-2 border-blue-500 pl-2">
-                                        <div>Rate as of {formatDate(rateData.date)}</div>
-                                        <div>Source: {rateData.source}</div>
-                                    </div>
-                                )}
-
-                                <button className="w-full py-3 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 transition-colors">
-                                    Compare Rates
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Card 2: Broker Profile (Center - Large) */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-[360px]">
-                            <div className="relative rounded-[2.5rem] overflow-hidden bg-white shadow-2xl shadow-gray-200 border border-white">
-                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 z-10" />
-                                {/* Placeholder Image */}
-                                <div className="h-[520px] bg-gray-50 flex items-center justify-center">
-                                    <div className="text-gray-200 text-9xl">👤</div>
-                                </div>
-
-                                <div className="absolute top-6 left-6 z-20">
-                                    <div className="text-gray-900 font-semibold">Sarah Jenkins</div>
-                                    <div className="text-gray-500 text-sm">Senior Broker</div>
-                                </div>
-
-                                <div className="absolute bottom-6 left-6 right-6 z-20">
-                                    <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-3 rounded-2xl border border-white/50 shadow-sm">
-                                        <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                                        </div>
-                                        <div>
-                                            <div className="text-gray-900 text-sm font-medium">Active Now</div>
-                                            <div className="text-gray-500 text-xs">Replies in ~2m</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Card 3: AI Recommendation (Far Right) */}
-                        <div className="absolute top-24 right-4 xl:right-12 animate-float-slower z-20">
-                            <div className="p-6 rounded-3xl bg-white/80 border border-white backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-[300px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-500">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 rounded-xl bg-purple-100 text-purple-600">✨</div>
-                                    <div className="font-bold text-gray-900">AI Recommendation</div>
-                                </div>
-                                <div className="space-y-4">
-                                    {[1, 2].map((i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 border border-gray-100">
-                                            <div className="flex flex-col text-left">
-                                                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Interest</span>
-                                                <span className="font-bold text-gray-900">6.08%</span>
-                                            </div>
-                                            <div className="h-8 w-[1px] bg-gray-200" />
-                                            <div className="flex flex-col text-right">
-                                                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Monthly</span>
-                                                <span className="font-bold text-gray-900">$2,450</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/* Mobile Fallback for Cards (Stack) */}
-                    <div className="lg:hidden flex flex-col items-center gap-8 pb-20">
-                        {/* Card 2: Broker (First on mobile) */}
-                        <div className="relative w-full max-w-sm rounded-[2.5rem] overflow-hidden bg-white shadow-xl h-[400px] border border-gray-100">
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 z-10" />
-                            <div className="h-full bg-gray-50 flex items-center justify-center">
-                                <div className="text-gray-200 text-8xl">👤</div>
-                            </div>
-                            <div className="absolute bottom-6 left-6 right-6 z-20">
-                                <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-3 rounded-2xl border border-white/50 shadow-sm">
-                                    <div>
-                                        <div className="text-gray-900 text-sm font-medium">Active Now</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Card 1 */}
-                        <div className="p-6 rounded-3xl bg-white border border-gray-100 shadow-lg w-full max-w-sm">
-                            <h3 className="font-bold text-gray-900">Finance.</h3>
-                            <div className="text-4xl font-bold text-gray-900 my-4">{!loading && rateData ? rateData.rate.toFixed(3) : '--.--'}%</div>
-                        </div>
-                    </div>
-
+        <>
+            {/* Hero Section with Dark Green Background */}
+            <section className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-br from-[#0D3B25] via-[#0A2E1D] to-[#061912]">
+                {/* Decorative Elements */}
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#22C55E]/10 rounded-full blur-[150px]" />
+                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#22C55E]/5 rounded-full blur-[100px]" />
+                    {/* Animated line graph */}
+                    <svg className="absolute bottom-20 left-0 right-0 w-full h-32 opacity-30" viewBox="0 0 1200 100" preserveAspectRatio="none">
+                        <path
+                            d="M0,80 Q150,60 300,70 T600,50 T900,60 T1200,40"
+                            stroke="#22C55E"
+                            strokeWidth="2"
+                            fill="none"
+                            className="animate-pulse"
+                        />
+                    </svg>
                 </div>
-            </div>
-        </section>
+
+                <div className="relative z-10 container mx-auto px-6">
+                    <div className="text-center max-w-4xl mx-auto">
+                        {/* Badge */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-white/90 mb-8">
+                            <span className="flex h-2 w-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+                            AI-Powered Mortgage Platform
+                        </div>
+
+                        {/* Headline */}
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
+                            A smarter way to find
+                            <br />
+                            <span className="text-[#22C55E]">your perfect mortgage</span>
+                        </h1>
+
+                        {/* Subtitle */}
+                        <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/70 mb-10 leading-relaxed">
+                            Compare rates from top lenders instantly. Our AI analyzes your profile
+                            to find the best loan options tailored just for you.
+                        </p>
+
+                        {/* CTAs */}
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                            <Link href="/apply">
+                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-all duration-300 shadow-lg shadow-[#22C55E]/25 hover:shadow-xl hover:shadow-[#22C55E]/30 min-w-[200px]">
+                                    Get Started
+                                </button>
+                            </Link>
+                            <Link href="#calculator">
+                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 transition-all min-w-[200px]">
+                                    Calculate Payment
+                                </button>
+                            </Link>
+                        </div>
+
+                        {/* Stats Cards */}
+                        <div className="flex flex-wrap justify-center gap-6 mt-8">
+                            <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+                                <div className="text-sm text-white/60 mb-1">Current Rate</div>
+                                <div className="text-2xl font-bold text-white">
+                                    {loading ? '---' : `${rateData?.rate.toFixed(2)}%`}
+                                </div>
+                            </div>
+                            <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+                                <div className="text-sm text-white/60 mb-1">Avg. Approval Time</div>
+                                <div className="text-2xl font-bold text-white">24 hrs</div>
+                            </div>
+                            <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+                                <div className="text-sm text-white/60 mb-1">Lenders Available</div>
+                                <div className="text-2xl font-bold text-white">50+</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Calculator Section with Light Mint Background */}
+            <section id="calculator" className="py-20 bg-[#E8F5E9]">
+                <div className="container mx-auto px-6">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-4">
+                            Stay on budget — calculate your monthly loan easily
+                        </h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">
+                            Use our calculator to estimate your monthly payments and plan your home purchase.
+                        </p>
+                    </div>
+
+                    <div className="max-w-5xl mx-auto">
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {/* Calculator Inputs */}
+                            <div className="bg-white rounded-3xl p-8 shadow-sm">
+                                <div className="space-y-6">
+                                    {/* Loan Amount */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Total Principal Paid
+                                        </label>
+                                        <div className="text-2xl font-bold text-[#0D3B25] mb-3">
+                                            ${loanAmount.toLocaleString()}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[100000, 200000, 350000, 500000, 750000].map((amount) => (
+                                                <button
+                                                    key={amount}
+                                                    onClick={() => setLoanAmount(amount)}
+                                                    className={`px-3 py-1.5 text-sm rounded-full transition-all ${loanAmount === amount
+                                                            ? 'bg-[#0D3B25] text-white'
+                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        }`}
+                                                >
+                                                    ${(amount / 1000).toFixed(0)}k
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Loan Term */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Loan Term in Years
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="10"
+                                            max="30"
+                                            step="5"
+                                            value={loanTerm}
+                                            onChange={(e) => setLoanTerm(Number(e.target.value))}
+                                            className="w-full h-2 bg-[#22C55E] rounded-lg appearance-none cursor-pointer accent-[#0D3B25]"
+                                        />
+                                        <div className="flex justify-between text-sm text-gray-500 mt-2">
+                                            <span>10 yrs</span>
+                                            <span className="font-semibold text-[#0D3B25]">{loanTerm} years</span>
+                                            <span>30 yrs</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Interest Rate */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Interest Rate (%)
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="3"
+                                            max="10"
+                                            step="0.125"
+                                            value={interestRate}
+                                            onChange={(e) => setInterestRate(Number(e.target.value))}
+                                            className="w-full h-2 bg-[#22C55E] rounded-lg appearance-none cursor-pointer accent-[#0D3B25]"
+                                        />
+                                        <div className="flex justify-between text-sm text-gray-500 mt-2">
+                                            <span>3%</span>
+                                            <span className="font-semibold text-[#0D3B25]">{interestRate.toFixed(2)}%</span>
+                                            <span>10%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Results Card */}
+                            <div className="bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-3xl p-8 shadow-sm border border-[#BBF7D0] flex flex-col justify-center">
+                                <div className="text-center">
+                                    <div className="text-5xl md:text-6xl font-bold text-[#0D3B25] mb-2">
+                                        ${monthlyPayment.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                                    </div>
+                                    <div className="text-gray-600 mb-8">Monthly Payments</div>
+
+                                    <div className="border-t border-[#BBF7D0] pt-6 space-y-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-600">Total Principal Paid</span>
+                                            <span className="font-semibold text-[#0D3B25]">${loanAmount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-600">Total Interest Paid</span>
+                                            <span className="font-semibold text-[#0D3B25]">${totalInterest.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
+                                        </div>
+                                    </div>
+
+                                    <Link href="/apply">
+                                        <button className="w-full mt-8 px-6 py-4 rounded-full text-lg font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all shadow-lg">
+                                            Apply Now
+                                        </button>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Feature Section with Lavender Background */}
+            <section className="py-20 bg-[#F5F3FF]">
+                <div className="container mx-auto px-6">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        {/* Left Content */}
+                        <div>
+                            <div className="mb-8">
+                                <span className="text-6xl">🏠</span>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-6">
+                                Power your home purchase with smarter financing
+                            </h2>
+                            <p className="text-gray-600 text-lg mb-8">
+                                From pre-approval to closing, unlock tools that help you move faster,
+                                save more, and stay in control of your mortgage journey.
+                            </p>
+                            <Link href="/apply">
+                                <button className="px-6 py-3 rounded-full text-base font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all">
+                                    Get Pre-Approved
+                                </button>
+                            </Link>
+                        </div>
+
+                        {/* Right Image Placeholder */}
+                        <div className="relative">
+                            <div className="aspect-[4/3] bg-gradient-to-br from-[#22C55E]/20 to-[#0D3B25]/20 rounded-3xl flex items-center justify-center">
+                                <div className="text-center text-gray-400">
+                                    <div className="text-8xl mb-4">🏡</div>
+                                    <div className="text-sm">Happy Homeowners</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Smart Loan Products Section */}
+            <section id="how-it-works" className="py-20 bg-white">
+                <div className="container mx-auto px-6">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        {/* Left Content */}
+                        <div>
+                            <div className="text-[#22C55E] font-medium mb-4">Smart Loan Products</div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-[#0D3B25] mb-6">
+                                Unlock a mortgage experience that adapts to your lifestyle.
+                            </h2>
+                            <p className="text-gray-600 text-lg mb-8">
+                                The more you share about your goals, the more personalized recommendations
+                                you unlock — with built-in flexibility at every stage.
+                            </p>
+                            <Link href="#loan-products">
+                                <button className="px-6 py-3 rounded-full text-base font-semibold bg-[#0D3B25] text-white hover:bg-[#0A2E1D] transition-all">
+                                    Learn More
+                                </button>
+                            </Link>
+                        </div>
+
+                        {/* Right - Placeholder */}
+                        <div className="relative">
+                            <div className="aspect-video bg-gradient-to-br from-[#E8F5E9] to-[#DCFCE7] rounded-3xl flex items-center justify-center">
+                                <div className="text-center text-gray-400">
+                                    <div className="text-8xl mb-4">🤝</div>
+                                    <div className="text-sm">Personalized Experience</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </>
     )
 }
