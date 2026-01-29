@@ -199,8 +199,8 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                     <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 font-bold">Credit Score</p>
                                     {userProfile.creditScore > 0 ? (
                                         <p className={`text-2xl font-bold ${userProfile.creditScore >= 740 ? 'text-green-600' :
-                                                userProfile.creditScore >= 670 ? 'text-blue-600' :
-                                                    userProfile.creditScore >= 580 ? 'text-amber-600' : 'text-red-600'
+                                            userProfile.creditScore >= 670 ? 'text-blue-600' :
+                                                userProfile.creditScore >= 580 ? 'text-amber-600' : 'text-red-600'
                                             }`}>{userProfile.creditScore}</p>
                                     ) : (
                                         <p className="text-xl font-medium text-gray-400">Pending</p>
@@ -340,6 +340,51 @@ export function DashboardClient({ user }: DashboardClientProps) {
                 }}
                 onSave={handleProfileUpdate}
             />
+
+            {/* Extended Compliance Footer */}
+            <footer className="mt-16 border-t border-gray-200 bg-white">
+                <div className="container mx-auto px-6 py-8">
+                    <div className="text-center space-y-3 text-[11px] leading-relaxed max-w-4xl mx-auto text-gray-500">
+                        <p>
+                            NMLS #1631748 | Loans originated through C2 Financial Corporation | NMLS #135622
+                        </p>
+                        <p>
+                            Licensed Mortgage Broker | Florida Office of Financial Regulation
+                        </p>
+                        <p>
+                            Loan approval is not guaranteed and is subject to lender review of information.
+                            All loan approvals are conditional and all conditions must be met by borrower.
+                            Loan is only approved when lender has issued approval in writing and is subject to
+                            the Lender conditions. Specified rates may not be available for all borrowers.
+                            Rate subject to change with market conditions.
+                        </p>
+                        <p>
+                            C2 Financial Corporation is an Equal Opportunity Mortgage Broker/Lender.
+                            For state licensing information, visit{' '}
+                            <a
+                                href="https://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/135622"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                            >
+                                NMLS Consumer Access
+                            </a>.
+                            As a broker, C2 Financial Corporation is NOT individually approved by the FHA or HUD,
+                            but C2 Financial Corporation is allowed to originate FHA loans based on their
+                            relationships with FHA approved lenders.
+                        </p>
+                        <p className="text-gray-400 text-[10px]">
+                            C2 Financial Corporation, 12230 El Camino Real #100, San Diego, CA 92130
+                        </p>
+                        <div className="flex items-center justify-center gap-2 pt-2">
+                            <span>Equal Housing Lender</span>
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3L2 12h3v9h14v-9h3L12 3zm0 2.84L18 11v8H6v-8l6-5.16z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
     )
 }
