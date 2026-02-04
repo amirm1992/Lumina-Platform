@@ -1,17 +1,23 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { MessagesClient } from "@/components/messages/MessagesClient";
+import { auth, currentUser } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import { MessagesClient } from '@/components/messages/MessagesClient'
 
 export default async function MessagesPage() {
-    const supabase = await createClient();
+    const { userId } = await auth()
+    const user = await currentUser()
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-        return redirect("/sign-in");
+    if (!userId || !user) {
+        return redirect('/login')
     }
 
-    return <MessagesClient user={user} />;
+    // Create a user object compatible with the existing component
+    const userData = {
+        id: userId,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        user_metadata: {
+            full_name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.emailAddresses[0]?.emailAddress,
+        }
+    }
+
+    return <MessagesClient user={userData} />
 }

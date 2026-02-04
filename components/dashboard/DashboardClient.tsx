@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { User } from '@supabase/supabase-js'
 import { DashboardNavbar } from './DashboardNavbar'
 import { LenderCard } from './LenderCard'
 import { PaymentBreakdown } from './PaymentBreakdown'
@@ -11,9 +10,10 @@ import { EditDetailsModal } from './EditDetailsModal'
 import { RATE_TRENDS } from './constants'
 import { UserProfile, Lender } from './types'
 import { Application, LenderOffer } from '@/types/database'
+import { AuthUser } from '@/types/auth'
 
 interface DashboardClientProps {
-    user: User | null
+    user: AuthUser | null
 }
 
 // Convert database offer to Lender type for display

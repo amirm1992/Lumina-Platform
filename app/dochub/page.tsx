@@ -1,38 +1,29 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { DocHubClient } from "@/components/dochub/DocHubClient";
-import { DocFile } from "@/components/dochub/types";
+import { auth, currentUser } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma'
+import { DocHubClient } from '@/components/dochub/DocHubClient'
+import { DocFile } from '@/components/dochub/types'
 
 export default async function DocHubPage() {
-    const supabase = await createClient();
+    const { userId } = await auth()
+    const user = await currentUser()
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-        return redirect("/sign-in");
+    if (!userId || !user) {
+        return redirect('/login')
     }
 
-    // Fetch documents
-    const { data: documents } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+    // Create a user object compatible with the existing component
+    const userData = {
+        id: userId,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        user_metadata: {
+            full_name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.emailAddresses[0]?.emailAddress,
+        }
+    }
 
-    // Map to DocFile type
-    const initialFiles: DocFile[] = (documents || []).map(doc => ({
-        id: doc.id,
-        name: doc.file_name,
-        category: doc.category as any,
-        uploadDate: new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        size: doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown',
-        type: doc.file_type === 'pdf' ? 'pdf' : 'image',
-        status: doc.status as any,
-        path: doc.file_path,
-        downloadUrl: doc.file_path // Legacy support
-    }));
+    // TODO: Migrate documents table to Prisma and fetch from there
+    // For now, return empty array until documents are migrated
+    const initialFiles: DocFile[] = []
 
-    return <DocHubClient user={user} initialFiles={initialFiles} />;
+    return <DocHubClient user={userData} initialFiles={initialFiles} />
 }

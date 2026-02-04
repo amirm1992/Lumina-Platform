@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { User } from '@supabase/supabase-js'
+import { AuthUser } from '@/types/auth'
 import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
 import { PropertyCard } from './PropertyCard'
 import { AddPropertyCard } from './AddPropertyCard'
@@ -10,7 +10,7 @@ import { PropertyDetailsModal } from './PropertyDetailsModal'
 import { Property } from './types'
 
 interface PropertiesClientProps {
-    user: User | null
+    user: AuthUser | null
 }
 
 export function PropertiesClient({ user }: PropertiesClientProps) {

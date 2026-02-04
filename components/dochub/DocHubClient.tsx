@@ -1,15 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
+import { AuthUser } from '@/types/auth'
 import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
 import { DocGroup } from './DocGroup'
 import { UploadZone } from './UploadZone'
 import { DocFile } from './types'
 
 interface DocHubClientProps {
-    user: User | null
+    user: AuthUser | null
     initialFiles: DocFile[]
 }
 
@@ -20,8 +19,7 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
         setFiles(prev => [...newFiles, ...prev])
     }
 
-    const supabase = createClient()
-
+    // TODO: Migrate document storage from Supabase to DigitalOcean Spaces
     const handleDelete = async (id: string) => {
         const fileToDelete = files.find(f => f.id === id)
         if (!fileToDelete) return
@@ -29,48 +27,21 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
         if (!confirm('Are you sure you want to delete this file?')) return
 
         // Optimistic UI update
-        const previousFiles = [...files]
         setFiles(prev => prev.filter(f => f.id !== id))
 
-        try {
-            // 1. Delete from Storage
-            if (fileToDelete.path) {
-                const { error: storageError } = await supabase.storage
-                    .from('documents')
-                    .remove([fileToDelete.path])
-                if (storageError) console.error('Storage delete error:', storageError)
-            }
-
-            // 2. Delete from Database
-            const { error: dbError } = await supabase
-                .from('documents')
-                .delete()
-                .eq('id', id)
-
-            if (dbError) throw dbError
-        } catch (error) {
-            console.error('Delete failed:', error)
-            alert('Failed to delete file')
-            setFiles(previousFiles) // Revert
-        }
+        // TODO: Implement API call to delete document
+        console.log('Delete document:', id)
     }
 
     const handleDownload = async (file: DocFile) => {
-        if (!file.path) return
-
-        try {
-            const { data, error } = await supabase.storage
-                .from('documents')
-                .createSignedUrl(file.path, 300) // 5 minutes expiry
-
-            if (error) throw error
-            if (data?.signedUrl) {
-                window.open(data.signedUrl, '_blank')
-            }
-        } catch (error) {
-            console.error('Download failed:', error)
-            alert('Failed to access document')
+        if (!file.path) {
+            alert('Document not available')
+            return
         }
+
+        // TODO: Implement API call to get signed download URL
+        console.log('Download document:', file.id)
+        alert('Document download will be available after storage migration')
     }
 
     // Categorize files
@@ -79,7 +50,7 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
     const disclosureFiles = files.filter(f => f.category === 'disclosure')
 
     return (
-        <div className="min-h-screen bg-gray-50 selection:bg-purple-100 font-sans text-gray-900">
+        <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
             <DashboardNavbar user={user} />
 
             <main className="container mx-auto px-6 py-10 max-w-7xl">

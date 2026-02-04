@@ -1,5 +1,6 @@
 import './globals.css'
 import { Orbitron } from 'next/font/google'
+import { ClerkProvider } from '@clerk/nextjs'
 import { ComplianceFooter } from '@/components/layout/ComplianceFooter'
 
 const orbitron = Orbitron({
@@ -54,14 +55,15 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en" className={orbitron.variable}>
-            <body className="flex flex-col min-h-screen">
-                <main className="flex-1">
-                    {children}
-                </main>
-                <ComplianceFooter />
-            </body>
-        </html>
+        <ClerkProvider>
+            <html lang="en" className={orbitron.variable}>
+                <body className="flex flex-col min-h-screen">
+                    <main className="flex-1">
+                        {children}
+                    </main>
+                    <ComplianceFooter />
+                </body>
+            </html>
+        </ClerkProvider>
     )
 }
-

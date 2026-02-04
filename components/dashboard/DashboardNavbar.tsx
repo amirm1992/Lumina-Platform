@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import SignOutButton from '@/components/auth/signout-button'
-import { User } from '@supabase/supabase-js'
+import { AuthUser } from '@/types/auth'
 
 interface DashboardNavbarProps {
-    user: User | null
+    user: AuthUser | null
 }
 
 export function DashboardNavbar({ user }: DashboardNavbarProps) {

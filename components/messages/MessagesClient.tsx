@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { User } from '@supabase/supabase-js'
+import { AuthUser } from '@/types/auth'
 import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
 import { MessageList } from './MessageList'
 import { MessageDetail } from './MessageDetail'
@@ -10,7 +10,7 @@ import { Message } from './types'
 import { Plus } from 'lucide-react'
 
 interface MessagesClientProps {
-    user: User | null
+    user: AuthUser | null
 }
 
 const INITIAL_MESSAGES: Message[] = [
