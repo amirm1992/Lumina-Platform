@@ -9,6 +9,7 @@ interface MortgageRate {
     source: string
     description?: string
     isFallback?: boolean
+    history?: { date: string, rate: number }[]
 }
 
 export function Hero() {
@@ -21,7 +22,7 @@ export function Hero() {
     useEffect(() => {
         async function fetchRate() {
             try {
-                const response = await fetch('/api/mortgage-rate')
+                const response = await fetch('/api/mortgage-rate?history=true')
                 const data = await response.json()
                 setRateData(data)
                 if (data.rate) {
@@ -122,21 +123,58 @@ export function Hero() {
                             </Link>
                         </div>
 
-                        {/* Stats Cards */}
-                        <div className="flex flex-wrap justify-center gap-6 mt-8">
-                            <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                                <div className="text-sm text-white/60 mb-1">Current Rate</div>
-                                <div className="text-2xl font-bold text-white">
-                                    {loading ? '---' : `${(rateData?.rate || 6.89).toFixed(2)}%`}
+                        {/* Live Rate Dashboard */}
+                        <div className="mt-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 max-w-2xl mx-auto shadow-xl">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                                {/* Current Rate Display */}
+                                <div className="text-center md:text-left">
+                                    <h3 className="text-white/80 text-lg font-medium mb-1">Current 30-Year Fixed</h3>
+                                    <div className="flex items-baseline justify-center md:justify-start gap-2">
+                                        <span className="text-6xl md:text-7xl font-bold text-white tracking-tighter">
+                                            {loading ? '---' : `${rateData?.rate?.toFixed(2)}%`}
+                                        </span>
+                                        {rateData?.history && rateData.history.length > 1 && (
+                                            <span className={`text-lg font-medium px-2 py-1 rounded-full ${rateData.rate > rateData.history[1].rate ? 'bg-red-500/20 text-red-200' : 'bg-green-500/20 text-green-200'
+                                                }`}>
+                                                {rateData.rate > rateData.history[1].rate ? '▲' : '▼'}
+                                                {Math.abs(rateData.rate - rateData.history[1].rate).toFixed(2)}%
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-white/50 text-sm mt-3 flex items-center justify-center md:justify-start gap-2">
+                                        <span>As of {rateData ? new Date(rateData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}</span>
+                                        <span>•</span>
+                                        <span>Source: FRED</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                                <div className="text-sm text-white/60 mb-1">Avg. Approval Time</div>
-                                <div className="text-2xl font-bold text-white">24 hrs</div>
-                            </div>
-                            <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                                <div className="text-sm text-white/60 mb-1">Lenders Available</div>
-                                <div className="text-2xl font-bold text-white">50+</div>
+
+                                {/* Trend Table */}
+                                <div className="w-full md:w-auto bg-black/20 rounded-xl p-4 min-w-[240px]">
+                                    <h4 className="text-white/90 text-sm font-semibold mb-3 border-b border-white/10 pb-2">Rate History</h4>
+                                    <div className="space-y-3 text-sm">
+                                        {[
+                                            { label: 'Last Week', index: 1 },
+                                            { label: '6 Weeks Ago', index: 6 },
+                                            { label: '6 Months Ago', index: 25 }
+                                        ].map((period) => {
+                                            const historicalRate = rateData?.history?.[period.index]?.rate;
+                                            const current = rateData?.rate || 0;
+                                            const diff = historicalRate ? current - historicalRate : 0;
+
+                                            return (
+                                                <div key={period.label} className="flex justify-between items-center text-white/80">
+                                                    <span>{period.label}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="font-medium">{historicalRate ? `${historicalRate.toFixed(2)}%` : '--'}</span>
+                                                        <span className={`text-xs w-12 text-right ${diff > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                                                            {diff > 0 ? '+' : ''}{diff.toFixed(2)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
