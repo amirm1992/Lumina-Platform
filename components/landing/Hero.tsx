@@ -127,7 +127,7 @@ export function Hero() {
                             <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
                                 <div className="text-sm text-white/60 mb-1">Current Rate</div>
                                 <div className="text-2xl font-bold text-white">
-                                    {loading ? '---' : `${rateData?.rate.toFixed(2)}%`}
+                                    {loading ? '---' : `${(rateData?.rate || 6.89).toFixed(2)}%`}
                                 </div>
                             </div>
                             <div className="px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
@@ -174,8 +174,8 @@ export function Hero() {
                                                     key={amount}
                                                     onClick={() => setLoanAmount(amount)}
                                                     className={`px-3 py-1.5 text-sm rounded-full transition-all ${loanAmount === amount
-                                                            ? 'bg-[#1E3A5F] text-white'
-                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        ? 'bg-[#1E3A5F] text-white'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                         }`}
                                                 >
                                                     ${(amount / 1000).toFixed(0)}k

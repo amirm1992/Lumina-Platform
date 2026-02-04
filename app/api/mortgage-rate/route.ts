@@ -12,10 +12,20 @@ export async function GET(request: Request) {
     const limit = history ? 52 : 1
 
     if (!apiKey) {
-        return NextResponse.json(
-            { error: 'FRED API key not configured' },
-            { status: 500 }
-        )
+        // Return fallback data if API key is not configured
+        const mockHistory = Array.from({ length: 12 }, (_, i) => ({
+            date: new Date(Date.now() - (11 - i) * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            rate: 6.5 + Math.random() * 0.5 - 0.25
+        }))
+
+        return NextResponse.json({
+            rate: 6.89,
+            date: new Date().toISOString().split('T')[0],
+            history: mockHistory,
+            source: 'Fallback (FRED API key missing)',
+            description: '30-Year Fixed Rate Mortgage Average (Fallback)',
+            isFallback: true
+        })
     }
 
     try {
