@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+
+// Dynamic import for Lottie to avoid SSR issues
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
 
 interface MortgageRate {
     rate: number
@@ -20,6 +24,22 @@ export function Hero() {
     const [loanTerm, setLoanTerm] = useState(30)
     const [interestRate, setInterestRate] = useState(6.5)
     const [chartView, setChartView] = useState<'D' | 'M' | 'W'>('W')
+    const [lottieData, setLottieData] = useState<any>(null)
+    const [lottieDataLoan, setLottieDataLoan] = useState<any>(null)
+
+    useEffect(() => {
+        // Fetch Lottie animation data
+        fetch('/rocksolid-estate.json')
+            .then(res => res.json())
+            .then(data => setLottieData(data))
+            .catch(err => console.warn('Failed to load animation:', err))
+
+        // Fetch second Lottie animation
+        fetch('/mortgage-loan.json')
+            .then(res => res.json())
+            .then(data => setLottieDataLoan(data))
+            .catch(err => console.warn('Failed to load loan animation:', err))
+    }, [])
 
     useEffect(() => {
         async function fetchRate() {
@@ -67,14 +87,17 @@ export function Hero() {
 
         let data: any[] = []
         if (chartView === 'M') {
-            // Last 6 Months (approx 1 per month)
+            // Last 6 Months - take last ~26 weeks (6 months), sample every 4th week
+            // Data is chronological (oldest → newest), so slice from END
             if (rateData?.history) {
-                data = rateData.history.filter((_, i) => i % 4 === 0).slice(0, 6).reverse()
+                const last26Weeks = rateData.history.slice(-26)  // Most recent 6 months
+                // Sample every 4th entry for monthly view
+                data = last26Weeks.filter((_, i) => i % 4 === 0).slice(-6)
             }
         } else {
-            // Weekly (Last 6 weeks)
+            // Weekly (Last 6 weeks) - slice from END to get newest data
             if (rateData?.history) {
-                data = rateData.history.slice(0, 6).reverse()
+                data = rateData.history.slice(-6)  // Most recent 6 weeks
             }
         }
 
@@ -271,48 +294,26 @@ export function Hero() {
                             {/* Calculator Inputs */}
                             <div className="bg-white rounded-3xl p-8 shadow-sm">
                                 <div className="space-y-6">
-                                    {/* Loan Amount */}
+                                    {/* Loan Amount Slider */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Total Principal Paid
+                                            Loan Amount
                                         </label>
                                         <div className="text-2xl font-bold text-[#1E3A5F] mb-3">
                                             ${loanAmount.toLocaleString()}
                                         </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {[100000, 200000, 350000, 500000, 750000].map((amount) => (
-                                                <button
-                                                    key={amount}
-                                                    onClick={() => setLoanAmount(amount)}
-                                                    className={`px-3 py-1.5 text-sm rounded-full transition-all ${loanAmount === amount
-                                                        ? 'bg-[#1E3A5F] text-white'
-                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                                        }`}
-                                                >
-                                                    ${(amount / 1000).toFixed(0)}k
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Loan Term */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Loan Term in Years
-                                        </label>
                                         <input
                                             type="range"
-                                            min="10"
-                                            max="30"
-                                            step="5"
-                                            value={loanTerm}
-                                            onChange={(e) => setLoanTerm(Number(e.target.value))}
+                                            min="50000"
+                                            max="1000000"
+                                            step="10000"
+                                            value={loanAmount}
+                                            onChange={(e) => setLoanAmount(Number(e.target.value))}
                                             className="w-full h-2 bg-[#3B82F6] rounded-lg appearance-none cursor-pointer accent-[#1E3A5F]"
                                         />
                                         <div className="flex justify-between text-sm text-gray-500 mt-2">
-                                            <span>10 yrs</span>
-                                            <span className="font-semibold text-[#1E3A5F]">{loanTerm} years</span>
-                                            <span>30 yrs</span>
+                                            <span>$50k</span>
+                                            <span>$1M</span>
                                         </div>
                                     </div>
 
@@ -376,9 +377,6 @@ export function Hero() {
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         {/* Left Content */}
                         <div>
-                            <div className="mb-8">
-                                <span className="text-6xl">🏠</span>
-                            </div>
                             <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-6">
                                 Power your home purchase with smarter financing
                             </h2>
@@ -393,13 +391,22 @@ export function Hero() {
                             </Link>
                         </div>
 
-                        {/* Right Image Placeholder */}
+                        {/* Right - Lottie Animation */}
                         <div className="relative">
-                            <div className="aspect-[4/3] bg-gradient-to-br from-[#3B82F6]/20 to-[#1E3A5F]/20 rounded-3xl flex items-center justify-center">
-                                <div className="text-center text-gray-400">
-                                    <div className="text-8xl mb-4">🏡</div>
-                                    <div className="text-sm">Happy Homeowners</div>
-                                </div>
+                            <div className="aspect-[4/3] bg-gradient-to-br from-[#C7D9F0] to-[#E4EDF9] rounded-3xl flex items-center justify-center overflow-hidden p-8">
+                                {lottieData ? (
+                                    <Lottie
+                                        animationData={lottieData}
+                                        loop={true}
+                                        autoplay={true}
+                                        className="w-full h-full max-w-[400px] drop-shadow-lg"
+                                    />
+                                ) : (
+                                    <div className="text-center text-gray-400">
+                                        <div className="text-8xl mb-4">🏡</div>
+                                        <div className="text-sm">Happy Homeowners</div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -427,13 +434,22 @@ export function Hero() {
                             </Link>
                         </div>
 
-                        {/* Right - Placeholder */}
+                        {/* Right - Lottie Animation */}
                         <div className="relative">
-                            <div className="aspect-video bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-3xl flex items-center justify-center">
-                                <div className="text-center text-gray-400">
-                                    <div className="text-8xl mb-4">🤝</div>
-                                    <div className="text-sm">Personalized Experience</div>
-                                </div>
+                            <div className="aspect-video bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-3xl flex items-center justify-center overflow-hidden p-8">
+                                {lottieDataLoan ? (
+                                    <Lottie
+                                        animationData={lottieDataLoan}
+                                        loop={true}
+                                        autoplay={true}
+                                        className="w-full h-full max-w-[450px] drop-shadow-lg"
+                                    />
+                                ) : (
+                                    <div className="text-center text-gray-400">
+                                        <div className="text-8xl mb-4">🤝</div>
+                                        <div className="text-sm">Personalized Experience</div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
