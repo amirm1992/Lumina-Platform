@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -149,4 +150,12 @@ model AdminActivityLog {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("admin_activity_log")
+}
+
+model SystemMetric {
+  key        String   @id
+  value      Json
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("system_metrics")
 }
