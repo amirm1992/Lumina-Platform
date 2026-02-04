@@ -73,7 +73,7 @@ export async function GET(request: Request) {
                 const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2500))
 
                 // @ts-ignore
-                const cachedMetric = await Promise.race([dbCall, timeout])
+                const cachedMetric = (await Promise.race([dbCall, timeout])) as any
 
                 if (cachedMetric && cachedMetric.value) {
                     // Start with a clean object copy
