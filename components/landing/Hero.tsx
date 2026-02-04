@@ -41,21 +41,8 @@ export function Hero() {
                     setInterestRate(data.rate)
                 }
             } catch (error) {
-                console.warn('Using fallback data due to API error/timeout:', error)
-                setRateData({
-                    rate: 6.89,
-                    date: new Date().toISOString().split('T')[0],
-                    source: 'Fallback',
-                    isFallback: true,
-                    history: Array.from({ length: 30 }, (_, i) => {
-                        const d = new Date()
-                        d.setDate(d.getDate() - (i * 7)) // Weekly points
-                        return {
-                            date: d.toISOString().split('T')[0],
-                            rate: 6.5 + (Math.sin(i) * 0.2) + (Math.random() * 0.1) // Fake trend
-                        }
-                    }).reverse()
-                })
+                console.warn('Failed to fetch rate:', error)
+                // No mock data fallback. Relies on API/DB returning valid data.
             } finally {
                 setLoading(false)
             }

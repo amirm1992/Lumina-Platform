@@ -84,21 +84,13 @@ export async function GET(request: Request) {
         }
 
         // 4. If still no data, return Fallback
+        // 4. If still no data, return Error
         if (!rateData) {
-            console.warn('No data available in DB/API. Returning hardcoded fallback.')
-            const mockHistory = Array.from({ length: 12 }, (_, i) => ({
-                date: new Date(Date.now() - (11 - i) * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                rate: 6.5 + Math.random() * 0.5 - 0.25
-            }))
-
-            rateData = {
-                rate: 6.89,
-                date: new Date().toISOString().split('T')[0],
-                history: mockHistory,
-                source: 'Fallback (System)',
-                description: '30-Year Fixed Rate Mortgage Average (Fallback)',
-                isFallback: true
-            }
+            console.warn('No data available in DB/API.')
+            return NextResponse.json(
+                { error: 'Service Unavailable - No Data' },
+                { status: 503 }
+            )
         }
 
         return NextResponse.json(rateData)
