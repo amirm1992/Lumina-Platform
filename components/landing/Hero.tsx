@@ -24,14 +24,9 @@ export function Hero() {
     useEffect(() => {
         async function fetchRate() {
             try {
-                // Timeout after 2s for local dev (Database connection hangs locally)
-                const controller = new AbortController()
-                const timeoutId = setTimeout(() => controller.abort(), 2000)
-
                 const response = await fetch('/api/mortgage-rate?history=true', {
-                    signal: controller.signal
+                    next: { revalidate: 3600 }
                 })
-                clearTimeout(timeoutId)
 
                 if (!response.ok) throw new Error('Failed to fetch')
 
@@ -247,6 +242,7 @@ export function Hero() {
                                                 strokeWidth={3}
                                                 fillOpacity={1}
                                                 fill="url(#colorRate)"
+                                                dot={{ r: 4, strokeWidth: 2, stroke: '#60A5FA', fill: '#1E3A5F' }}
                                                 activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }}
                                             />
                                         </AreaChart>
