@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface MortgageRate {
     rate: number
@@ -18,6 +19,7 @@ export function Hero() {
     const [loanAmount, setLoanAmount] = useState(350000)
     const [loanTerm, setLoanTerm] = useState(30)
     const [interestRate, setInterestRate] = useState(6.5)
+    const [chartView, setChartView] = useState<'D' | 'M' | 'W'>('W')
 
     useEffect(() => {
         async function fetchRate() {
@@ -34,7 +36,15 @@ export function Hero() {
                     rate: 6.89,
                     date: new Date().toISOString().split('T')[0],
                     source: 'Fallback',
-                    isFallback: true
+                    isFallback: true,
+                    history: Array.from({ length: 30 }, (_, i) => {
+                        const d = new Date()
+                        d.setDate(d.getDate() - (i * 7)) // Weekly points
+                        return {
+                            date: d.toISOString().split('T')[0],
+                            rate: 6.5 + (Math.sin(i) * 0.2) + (Math.random() * 0.1) // Fake trend
+                        }
+                    }).reverse()
                 })
             } finally {
                 setLoading(false)
@@ -42,6 +52,47 @@ export function Hero() {
         }
         fetchRate()
     }, [])
+
+    const getChartData = () => {
+        if (!rateData?.history && !rateData?.rate) return []
+
+        // Logic for different views
+        if (chartView === 'D') {
+            // Last 6 Days (Flat line of current rate as placeholder)
+            const currentRate = rateData?.rate || 6.5
+            const today = new Date()
+            return Array.from({ length: 6 }, (_, i) => {
+                const d = new Date(today)
+                d.setDate(today.getDate() - (5 - i))
+                return {
+                    date: d.toISOString().split('T')[0],
+                    rate: currentRate,
+                    label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                    fullDate: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                }
+            })
+        }
+
+        let data: any[] = []
+        if (chartView === 'M') {
+            // Last 6 Months (approx 1 per month)
+            if (rateData?.history) {
+                data = rateData.history.filter((_, i) => i % 4 === 0).slice(0, 6).reverse()
+            }
+        } else {
+            // Weekly (Last 6 weeks)
+            if (rateData?.history) {
+                data = rateData.history.slice(0, 6).reverse()
+            }
+        }
+
+        return data.map(item => ({
+            ...item,
+            label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            fullDate: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        }))
+    }
+    const chartData = getChartData()
 
     // Calculate monthly payment
     const calculateMonthlyPayment = () => {
@@ -124,56 +175,85 @@ export function Hero() {
                         </div>
 
                         {/* Live Rate Dashboard */}
-                        <div className="mt-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 max-w-2xl mx-auto shadow-xl">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                                {/* Current Rate Display */}
-                                <div className="text-center md:text-left">
+                        <div className="mt-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 max-w-4xl mx-auto shadow-xl">
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {/* Rate Column */}
+                                <div className="md:col-span-1 flex flex-col justify-center text-center md:text-left">
                                     <h3 className="text-white/80 text-lg font-medium mb-1">Current 30-Year Fixed</h3>
-                                    <div className="flex items-baseline justify-center md:justify-start gap-2">
-                                        <span className="text-6xl md:text-7xl font-bold text-white tracking-tighter">
-                                            {loading ? '---' : `${rateData?.rate?.toFixed(2)}%`}
-                                        </span>
-                                        {rateData?.history && rateData.history.length > 1 && (
-                                            <span className={`text-lg font-medium px-2 py-1 rounded-full ${rateData.rate > rateData.history[1].rate ? 'bg-red-500/20 text-red-200' : 'bg-green-500/20 text-green-200'
-                                                }`}>
-                                                {rateData.rate > rateData.history[1].rate ? '▲' : '▼'}
-                                                {Math.abs(rateData.rate - rateData.history[1].rate).toFixed(2)}%
-                                            </span>
-                                        )}
+                                    <div className="text-6xl font-bold text-white tracking-tighter mb-4">
+                                        {loading ? '---' : `${rateData?.rate?.toFixed(2)}%`}
                                     </div>
-                                    <div className="text-white/50 text-sm mt-3 flex items-center justify-center md:justify-start gap-2">
-                                        <span>As of {rateData ? new Date(rateData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}</span>
-                                        <span>•</span>
-                                        <span>Source: FRED</span>
+                                    <div className="text-white/40 text-xs">
+                                        Source: FRED • Updated {new Date().toLocaleDateString()}
                                     </div>
                                 </div>
 
-                                {/* Trend Table */}
-                                <div className="w-full md:w-auto bg-black/20 rounded-xl p-4 min-w-[240px]">
-                                    <h4 className="text-white/90 text-sm font-semibold mb-3 border-b border-white/10 pb-2">Rate History</h4>
-                                    <div className="space-y-3 text-sm">
-                                        {[
-                                            { label: 'Last Week', index: 1 },
-                                            { label: '6 Weeks Ago', index: 6 },
-                                            { label: '6 Months Ago', index: 25 }
-                                        ].map((period) => {
-                                            const historicalRate = rateData?.history?.[period.index]?.rate;
-                                            const current = rateData?.rate || 0;
-                                            const diff = historicalRate ? current - historicalRate : 0;
+                                {/* Chart Area */}
+                                <div className="md:col-span-2 min-h-[220px] w-full bg-black/10 rounded-2xl p-4 border border-white/5 relative group">
+                                    {/* Glassmorphic Grid Overlay */}
+                                    <div className="absolute inset-x-4 bottom-4 top-4 border-b border-white/5 pointer-events-none" />
 
-                                            return (
-                                                <div key={period.label} className="flex justify-between items-center text-white/80">
-                                                    <span>{period.label}</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="font-medium">{historicalRate ? `${historicalRate.toFixed(2)}%` : '--'}</span>
-                                                        <span className={`text-xs w-12 text-right ${diff > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                                                            {diff > 0 ? '+' : ''}{diff.toFixed(2)}%
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                    {/* Controls (Moved Inside) */}
+                                    <div className="absolute top-4 right-4 z-10 flex gap-2">
+                                        {['D', 'M', 'W'].map((view) => (
+                                            <button
+                                                key={view}
+                                                onClick={() => setChartView(view as any)}
+                                                className={`w-8 h-8 rounded-full text-xs font-bold transition-all border ${chartView === view
+                                                        ? 'bg-white text-[#1E3A5F] border-white'
+                                                        : 'bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
+                                                    }`}
+                                            >
+                                                {view}
+                                            </button>
+                                        ))}
                                     </div>
+
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.6} />
+                                                    <stop offset="95%" stopColor="#60A5FA" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <XAxis
+                                                dataKey="label"
+                                                stroke="rgba(255,255,255,0.3)"
+                                                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10, dy: 10 }}
+                                                tickLine={false}
+                                                axisLine={false}
+                                            />
+                                            <YAxis
+                                                hide={true}
+                                                domain={['dataMin - 0.2', 'dataMax + 0.2']}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(20, 30, 60, 0.90)',
+                                                    backdropFilter: 'blur(8px)',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                                                    padding: '12px'
+                                                }}
+                                                itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}
+                                                labelStyle={{ color: '#9CA3AF', marginBottom: '4px', fontSize: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}
+                                                formatter={(value: number) => [`${value.toFixed(2)}%`, 'Rate']}
+                                                labelFormatter={(_, payload) => payload[0]?.payload?.fullDate || ''}
+                                                cursor={{ stroke: 'rgba(255,255,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="rate"
+                                                stroke="#60A5FA"
+                                                strokeWidth={3}
+                                                fillOpacity={1}
+                                                fill="url(#colorRate)"
+                                                activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
                                 </div>
                             </div>
                         </div>
