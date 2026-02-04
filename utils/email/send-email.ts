@@ -1,6 +1,19 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
+// Lazy initialization to avoid build-time errors when API key is not set
+let resendClient: Resend | null = null
+
+function getResendClient() {
+    if (!resendClient) {
+        const apiKey = process.env.RESEND_API_KEY
+        if (!apiKey) {
+            console.warn('RESEND_API_KEY not configured - email sending disabled')
+            return null
+        }
+        resendClient = new Resend(apiKey)
+    }
+    return resendClient
+}
 
 export type EmailStatus = 'pending' | 'approved' | 'rejected' | 'documents_needed' | 'in_review' | 'offers_ready'
 
@@ -50,6 +63,12 @@ export async function sendStatusUpdateEmail({
 }) {
     const statusInfo = STATUS_MESSAGES[status]
     const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://lumina.finance'}/dashboard`
+
+    const resend = getResendClient()
+    if (!resend) {
+        console.warn('Email not sent - Resend not configured')
+        return { success: false, error: 'Email service not configured' }
+    }
 
     try {
         await resend.emails.send({
