@@ -68,11 +68,14 @@ export async function GET(request: Request) {
                 })
 
                 if (cachedMetric && cachedMetric.value) {
-                    rateData = cachedMetric.value
-                    // Add flag to indicate cached data
-                    if (rateData) {
-                        (rateData as any).source += ' (Cached)'
-                            (rateData as any).isCached = true
+                    // Start with a clean object copy
+                    rateData = JSON.parse(JSON.stringify(cachedMetric.value));
+
+                    // Add flag to indicate cached data safely
+                    if (rateData && typeof rateData === 'object') {
+                        const rd = rateData as any;
+                        rd.source = (rd.source || '') + ' (Cached)';
+                        rd.isCached = true;
                     }
                 }
             } catch (dbError) {
