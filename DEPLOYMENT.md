@@ -1,9 +1,19 @@
-# Lumina Deployment Guide
+# Lumina Deployment Guide - Digital Ocean
+
+## Infrastructure Overview
+
+| Service | Provider | Details |
+|---------|----------|---------|
+| **Hosting** | Digital Ocean App Platform | Next.js application |
+| **Database** | Digital Ocean PostgreSQL | Managed PostgreSQL cluster |
+| **Authentication** | Clerk | User authentication |
+| **Domain** | Your registrar | Custom domain |
+
+---
 
 ## Pre-Deployment Checklist
 
 ### 1. Assets to Add (Manual)
-Since image generation is unavailable, you'll need to create these assets:
 
 #### **favicon.ico** (32x32px or 16x16px)
 - Location: `/public/favicon.ico`
@@ -23,121 +33,149 @@ Since image generation is unavailable, you'll need to create these assets:
 
 ## Step 2: Environment Variables
 
-Create a `.env.production` file with these variables:
+Set these environment variables in Digital Ocean App Platform:
 
 ```bash
-# Supabase (Authentication)
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Database (Digital Ocean PostgreSQL)
+DATABASE_URL=postgresql://doadmin:PASSWORD@your-db.db.ondigitalocean.com:25060/defaultdb?sslmode=require
 
-# FRED API (Mortgage Rates)
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
+CLERK_SECRET_KEY=sk_test_xxx
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+
+# External APIs
 FRED_API_KEY=your_fred_api_key
-
-# RapidAPI (Property Data)
+RENTCAST_API_KEY=your_rentcast_api_key
 RAPIDAPI_KEY=your_rapidapi_key
 RAPIDAPI_HOST=real-estate101.p.rapidapi.com
-
-# Google Places (Optional - if using autocomplete)
-NEXT_PUBLIC_GOOGLE_PLACES_API_KEY=your_google_api_key
 ```
 
 ---
 
-## Step 3: Deploy to Vercel (Recommended)
+## Step 3: Deploy to Digital Ocean App Platform
 
-### Option A: Deploy via Vercel CLI
-
-1. **Install Vercel CLI:**
-   ```bash
-   npm i -g vercel
-   ```
-
-2. **Login to Vercel:**
-   ```bash
-   vercel login
-   ```
-
-3. **Deploy:**
-   ```bash
-   vercel --prod
-   ```
-
-4. **Add Environment Variables:**
-   - Go to Vercel Dashboard → Your Project → Settings → Environment Variables
-   - Add all variables from `.env.production`
-
-### Option B: Deploy via GitHub Integration
+### Option A: Deploy via GitHub Integration (Recommended)
 
 1. **Push to GitHub:**
    ```bash
-   git init
    git add .
-   git commit -m "Initial commit - Production ready"
-   git branch -M main
-   git remote add origin https://github.com/yourusername/lumina.git
-   git push -u origin main
+   git commit -m "Production ready"
+   git push origin main
    ```
 
-2. **Connect to Vercel:**
-   - Go to [vercel.com/new](https://vercel.com/new)
-   - Import your GitHub repository
-   - Add environment variables in the deployment settings
-   - Click "Deploy"
+2. **Connect to Digital Ocean:**
+   - Go to [cloud.digitalocean.com/apps](https://cloud.digitalocean.com/apps)
+   - Click "Create App"
+   - Select "GitHub" as source
+   - Choose your repository and branch (main)
+
+3. **Configure Build Settings:**
+   - **Build Command:** `npm run build`
+   - **Run Command:** `npm run start`
+   - **HTTP Port:** `3000`
+
+4. **Add Environment Variables:**
+   - Go to App Settings → App-Level Environment Variables
+   - Add all variables from the list above
+   - Mark sensitive values (API keys, secrets) as encrypted
+
+5. **Click "Deploy"**
+
+### Option B: Deploy via doctl CLI
+
+1. **Install doctl:**
+   ```bash
+   brew install doctl
+   ```
+
+2. **Authenticate:**
+   ```bash
+   doctl auth init
+   ```
+
+3. **Create App Spec:**
+   Create `app.yaml` in your project root:
+   ```yaml
+   name: lumina
+   region: nyc
+   services:
+     - name: web
+       github:
+         repo: yourusername/Lumina-Platform
+         branch: main
+       build_command: npm run build
+       run_command: npm run start
+       http_port: 3000
+       instance_size_slug: basic-xxs
+       instance_count: 1
+       routes:
+         - path: /
+   databases:
+     - engine: PG
+       name: lumina-db
+       production: true
+   ```
+
+4. **Deploy:**
+   ```bash
+   doctl apps create --spec app.yaml
+   ```
 
 ---
 
-## Step 4: Deploy to Netlify (Alternative)
+## Step 4: Database Configuration
 
-1. **Install Netlify CLI:**
-   ```bash
-   npm i -g netlify-cli
-   ```
+Your Digital Ocean PostgreSQL database is already configured:
 
-2. **Login:**
-   ```bash
-   netlify login
-   ```
+- **Host:** `db-postgresql-nyc3-xxxxx-do-user-xxxxx-0.f.db.ondigitalocean.com`
+- **Port:** `25060`
+- **Database:** `defaultdb`
+- **SSL Mode:** `require` (mandatory)
 
-3. **Deploy:**
-   ```bash
-   netlify deploy --prod
-   ```
+### Run Migrations (if using Prisma)
+```bash
+npx prisma migrate deploy
+```
 
-4. **Configure:**
-   - Build command: `npm run build`
-   - Publish directory: `.next`
-   - Add environment variables in Netlify Dashboard
+### Verify Connection
+```bash
+npx prisma db pull
+```
 
 ---
 
 ## Step 5: Post-Deployment
 
 ### Custom Domain Setup
-1. Go to your hosting dashboard (Vercel/Netlify)
-2. Navigate to Domains
-3. Add your custom domain (e.g., `lumina.finance`)
-4. Update DNS records as instructed
+1. Go to Digital Ocean App Platform → Your App → Settings → Domains
+2. Add your custom domain (e.g., `lumina.finance`)
+3. Update DNS records at your domain registrar:
+   - Add a CNAME record pointing to your DO app URL
 
 ### SSL Certificate
-- Both Vercel and Netlify provide automatic SSL certificates
+- Digital Ocean automatically provisions SSL certificates via Let's Encrypt
 - No additional configuration needed
 
 ### Update Metadata URLs
 After deployment, update these files with your production URL:
 
-**`app/layout.tsx`** - Line 22:
+**`app/layout.tsx`** - Update metadataBase:
 ```typescript
 url: 'https://your-domain.com', // Update this
 ```
 
-**`app/robots.ts`** - Line 9:
+**`app/robots.ts`**:
 ```typescript
-sitemap: 'https://your-domain.com/sitemap.xml', // Update this
+sitemap: 'https://your-domain.com/sitemap.xml',
 ```
 
-**`app/sitemap.ts`** - Line 4:
+**`app/sitemap.ts`**:
 ```typescript
-const baseUrl = 'https://your-domain.com' // Update this
+const baseUrl = 'https://your-domain.com'
 ```
 
 ---
@@ -150,6 +188,7 @@ After deployment, verify these URLs work:
 - ✅ `https://your-domain.com/sitemap.xml`
 - ✅ `https://your-domain.com/apply`
 - ✅ `https://your-domain.com/login`
+- ✅ `https://your-domain.com/dashboard` (after auth)
 
 ### SEO Verification
 - Test OpenGraph tags: [opengraph.xyz](https://www.opengraph.xyz)
@@ -161,13 +200,20 @@ After deployment, verify these URLs work:
 ## Troubleshooting
 
 ### Build Fails
-- Check environment variables are set correctly
+- Check environment variables are set correctly in DO App Settings
 - Verify all dependencies are in `package.json`
 - Run `npm run build` locally first
+- Check build logs in DO App Platform
+
+### Database Connection Issues
+- Ensure `DATABASE_URL` includes `?sslmode=require`
+- Verify your app is in the same region as the database
+- Check that the database cluster is running
+- Add your app to the database's trusted sources
 
 ### 404 on Routes
-- Ensure you're using Next.js 14+ compatible hosting
-- Verify `output: 'standalone'` is NOT set in `next.config.js`
+- Ensure Next.js is configured for Node.js runtime
+- Verify `output: 'standalone'` is set in `next.config.js` for DO
 
 ### API Routes Not Working
 - Check environment variables are accessible
@@ -176,24 +222,34 @@ After deployment, verify these URLs work:
 
 ---
 
-## Performance Optimization (Optional)
+## Performance Optimization
 
 After deployment, consider:
-1. **Enable Edge Functions** (Vercel) for faster API responses
-2. **Add Analytics** (Vercel Analytics or Google Analytics)
-3. **Set up Monitoring** (Sentry for error tracking)
-4. **Configure CDN** (Already handled by Vercel/Netlify)
+1. **Enable Auto-Scaling** in DO App Platform for high traffic
+2. **Add Monitoring** - Enable DO Insights or integrate Sentry
+3. **Database Optimization** - Add read replicas if needed
+4. **CDN** - Consider Cloudflare in front of DO for caching
 
 ---
 
 ## Security Checklist
 
-- ✅ Environment variables are set on hosting platform (not in code)
+- ✅ Environment variables are set in DO App Platform (not in code)
 - ✅ `.env.local` is in `.gitignore`
-- ✅ API keys are restricted to your domain
-- ✅ HTTPS is enabled (automatic with Vercel/Netlify)
-- ✅ Supabase RLS policies are configured
+- ✅ Database uses SSL (`sslmode=require`)
+- ✅ HTTPS is enabled (automatic with DO)
+- ✅ API keys are encrypted in DO settings
+- ✅ Database is in private VPC (DO managed)
 
 ---
 
-**You're ready to deploy!** 🚀
+## Digital Ocean Resources
+
+- **App Platform Dashboard:** https://cloud.digitalocean.com/apps
+- **Database Dashboard:** https://cloud.digitalocean.com/databases
+- **Monitoring:** https://cloud.digitalocean.com/monitoring
+- **Documentation:** https://docs.digitalocean.com/products/app-platform/
+
+---
+
+**You're ready to deploy to Digital Ocean!** 🚀🌊

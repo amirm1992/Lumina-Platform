@@ -8,7 +8,7 @@ A modern, AI-powered mortgage platform built with Next.js 14, featuring instant 
 
 - **AI-Driven Rate Comparison**: Real-time mortgage rates from FRED API
 - **Smart Property Search**: Integrated property lookup with RapidAPI
-- **Secure Authentication**: Powered by Supabase
+- **Secure Authentication**: Powered by Clerk
 - **Interactive Dashboard**: Lender comparison, payment breakdown, market trends
 - **Document Management**: Centralized DocHub for all mortgage documents
 - **Responsive Design**: Optimized for desktop, tablet, and mobile
@@ -18,10 +18,11 @@ A modern, AI-powered mortgage platform built with Next.js 14, featuring instant 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Authentication**: Supabase
+- **Authentication**: Clerk
 - **State Management**: Zustand
 - **Charts**: Recharts
-- **Deployment**: Vercel (recommended)
+- **Hosting**: Digital Ocean App Platform
+- **Database**: Digital Ocean PostgreSQL
 
 ## 📦 Installation
 
@@ -81,8 +82,8 @@ lumina/
 
 ## 🔑 Required API Keys
 
-1. **Supabase** - Authentication & Database
-   - Sign up at [supabase.com](https://supabase.com)
+1. **Clerk** - Authentication
+   - Sign up at [clerk.com](https://clerk.com)
    
 2. **FRED API** - Mortgage Rate Data
    - Get key at [fred.stlouisfed.org](https://fred.stlouisfed.org/docs/api/api_key.html)
@@ -109,7 +110,7 @@ lumina/
 
 - Environment variables are never committed
 - API keys are server-side only
-- Supabase Row Level Security (RLS) enabled
+- Database SSL encryption required
 - HTTPS enforced in production
 
 ## 📄 License
