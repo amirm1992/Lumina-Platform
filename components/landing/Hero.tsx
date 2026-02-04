@@ -24,14 +24,24 @@ export function Hero() {
     useEffect(() => {
         async function fetchRate() {
             try {
-                const response = await fetch('/api/mortgage-rate?history=true')
+                // Timeout after 2s for local dev (Database connection hangs locally)
+                const controller = new AbortController()
+                const timeoutId = setTimeout(() => controller.abort(), 2000)
+
+                const response = await fetch('/api/mortgage-rate?history=true', {
+                    signal: controller.signal
+                })
+                clearTimeout(timeoutId)
+
+                if (!response.ok) throw new Error('Failed to fetch')
+
                 const data = await response.json()
                 setRateData(data)
                 if (data.rate) {
                     setInterestRate(data.rate)
                 }
             } catch (error) {
-                console.error('Failed to fetch rate:', error)
+                console.warn('Using fallback data due to API error/timeout:', error)
                 setRateData({
                     rate: 6.89,
                     date: new Date().toISOString().split('T')[0],
@@ -200,8 +210,8 @@ export function Hero() {
                                                 key={view}
                                                 onClick={() => setChartView(view as any)}
                                                 className={`w-8 h-8 rounded-full text-xs font-bold transition-all border ${chartView === view
-                                                        ? 'bg-white text-[#1E3A5F] border-white'
-                                                        : 'bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
+                                                    ? 'bg-white text-[#1E3A5F] border-white'
+                                                    : 'bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
                                                     }`}
                                             >
                                                 {view}
