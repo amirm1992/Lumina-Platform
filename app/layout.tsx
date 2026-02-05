@@ -42,9 +42,9 @@ export const metadata = {
         creator: '@luminafinance'
     },
     icons: {
-        icon: '/favicon.svg',
-        shortcut: '/favicon.svg',
-        apple: '/apple-touch-icon.png'
+        icon: '/logo-transparent.png',
+        shortcut: '/logo-transparent.png',
+        apple: '/logo-transparent.png'
     },
     viewport: {
         width: 'device-width',
