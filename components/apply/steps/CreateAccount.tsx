@@ -1,13 +1,14 @@
 'use client'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useSignUp } from '@clerk/nextjs'
 import { useApplicationStore } from '@/store/applicationStore'
-import { createClient } from '@/utils/supabase/client'
 
 export function CreateAccount() {
     const router = useRouter()
+    const { isLoaded, signUp, setActive } = useSignUp()
     const { email, setEmail, setPassword, completeApplication, prevStep, isCompleted } = useApplicationStore()
+
     const [localEmail, setLocalEmail] = useState(email)
     const [localPassword, setLocalPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
@@ -16,14 +17,16 @@ export function CreateAccount() {
     const [showExistingAccount, setShowExistingAccount] = useState(false)
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(isCompleted)
-
-    const supabase = createClient()
+    const [pendingVerification, setPendingVerification] = useState(false)
+    const [verificationCode, setVerificationCode] = useState('')
 
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) {
             e.preventDefault()
             e.stopPropagation()
         }
+
+        if (!isLoaded) return
 
         // Validation
         if (!localEmail || !localPassword) {
@@ -48,73 +51,100 @@ export function CreateAccount() {
         setError('')
         setShowExistingAccount(false)
 
-        const { data, error: signUpError } = await supabase.auth.signUp({
-            email: localEmail,
-            password: localPassword,
-            options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
-            },
-        })
+        try {
+            // Start sign up with Clerk
+            await signUp.create({
+                emailAddress: localEmail,
+                password: localPassword,
+            })
 
-        if (signUpError) {
-            // Check if user already exists
-            if (signUpError.message.includes('already registered') || signUpError.message.includes('User already')) {
+            // Send email verification code
+            await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+
+            // Move to verification step
+            setPendingVerification(true)
+            setLoading(false)
+
+        } catch (err: any) {
+            console.error('Sign up error:', err)
+
+            // Handle specific Clerk errors
+            if (err.errors?.[0]?.code === 'form_identifier_exists') {
                 setShowExistingAccount(true)
                 setError('An account with this email already exists.')
             } else {
-                setError(signUpError.message)
+                setError(err.errors?.[0]?.message || 'Something went wrong. Please try again.')
             }
             setLoading(false)
-            return
         }
+    }
 
-        // If we have a user object, signup was successful
-        // Note: When email confirmation is enabled, identities may be empty until verified
-        // We should NOT treat this as an error - it means signup succeeded and email was sent
-        if (!data.user) {
-            setError('Something went wrong. Please try again.')
-            setLoading(false)
-            return
-        }
+    const handleVerification = async () => {
+        if (!isLoaded || !verificationCode) return
 
-        console.log('Signup successful, user:', data.user.id, 'email:', data.user.email)
+        setLoading(true)
+        setError('')
 
-        // Get full application state to submit
-        const applicationState = useApplicationStore.getState()
-
-        // Submit application to database
         try {
-            const response = await fetch('/api/applications', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    productType: applicationState.productType,
-                    propertyType: applicationState.propertyType,
-                    propertyUsage: applicationState.propertyUsage,
-                    zipCode: applicationState.zipCode,
-                    estimatedValue: applicationState.estimatedValue,
-                    loanAmount: applicationState.loanAmount,
-                    firstName: applicationState.firstName,
-                    lastName: applicationState.lastName,
-                    phone: applicationState.phone,
-                    employmentStatus: applicationState.employmentStatus,
-                    annualIncome: applicationState.annualIncome,
-                    liquidAssets: applicationState.liquidAssets,
-                })
+            // Verify the email code
+            const completeSignUp = await signUp.attemptEmailAddressVerification({
+                code: verificationCode,
             })
 
-            if (!response.ok) {
-                console.error('Failed to submit application')
+            if (completeSignUp.status !== 'complete') {
+                setError('Verification failed. Please try again.')
+                setLoading(false)
+                return
             }
-        } catch (err) {
-            console.error('Error submitting application:', err)
-        }
 
-        setEmail(localEmail)
-        setPassword(localPassword)
-        completeApplication()
-        setSuccess(true)
-        setLoading(false)
+            // Set the session as active
+            await setActive({ session: completeSignUp.createdSessionId })
+
+            // Get full application state to submit
+            const applicationState = useApplicationStore.getState()
+
+            // Submit application to database
+            try {
+                const response = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        productType: applicationState.productType,
+                        propertyType: applicationState.propertyType,
+                        propertyUsage: applicationState.propertyUsage,
+                        zipCode: applicationState.zipCode,
+                        estimatedValue: applicationState.estimatedValue,
+                        loanAmount: applicationState.loanAmount,
+                        firstName: applicationState.firstName,
+                        lastName: applicationState.lastName,
+                        phone: applicationState.phone,
+                        employmentStatus: applicationState.employmentStatus,
+                        annualIncome: applicationState.annualIncome,
+                        liquidAssets: applicationState.liquidAssets,
+                    })
+                })
+
+                if (!response.ok) {
+                    console.error('Failed to submit application')
+                }
+            } catch (err) {
+                console.error('Error submitting application:', err)
+            }
+
+            setEmail(localEmail)
+            setPassword(localPassword)
+            completeApplication()
+            setSuccess(true)
+            setLoading(false)
+
+            // Redirect to dashboard
+            router.push('/dashboard')
+
+        } catch (err: any) {
+            console.error('Verification error:', err)
+            setError(err.errors?.[0]?.message || 'Invalid verification code')
+            setLoading(false)
+        }
     }
 
     const handleBack = () => {
@@ -122,82 +152,88 @@ export function CreateAccount() {
         router.push('/apply/step/11')
     }
 
+    // Success state
     if (success || isCompleted) {
         return (
             <div className="space-y-8 text-center py-8">
-                {/* Success Icon */}
                 <div className="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-green-600">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-
-                {/* Congratulations Header */}
                 <div>
                     <h1 className="text-3xl font-bold text-black mb-3">Congratulations! 🎉</h1>
                     <p className="text-xl text-gray-600">Your application has been submitted successfully.</p>
                 </div>
-
-                {/* Email Verification Card */}
-                <div className="p-6 rounded-2xl bg-[#EFF6FF] border border-[#DBEAFE] max-w-md mx-auto">
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-[#2563EB]">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
-                        <h2 className="text-lg font-semibold text-[#1E3A5F]">Verify Your Email</h2>
-                    </div>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                        We've sent a verification link to<br />
-                        <span className="font-semibold text-[#1D4ED8]">{localEmail}</span>
-                    </p>
-                    <p className="text-gray-500 text-sm mt-3">
-                        Please check your inbox and click the link to activate your account and view your personalized mortgage rates.
-                    </p>
-                </div>
-
-                {/* What's Next Section */}
-                <div className="max-w-md mx-auto text-left">
-                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">What happens next?</h3>
-                    <div className="space-y-3">
-                        <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
-                            <p className="text-gray-600 text-sm">Click the verification link in your email</p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                            <p className="text-gray-600 text-sm">Log in to your secure dashboard</p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
-                            <p className="text-gray-600 text-sm">View your personalized rates from top lenders</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Help Text */}
-                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-500 max-w-md mx-auto">
-                    💡 Didn't receive the email? Check your spam folder or wait a few minutes.
-                </div>
-
-                {/* Sign In Link */}
                 <button
-                    onClick={() => router.push('/login')}
+                    onClick={() => router.push('/dashboard')}
                     className="px-8 py-3 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-all shadow-md"
                 >
-                    Already verified? Sign In →
+                    View Your Dashboard →
                 </button>
             </div>
         )
     }
 
+    // Verification step
+    if (pendingVerification) {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold text-black mb-2">Check your email</h1>
+                    <p className="text-gray-600">
+                        We've sent a 6-digit verification code to <span className="font-semibold text-[#1D4ED8]">{localEmail}</span>
+                    </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-sm text-[#1D4ED8]">
+                    📧 Can't find it? Check your spam folder.
+                </div>
+
+                <div>
+                    <label className="block text-sm text-gray-500 mb-2">Verification Code</label>
+                    <input
+                        type="text"
+                        value={verificationCode}
+                        onChange={(e) => { setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }}
+                        placeholder="000000"
+                        className="w-full p-4 rounded-xl bg-white border border-gray-200 text-black placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm text-2xl text-center tracking-[0.5em]"
+                        maxLength={6}
+                    />
+                </div>
+
+                {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+
+                <div className="pt-4 flex justify-between items-center">
+                    <button
+                        type="button"
+                        onClick={() => setPendingVerification(false)}
+                        className="text-gray-500 hover:text-black text-sm flex items-center gap-1 font-medium transition-colors"
+                    >
+                        ← Back
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleVerification}
+                        disabled={loading || verificationCode.length !== 6}
+                        className="px-8 py-4 rounded-full bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all"
+                    >
+                        {loading ? 'Verifying...' : 'Verify & Continue'}
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    // Main form
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold text-black mb-2" style={{ color: '#000000' }}>Create your dashboard</h1>
+                <h1 className="text-3xl font-bold text-black mb-2">Create your dashboard</h1>
                 <p className="text-gray-600">Your personalized rates are almost ready. Create an account to save your progress.</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#EFF6FF]0/10 border border-[#EFF6FF]0/20 text-sm text-[#1D4ED8]">
+            <div className="p-4 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-sm text-[#1D4ED8]">
                 🔒 Your data is encrypted. We are not a lead generator—your info stays with us.
             </div>
 
@@ -249,6 +285,18 @@ export function CreateAccount() {
 
                 {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
 
+                {showExistingAccount && (
+                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm">
+                        <p className="text-amber-800 mb-2">Already have an account?</p>
+                        <button
+                            onClick={() => router.push('/login')}
+                            className="text-[#2563EB] font-semibold hover:underline"
+                        >
+                            Sign in instead →
+                        </button>
+                    </div>
+                )}
+
                 <div className="pt-4 flex justify-between items-center">
                     <button type="button" onClick={handleBack} className="text-gray-500 hover:text-black text-sm flex items-center gap-1 font-medium transition-colors">
                         ← Back
@@ -256,7 +304,7 @@ export function CreateAccount() {
                     <button
                         type="button"
                         onClick={() => handleSubmit()}
-                        disabled={loading}
+                        disabled={loading || !isLoaded}
                         className="px-8 py-4 rounded-full bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all"
                     >
                         {loading ? 'Creating Account...' : 'Complete & View Rates'}
