@@ -55,7 +55,7 @@ export default function LoginPage() {
                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 shadow-2xl inline-block">
                         <SignIn
-                            appearance={{
+                            /* appearance={{
                                 elements: {
                                     rootBox: "w-full",
                                     card: "bg-transparent shadow-none border-0 p-6",
@@ -92,7 +92,7 @@ export default function LoginPage() {
                                     socialButtonsPlacement: "bottom",
                                     socialButtonsVariant: "blockButton",
                                 }
-                            }}
+                            }} */
                             routing="path"
                             path="/login"
                             signUpUrl="/signup"
