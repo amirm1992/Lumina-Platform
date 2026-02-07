@@ -76,7 +76,7 @@ model VerificationToken {
 // ==========================================
 
 model Profile {
-  id          String   @id @db.Uuid
+  id          String   @id
   email       String?
   fullName    String?  @map("full_name")
   phone       String?
@@ -89,7 +89,7 @@ model Profile {
 
 model Application {
   id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String?   @map("user_id") @db.Uuid
+  userId              String?   @map("user_id")
   newUserId           String?   @map("new_user_id")
   productType         String?   @map("product_type")
   propertyType        String?   @map("property_type")
@@ -142,10 +142,10 @@ model LenderOffer {
 
 model AdminActivityLog {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  adminId     String   @map("admin_id") @db.Uuid
+  adminId     String   @map("admin_id")
   action      String
   targetType  String?  @map("target_type")
-  targetId    String?  @map("target_id") @db.Uuid
+  targetId    String?  @map("target_id")
   details     Json?
   createdAt   DateTime @default(now()) @map("created_at")
 
