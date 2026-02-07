@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { AuthUser } from '@/types/auth'
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
 import { PropertyCard } from './PropertyCard'
 import { AddPropertyCard } from './AddPropertyCard'
 import { AddPropertyModal } from './AddPropertyModal'

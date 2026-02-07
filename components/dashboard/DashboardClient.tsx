@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { DashboardSidebar } from './DashboardSidebar'
+import DashboardSidebar from './DashboardSidebar'
 import { LenderCard } from './LenderCard'
 import { PaymentBreakdown } from './PaymentBreakdown'
 import { MarketTrends } from './MarketTrends'

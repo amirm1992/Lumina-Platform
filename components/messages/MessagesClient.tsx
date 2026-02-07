@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { AuthUser } from '@/types/auth'
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
 import { MessageList } from './MessageList'
 import { MessageDetail } from './MessageDetail'
 import { ComposeModal } from './ComposeModal'

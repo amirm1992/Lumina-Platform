@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { AuthUser } from '@/types/auth'
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
 import { DocGroup } from './DocGroup'
 import { UploadZone } from './UploadZone'
 import { DocFile } from './types'
