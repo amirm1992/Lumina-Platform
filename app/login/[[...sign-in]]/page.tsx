@@ -3,11 +3,17 @@
 import { SignIn } from '@clerk/nextjs'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
+    const searchParams = useSearchParams()
+    const redirectTo = searchParams.get('redirect') || '/dashboard'
     return (
-        <div className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-hidden">
-            {/* Abstract Background */}
+        <div
+            className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-hidden"
+            style={{ backgroundColor: '#0F172A' }}
+        >
+            {/* Abstract Background - inline bg prevents white flash before Tailwind */}
             <div className="absolute inset-0 bg-[#0F172A] z-0">
                 <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
                 <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse" />
@@ -39,7 +45,9 @@ export default function LoginPage() {
                         />
                     </div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Welcome Back</h1>
-                    <p className="text-white/50 mt-2 text-sm">Sign in to access your financial dashboard</p>
+                    <p className="text-white/50 mt-2 text-sm">
+                        {redirectTo.startsWith('/admin') ? 'Sign in to access the Admin Portal' : 'Sign in to access your financial dashboard'}
+                    </p>
                 </div>
 
                 {/* Glassmorphism Card Container */}
@@ -88,7 +96,7 @@ export default function LoginPage() {
                             routing="path"
                             path="/login"
                             signUpUrl="/signup"
-                            afterSignInUrl="/dashboard"
+                            afterSignInUrl={redirectTo}
                         />
                     </div>
                 </div>
