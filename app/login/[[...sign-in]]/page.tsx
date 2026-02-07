@@ -51,20 +51,34 @@ export default function LoginPage() {
                                 elements: {
                                     rootBox: "w-full",
                                     card: "bg-transparent shadow-none border-0 p-6",
-                                    headerTitle: "hidden", // We have our own header
+                                    headerTitle: "hidden",
                                     headerSubtitle: "hidden",
+                                    // Primary Button
                                     formButtonPrimary: "bg-white text-black hover:bg-gray-100 transition-all transform hover:scale-[1.02] active:scale-[0.98] font-medium h-10 rounded-lg",
-                                    formFieldInput: "bg-white/10 border-white/10 text-white placeholder-white/30 focus:border-blue-500 focus:ring-blue-500 rounded-lg",
-                                    formFieldLabel: "text-white/70",
-                                    footerActionLink: "text-blue-400 hover:text-blue-300",
-                                    identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
-                                    formFieldAction: "text-blue-400 hover:text-blue-300",
+                                    // Inputs
+                                    formFieldInput: "!bg-white/10 !border-white/10 !text-white placeholder:text-white/30 focus:!border-blue-500 focus:!ring-blue-500 rounded-lg",
+                                    formFieldLabel: "!text-white/80",
+                                    // Links
+                                    footerActionLink: "!text-blue-400 hover:!text-blue-300",
+                                    identityPreviewEditButton: "!text-blue-400 hover:!text-blue-300",
+                                    formFieldAction: "!text-blue-400 hover:!text-blue-300",
+                                    formResendCodeLink: "!text-blue-400 hover:!text-blue-300",
+                                    // Divider
                                     dividerLine: "bg-white/10",
-                                    dividerText: "text-white/30",
-                                    socialButtonsBlockButton: "bg-white/5 border-white/10 hover:bg-white/10 text-white",
-                                    socialButtonsBlockButtonText: "text-white font-medium",
-                                    socialButtonsBlockButtonArrow: "text-white/50",
-                                    formResendCodeLink: "text-blue-400 hover:text-blue-300"
+                                    dividerText: "!text-white/50",
+                                    // Social / Alternative Methods
+                                    socialButtonsBlockButton: "!bg-white/5 !border-white/10 hover:!bg-white/10",
+                                    socialButtonsBlockButtonText: "!text-white",
+                                    socialButtonsBlockButtonArrow: "!text-white/50",
+                                    alternativeMethodsBlockButton: "!bg-white/5 !border-white/10 hover:!bg-white/10 !text-white",
+                                    alternativeMethodsBlockButtonText: "!text-white",
+                                    alternativeMethodsBlockButtonArrow: "!text-white/50",
+                                    // Alerts & Errors
+                                    formFieldErrorText: "!text-red-300",
+                                    alertText: "!text-red-200",
+                                    alert: "!bg-red-900/50 !border-red-800",
+                                    // OTP
+                                    otpCodeFieldInput: "!bg-white/10 !border-white/10 !text-white"
                                 },
                                 layout: {
                                     socialButtonsPlacement: "bottom",
