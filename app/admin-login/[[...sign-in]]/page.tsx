@@ -33,14 +33,21 @@ export default function AdminLoginPage() {
                     </div>
                 </div>
 
-                {/* Clerk Sign In Component */}
-                <SignIn
-                    appearance={{
-                        elements: {
-                            rootBox: "w-full",
-                            card: "bg-white rounded-2xl shadow-2xl border-0",
-                            headerTitle: "text-[#1E3A5F] font-bold",
-                            headerSubtitle: "text-gray-600",
+                {/* Sign-in heading so it's clear this is the login page */}
+                <h2 className="text-white text-center text-lg font-semibold mb-4">
+                    Sign in with your admin account
+                </h2>
+
+                {/* Clerk Sign In Component - email/password + social options */}
+                <div className="min-h-[320px] w-full flex justify-center">
+                    <SignIn
+                        appearance={{
+                            elements: {
+                                rootBox: "w-full max-w-full",
+                                card: "bg-white rounded-2xl shadow-2xl border-0 w-full",
+                                cardBox: "w-full",
+                                headerTitle: "text-[#1E3A5F] font-bold",
+                                headerSubtitle: "text-gray-600",
                             formButtonPrimary: "bg-[#2563EB] hover:bg-[#1D4ED8] transition-colors",
                             formFieldInput: "border-gray-200 focus:border-[#2563EB] focus:ring-[#2563EB]",
                             footerActionLink: "text-[#2563EB] hover:text-[#1D4ED8]",
@@ -55,6 +62,7 @@ export default function AdminLoginPage() {
                     path="/admin-login"
                     afterSignInUrl="/admin/applications"
                 />
+                </div>
             </div>
 
             {/* Footer */}
