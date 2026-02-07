@@ -1,0 +1,11 @@
+---
+description: Git remote and deploy conventions for Lumina
+alwaysApply: true
+---
+
+# Git & Deploy
+
+- **Default remote:** `origin` → https://github.com/amirm1992/Lumina-Platform.git
+- **Default branch:** `main`
+- When committing or pushing: use `origin` and `main` (e.g. `git push origin main`).
+- Deploy: push to `origin main` (Digital Ocean is connected to this repo); or run `./deploy.sh` and choose option 1 with remote `origin`, branch `main`.
