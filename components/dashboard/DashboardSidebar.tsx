@@ -1,44 +1,71 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FileText, MessageSquare, Building2, LogOut, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useClerk } from '@clerk/nextjs'
+import {
+    LayoutDashboard,
+    FileText,
+    MessageSquare,
+    Building2,
+    LogOut,
+    X,
+    ChevronRight
+} from 'lucide-react'
 
-export function DashboardSidebar() {
+export default function DashboardSidebar() {
     const [isOpen, setIsOpen] = useState(true)
     const pathname = usePathname()
     const { signOut } = useClerk()
 
-    // Auto-collapse logic
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsOpen(false)
-        }, 3000)
+        }, 500) // 0.5s auto-collapse
 
         // Clear timer if component unmounts
         return () => clearTimeout(timer)
     }, [])
 
     const navItems = [
-        { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/dochub', label: 'DocHub', icon: FileText },
-        { href: '/messages', label: 'Messages', icon: MessageSquare },
-        { href: '/properties', label: 'Properties', icon: Building2 },
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'DocHub', href: '/dochub', icon: FileText },
+        { name: 'Messages', href: '/messages', icon: MessageSquare },
+        { name: 'Properties', href: '/properties', icon: Building2 },
     ]
 
     return (
         <>
-            {/* Toggle Button (Fixed on screen when closed) */}
+            {/* Logo (Visible when sidebar is closed) */}
+            {!isOpen && (
+                <Link
+                    href="/dashboard"
+                    className="fixed top-6 left-6 z-40 transition-opacity duration-300 hover:opacity-80"
+                >
+                    <div className="relative w-10 h-10">
+                        <Image
+                            src="/logo-transparent.png"
+                            alt="Lumina"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                </Link>
+            )}
+
+            {/* Mid-Page Tab Trigger (Visible when sidebar is closed) */}
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="fixed top-6 left-6 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200 text-gray-600 hover:text-[#2563EB] hover:border-[#2563EB] transition-all"
+                    className="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-white border-y border-r border-gray-200 shadow-lg rounded-r-xl p-2 py-3 text-gray-500 hover:text-[#2563EB] hover:pl-3 transition-all duration-300 group"
                     aria-label="Open Menu"
                 >
-                    <Menu className="w-6 h-6" />
+                    <div className="flex flex-col items-center gap-1">
+                        <span className="w-1 h-8 bg-gray-300 rounded-full group-hover:bg-[#2563EB] transition-colors" />
+                        <ChevronRight className="w-4 h-4" />
+                    </div>
                 </button>
             )}
 
@@ -73,20 +100,19 @@ export function DashboardSidebar() {
                 <div className="flex flex-col h-[calc(100%-5rem)] justify-between py-6">
                     <nav className="px-4 space-y-2">
                         {navItems.map((item) => {
-                            const isActive = pathname === item.href
                             const Icon = item.icon
+                            const isActive = pathname === item.href
                             return (
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    onClick={() => setIsOpen(false)} // Close on navigate (optional, good for mobile)
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                        ? 'bg-[#EFF6FF] text-[#2563EB] font-medium'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-[#1E3A5F]'
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                                            ? 'bg-[#EBF5FF] text-[#2563EB] font-medium'
+                                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
-                                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#2563EB]' : 'text-gray-400'}`} />
-                                    <span>{item.label}</span>
+                                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#2563EB]' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                                    <span>{item.name}</span>
                                 </Link>
                             )
                         })}

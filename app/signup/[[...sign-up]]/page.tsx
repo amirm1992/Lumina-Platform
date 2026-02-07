@@ -26,7 +26,7 @@ export default function SignUpPage() {
                 Back to Home
             </Link>
 
-            <div className="w-full max-w-md z-10">
+            <div className="w-full max-w-md z-10 flex flex-col items-center">
                 {/* Logo Section */}
                 <div className="flex flex-col items-center mb-8">
                     <div className="relative w-16 h-16 mb-4">
@@ -43,9 +43,9 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Glassmorphism Card Container */}
-                <div className="relative group">
+                <div className="relative group w-full flex justify-center">
                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 shadow-2xl">
+                    <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 shadow-2xl inline-block">
                         <SignUp
                             appearance={{
                                 elements: {
