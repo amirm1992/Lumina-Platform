@@ -22,11 +22,11 @@ export async function AdminHeader() {
 
             <div className="flex items-center gap-4">
                 <span className="text-sm text-gray-500">
-                    Logged in as <span className="font-medium text-gray-900">{user?.email}</span>
+                    Logged in as <span className="font-medium text-gray-900">{user?.emailAddresses[0]?.emailAddress}</span>
                 </span>
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                     <span className="text-purple-700 font-medium text-sm">
-                        {user?.email?.[0].toUpperCase() || 'A'}
+                        {user?.emailAddresses[0]?.emailAddress?.[0].toUpperCase() || 'A'}
                     </span>
                 </div>
             </div>

@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
                 <div className="flex flex-col items-center mb-8">
                     <Link href="/" className="flex items-center gap-2 mb-4">
                         <Image
-                            src="/Lumina.svg"
+                            src="/logo-transparent.png"
                             alt="Lumina"
                             width={40}
                             height={40}
