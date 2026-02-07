@@ -38,29 +38,28 @@ export default function AdminLoginPage() {
                     Sign in with your admin account
                 </h2>
 
-                {/* Clerk Sign In Component - email/password + social options */}
+                {/* Clerk Sign In - use hash routing so the form renders on this page */}
                 <div className="min-h-[320px] w-full flex justify-center">
                     <SignIn
-                        /* appearance={{
+                        routing="hash"
+                        afterSignInUrl="/admin/applications"
+                        appearance={{
                             elements: {
                                 rootBox: "w-full max-w-full",
                                 card: "bg-white rounded-2xl shadow-2xl border-0 w-full",
                                 cardBox: "w-full",
                                 headerTitle: "text-[#1E3A5F] font-bold",
                                 headerSubtitle: "text-gray-600",
-                            formButtonPrimary: "bg-[#2563EB] hover:bg-[#1D4ED8] transition-colors",
-                            formFieldInput: "border-gray-200 focus:border-[#2563EB] focus:ring-[#2563EB]",
-                            footerActionLink: "text-[#2563EB] hover:text-[#1D4ED8]",
-                            identityPreviewEditButton: "text-[#2563EB]",
-                        },
-                        layout: {
-                            socialButtonsPlacement: "bottom",
-                            socialButtonsVariant: "iconButton",
-                        }
-                    }} */
-                        routing="path"
-                        path="/admin-login"
-                        afterSignInUrl="/admin/applications"
+                                formButtonPrimary: "bg-[#2563EB] hover:bg-[#1D4ED8] transition-colors",
+                                formFieldInput: "border-gray-200 focus:border-[#2563EB] focus:ring-[#2563EB]",
+                                footerActionLink: "text-[#2563EB] hover:text-[#1D4ED8]",
+                                identityPreviewEditButton: "text-[#2563EB]",
+                            },
+                            layout: {
+                                socialButtonsPlacement: "bottom",
+                                socialButtonsVariant: "iconButton",
+                            },
+                        }}
                     />
                 </div>
             </div>
