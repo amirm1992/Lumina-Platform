@@ -19,7 +19,7 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
         setFiles(prev => [...newFiles, ...prev])
     }
 
-    // TODO: Migrate document storage from Supabase to DigitalOcean Spaces
+    // TODO: Add document storage (e.g. DigitalOcean Spaces or S3) and Document model in Prisma
     const handleDelete = async (id: string) => {
         const fileToDelete = files.find(f => f.id === id)
         if (!fileToDelete) return

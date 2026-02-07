@@ -1,6 +1,5 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { createClient } from '@/utils/supabase/server' // Keep for Storage
 import type {
     Application,
     LenderOffer,
@@ -328,104 +327,24 @@ export async function deleteLenderOffer(offerId: string): Promise<boolean> {
 }
 
 // ============================================
-// DOCUMENTS (Keeping Supabase for Storage)
+// DOCUMENTS (stub until Document model + storage added)
 // ============================================
 
-export async function getDocuments(applicationId: string): Promise<Document[]> {
-    // Documents table is presumably in Supabase/Postgres.
-    // If it's a table, we should use Prisma if mapped.
-    // Checking schema... schema.prisma does NOT have a Document model!
-
-    // Fallback: Query "documents" table via Supabase Client (might fail RLS)
-    // OR: Check if schema has it.
-    // I read schema.prisma, it has User, Account, Session, Profile, Application, LenderOffer, AdminActivityLog, SystemMetric.
-    // It DOES NOT have "Document".
-
-    // Conclusion: "documents" table might exist in DB but not in Prisma Schema.
-    // Or it was missed.
-    // If so, I MUST use Supabase Client to query it.
-
-    const supabase = await createClient()
-    const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('application_id', applicationId)
-        .order('created_at', { ascending: false })
-
-    if (error) {
-        console.error('Error fetching documents:', error)
-        return []
-    }
-    return (data as any[]) ?? []
+export async function getDocuments(_applicationId: string): Promise<Document[]> {
+    return []
 }
 
 export async function uploadDocument(
-    applicationId: string,
-    userId: string,
-    file: File,
-    category: 'lender_doc' | 'client_upload' | 'disclosure' = 'lender_doc'
+    _applicationId: string,
+    _userId: string,
+    _file: File,
+    _category: 'lender_doc' | 'client_upload' | 'disclosure' = 'lender_doc'
 ): Promise<Document | null> {
-    const supabase = await createClient()
-
-    // 1. Upload to Storage
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`
-    const filePath = `${userId}/${fileName}`
-
-    const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file)
-
-    if (uploadError) {
-        console.error('Error uploading file:', uploadError)
-        return null
-    }
-
-    // 2. Insert into Database (documents table)
-    // Since 'documents' is not in Prisma, we use supabase client
-    const { data, error: insertError } = await supabase
-        .from('documents')
-        .insert({
-            application_id: applicationId,
-            user_id: userId,
-            file_name: file.name,
-            file_path: filePath,
-            file_size: file.size,
-            file_type: fileExt,
-            category,
-            // uploaded_by: needs ID.
-        })
-        .select()
-        .single()
-
-    if (insertError) {
-        console.error('Error saving document record:', insertError)
-        return null
-    }
-
-    return data as any
+    return null
 }
 
-// ... deleteDocument similarly ...
-
-export async function deleteDocument(documentId: string, filePath: string): Promise<boolean> {
-    const supabase = await createClient()
-
-    // 1. Delete from Storage
-    const { error: storageError } = await supabase.storage
-        .from('documents')
-        .remove([filePath])
-
-    if (storageError) console.error(storageError)
-
-    // 2. Delete from Database
-    const { error: dbError } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', documentId)
-
-    if (dbError) return false
-    return true
+export async function deleteDocument(_documentId: string, _filePath: string): Promise<boolean> {
+    return false
 }
 
 

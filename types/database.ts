@@ -1,5 +1,5 @@
 // Database types for Admin Portal MVP
-// These types mirror the Supabase schema
+// These types mirror the Prisma schema
 
 export type ApplicationStatus = 'pending' | 'in_review' | 'offers_ready' | 'completed' | 'cancelled'
 
