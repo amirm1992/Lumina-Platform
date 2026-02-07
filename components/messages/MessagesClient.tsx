@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { AuthUser } from '@/types/auth'
-import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { MessageList } from './MessageList'
 import { MessageDetail } from './MessageDetail'
 import { ComposeModal } from './ComposeModal'
@@ -74,8 +74,8 @@ export function MessagesClient({ user }: MessagesClientProps) {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-gray-50 selection:bg-purple-100 font-sans text-gray-900 overflow-hidden">
-            <DashboardNavbar user={user} />
+        <div className="h-screen flex flex-col bg-gray-50 selection:bg-purple-100 font-sans text-gray-900 overflow-hidden pt-20">
+            <DashboardSidebar />
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar Container */}

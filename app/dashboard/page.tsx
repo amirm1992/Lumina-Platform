@@ -16,6 +16,7 @@ export default async function DashboardPage() {
         email: user.emailAddresses[0]?.emailAddress || '',
         user_metadata: {
             full_name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.emailAddresses[0]?.emailAddress,
+            first_name: user.firstName || ''
         }
     }
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { AuthUser } from '@/types/auth'
-import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { PropertyCard } from './PropertyCard'
 import { AddPropertyCard } from './AddPropertyCard'
 import { AddPropertyModal } from './AddPropertyModal'
@@ -28,9 +28,9 @@ export function PropertiesClient({ user }: PropertiesClientProps) {
 
     return (
         <div className="min-h-screen bg-gray-50 selection:bg-purple-100 font-sans text-gray-900">
-            <DashboardNavbar user={user} />
+            <DashboardSidebar />
 
-            <main className="container mx-auto px-6 py-10">
+            <main className="container mx-auto px-6 py-10 pt-20">
                 <div className="mb-10">
                     <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">My Properties</h1>
                     <p className="text-gray-500">Manage and analyze your potential investments.</p>

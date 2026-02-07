@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { AuthUser } from '@/types/auth'
-import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { DocGroup } from './DocGroup'
 import { UploadZone } from './UploadZone'
 import { DocFile } from './types'
@@ -51,9 +51,9 @@ export function DocHubClient({ user, initialFiles }: DocHubClientProps) {
 
     return (
         <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
-            <DashboardNavbar user={user} />
+            <DashboardSidebar />
 
-            <main className="container mx-auto px-6 py-10 max-w-7xl">
+            <main className="container mx-auto px-6 py-10 pt-20 max-w-7xl">
                 <div className="mb-10">
                     <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">DocHub</h1>
                     <p className="text-gray-500">Secure document portal for your loan application.</p>

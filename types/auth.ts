@@ -4,5 +4,6 @@ export interface AuthUser {
     email: string
     user_metadata?: {
         full_name?: string
+        first_name?: string
     }
 }

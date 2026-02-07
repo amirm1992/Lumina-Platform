@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { DashboardNavbar } from './DashboardNavbar'
+import { DashboardSidebar } from './DashboardSidebar'
 import { LenderCard } from './LenderCard'
 import { PaymentBreakdown } from './PaymentBreakdown'
 import { MarketTrends } from './MarketTrends'
@@ -40,7 +40,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
     const [applicationStatus, setApplicationStatus] = useState<string>('pending')
 
     const [userProfile, setUserProfile] = useState<UserProfile>({
-        name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User",
+        name: user?.user_metadata?.first_name || user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || "User",
         creditScore: 0,
         estimatedLoanAmount: 0,
         downPayment: 0,
@@ -171,9 +171,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
     return (
         <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
-            <DashboardNavbar user={user} />
+            <DashboardSidebar />
 
-            <main className="container mx-auto px-6 py-10">
+            <main className="container mx-auto px-6 py-10 pt-20">
 
                 <StatusBanner />
 

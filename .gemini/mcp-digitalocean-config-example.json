@@ -1,0 +1,38 @@
+{
+    "mcpServers": {
+        "digitalocean-apps": {
+            "url": "https://apps.mcp.digitalocean.com/mcp",
+            "headers": {
+                "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+            }
+        },
+        "digitalocean-databases": {
+            "url": "https://databases.mcp.digitalocean.com/mcp",
+            "headers": {
+                "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+            }
+        },
+        "digitalocean-droplets": {
+            "url": "https://droplets.mcp.digitalocean.com/mcp",
+            "headers": {
+                "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+            }
+        },
+        "digitalocean-accounts": {
+            "url": "https://accounts.mcp.digitalocean.com/mcp",
+            "headers": {
+                "Authorization": "Bearer YOUR_DIGITALOCEAN_API_TOKEN"
+            }
+        },
+        "postgres": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-postgres"
+            ],
+            "env": {
+                "DATABASE_URL": "postgresql://doadmin:YOUR_PASSWORD@db-postgresql-nyc3-59212-do-user-32454978-0.f.db.ondigitalocean.com:25060/defaultdb?sslmode=require"
+            }
+        }
+    }
+}
