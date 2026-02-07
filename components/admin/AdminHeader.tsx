@@ -26,7 +26,7 @@ export async function AdminHeader() {
                 </span>
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                     <span className="text-purple-700 font-medium text-sm">
-                        {user?.emailAddresses[0]?.emailAddress?.[0].toUpperCase() || 'A'}
+                        {user?.emailAddresses[0]?.emailAddress?.[0]?.toUpperCase() || 'A'}
                     </span>
                 </div>
             </div>
