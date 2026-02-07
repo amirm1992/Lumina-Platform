@@ -68,6 +68,7 @@ export interface LenderOffer {
 
     // Lender info
     lender_name: string
+    lender_logo?: string | null // Logo URL
     lender_nmls: string | null
 
     // Loan terms
@@ -116,6 +117,7 @@ export interface CreditScoreFormData {
 
 export interface LenderOfferFormData {
     lender_name: string
+    lender_logo?: string
     lender_nmls?: string
     interest_rate: number
     apr?: number

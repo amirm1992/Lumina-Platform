@@ -15,6 +15,7 @@ export async function POST(
 
     const offer = await createLenderOffer(applicationId, {
         lender_name: body.lender_name,
+        lender_logo: body.lender_logo,
         interest_rate: body.interest_rate,
         apr: body.apr ?? undefined,
         monthly_payment: body.monthly_payment ?? undefined,

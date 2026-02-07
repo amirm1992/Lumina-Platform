@@ -29,6 +29,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
     // Form state
     const [formData, setFormData] = useState({
         lender_name: '',
+        lender_logo: '', // Added logo field
         interest_rate: '',
         apr: '',
         monthly_payment: '',
@@ -42,6 +43,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
     const resetForm = () => {
         setFormData({
             lender_name: '',
+            lender_logo: '',
             interest_rate: '',
             apr: '',
             monthly_payment: '',
@@ -63,6 +65,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
         setEditingOffer(offer)
         setFormData({
             lender_name: offer.lender_name,
+            lender_logo: offer.lender_logo || '',
             interest_rate: offer.interest_rate.toString(),
             apr: offer.apr?.toString() || '',
             monthly_payment: offer.monthly_payment?.toString() || '',
@@ -81,6 +84,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
 
         const payload = {
             lender_name: formData.lender_name,
+            lender_logo: formData.lender_logo || null,
             interest_rate: parseFloat(formData.interest_rate),
             apr: formData.apr ? parseFloat(formData.apr) : null,
             monthly_payment: formData.monthly_payment ? parseFloat(formData.monthly_payment) : null,
@@ -229,6 +233,20 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
                                     value={formData.lender_name}
                                     onChange={(e) => setFormData({ ...formData, lender_name: e.target.value })}
                                     placeholder="e.g., Wells Fargo"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white"
+                                />
+                            </div>
+
+                            {/* Lender Logo URL */}
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
+                                    Lender Logo URL (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.lender_logo}
+                                    onChange={(e) => setFormData({ ...formData, lender_logo: e.target.value })}
+                                    placeholder="https://example.com/logo.png"
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white"
                                 />
                             </div>

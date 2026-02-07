@@ -78,6 +78,7 @@ function mapLenderOffer(o: any): LenderOffer {
         admin_notes: null,
         is_best_match: o.isBestMatch || false, // Specific to Prisma schema
         is_visible: o.isVisible || true,      // Specific to Prisma schema
+        lender_logo: o.lenderLogo || null,     // Added field
         // Missing fields in Prisma schema: loan_type, points, origination_fee
         // We set defaults for now to satisfy TS interface
         created_at: o.createdAt?.toISOString(),
@@ -278,7 +279,8 @@ export async function createLenderOffer(
                 monthlyPayment: data.monthly_payment,
                 loanTerm: data.loan_term,
                 closingCosts: data.closing_costs,
-                isRecommended: data.is_recommended || false
+                isRecommended: data.is_recommended || false,
+                lenderLogo: data.lender_logo
             }
         })
         await logAdminActivity('created_offer', 'offer', offer.id, data)
@@ -301,7 +303,9 @@ export async function updateLenderOffer(
         if (data.monthly_payment) updateData.monthlyPayment = data.monthly_payment
         if (data.loan_term) updateData.loanTerm = data.loan_term
         if (data.closing_costs) updateData.closingCosts = data.closing_costs
+        if (data.closing_costs) updateData.closingCosts = data.closing_costs
         if (data.is_recommended !== undefined) updateData.isRecommended = data.is_recommended
+        if (data.lender_logo !== undefined) updateData.lenderLogo = data.lender_logo
 
         await prisma.lenderOffer.update({
             where: { id: offerId },

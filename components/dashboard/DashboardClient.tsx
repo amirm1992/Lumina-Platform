@@ -28,7 +28,8 @@ function offerToLender(offer: LenderOffer): Lender {
         loanType: (offer.loan_type?.toUpperCase() || 'CONVENTIONAL') as 'CONVENTIONAL' | 'FHA' | 'VA' | 'JUMBO',
         points: offer.points || 0,
         closingCosts: offer.closing_costs || 0,
-        isRecommended: offer.is_recommended
+        isRecommended: offer.is_recommended,
+        logo: offer.lender_logo || undefined
     }
 }
 

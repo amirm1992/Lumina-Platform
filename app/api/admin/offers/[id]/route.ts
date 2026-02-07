@@ -15,6 +15,7 @@ export async function PUT(
 
     const ok = await updateLenderOffer(offerId, {
         lender_name: body.lender_name,
+        lender_logo: body.lender_logo,
         interest_rate: body.interest_rate,
         apr: body.apr,
         monthly_payment: body.monthly_payment,

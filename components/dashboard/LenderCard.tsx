@@ -3,6 +3,7 @@
 import React from 'react'
 import { Lender } from './types'
 import { Check } from 'lucide-react'
+/* eslint-disable @next/next/no-img-element */
 
 interface LenderCardProps {
     lender: Lender
@@ -26,10 +27,20 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
             <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3">
                     {/* Placeholder Logo Avatar */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold
-                        ${isSelected ? 'bg-[#2563EB] text-white' : 'bg-gray-100 text-gray-500'}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden
+                        ${isSelected ? 'bg-white' : 'bg-gray-100'}
                     `}>
-                        {lender.name[0]}
+                        {lender.logo ? (
+                            <img
+                                src={lender.logo}
+                                alt={lender.name}
+                                className="w-full h-full object-contain p-1"
+                            />
+                        ) : (
+                            <span className={`text-lg font-bold ${isSelected ? 'text-[#2563EB]' : 'text-gray-500'}`}>
+                                {lender.name[0]}
+                            </span>
+                        )}
                     </div>
                     <div>
                         <h3 className="font-bold text-black text-lg">{lender.name}</h3>
