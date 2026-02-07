@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
                 {/* Clerk Sign In Component - email/password + social options */}
                 <div className="min-h-[320px] w-full flex justify-center">
                     <SignIn
-                        appearance={{
+                        /* appearance={{
                             elements: {
                                 rootBox: "w-full max-w-full",
                                 card: "bg-white rounded-2xl shadow-2xl border-0 w-full",
@@ -57,11 +57,11 @@ export default function AdminLoginPage() {
                             socialButtonsPlacement: "bottom",
                             socialButtonsVariant: "iconButton",
                         }
-                    }}
-                    routing="path"
-                    path="/admin-login"
-                    afterSignInUrl="/admin/applications"
-                />
+                    }} */
+                        routing="path"
+                        path="/admin-login"
+                        afterSignInUrl="/admin/applications"
+                    />
                 </div>
             </div>
 
