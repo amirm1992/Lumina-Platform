@@ -14,6 +14,8 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        console.log(`[App Submission] Received application for User ID: ${userId}`)
+
         // Create the application using Prisma
         const application = await prisma.application.create({
             data: {
@@ -32,10 +34,16 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        // Update or create the user's profile (email, phone from application)
-        const fullName = `${body.firstName || ''} ${body.lastName || ''}`.trim()
+        console.log(`[App Submission] Application created in DB: ${application.id}`)
+
+        // Sync User Data to Clerk (Name & Phone)
+        const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : ''
+        const lastName = typeof body.lastName === 'string' ? body.lastName.trim() : ''
+        const fullName = `${firstName} ${lastName}`.trim()
         const email = typeof body.email === 'string' ? body.email.trim() : null
         const phone = typeof body.phone === 'string' ? body.phone.trim() : null
+
+        // Update Prisma Profile
         await prisma.profile.upsert({
             where: { id: userId },
             update: {
@@ -51,16 +59,43 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        // Sync phone to Clerk user metadata so it appears in Clerk Dashboard
-        if (phone) {
-            try {
-                const clerk = await clerkClient()
-                await clerk.users.updateUserMetadata(userId, {
-                    unsafeMetadata: { phone }
+        // Sync to Clerk
+        try {
+            const clerk = await clerkClient()
+
+            // 1. Update Name
+            if (firstName || lastName) {
+                await clerk.users.updateUser(userId, {
+                    firstName: firstName || undefined,
+                    lastName: lastName || undefined
                 })
-            } catch (e) {
-                console.warn('Could not sync phone to Clerk metadata:', e)
+                console.log(`[App Submission] Updated Clerk user name for ${userId}`)
             }
+
+            // 2. Sync Phone Number
+            if (phone) {
+                // Formatting checks can happen here if needed, but Clerk API validates E.164 usually
+                // We'll trust the input is relatively clean or let Clerk reject it gently
+
+                // First, list existing phones to avoid duplicates
+                const user = await clerk.users.getUser(userId)
+                const existingPhone = user.phoneNumbers.find(p => p.phoneNumber === phone)
+
+                if (!existingPhone) {
+                    await clerk.phoneNumbers.createPhoneNumber({
+                        userId,
+                        phoneNumber: phone,
+                        verified: true // We assume true since it came from our trusted app flow, or let them verify
+                    })
+                    console.log(`[App Submission] Added phone number to Clerk for ${userId}`)
+                } else {
+                    console.log(`[App Submission] Phone number already exists in Clerk for ${userId}`)
+                }
+            }
+
+        } catch (clerkError) {
+            console.error('[App Submission] Clerk Sync Warning:', clerkError)
+            // We do NOT fail the request here, just log the warning
         }
 
         return NextResponse.json({
@@ -69,7 +104,7 @@ export async function POST(request: NextRequest) {
         })
 
     } catch (error) {
-        console.error('Application submission error:', error)
+        console.error('[App Submission] Critical Error:', error)
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
