@@ -8,17 +8,15 @@ export async function GET() {
         status: 'ok',
         timestamp: new Date().toISOString(),
         database: 'unknown',
-        error: null as string | null
     }
 
     try {
-        // Test database connection with a simple query
-        const result = await prisma.$queryRaw`SELECT 1 as test`
+        await prisma.$queryRaw`SELECT 1 as test`
         healthCheck.database = 'connected'
     } catch (error) {
         healthCheck.status = 'degraded'
         healthCheck.database = 'error'
-        healthCheck.error = error instanceof Error ? error.message : 'Unknown database error'
+        // Don't leak database error details to public endpoint
         console.error('Health check database error:', error)
     }
 

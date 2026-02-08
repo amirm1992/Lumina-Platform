@@ -1,33 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
 
-// Define protected routes
+// Define protected routes (require authentication)
 const isProtectedRoute = createRouteMatcher([
     '/dashboard(.*)',
     '/dochub(.*)',
     '/messages(.*)',
     '/properties(.*)',
-    '/admin(.*)',
-])
-
-// Define public routes (accessible without auth)
-const isPublicRoute = createRouteMatcher([
-    '/',
-    '/login(.*)',
-    '/signup(.*)',
-    '/auth(.*)',
-    '/admin-login(.*)',
-    '/apply(.*)',
-    '/how-it-works(.*)',
-    '/privacy(.*)',
-    '/terms(.*)',
-    '/disclosures(.*)',
-    '/forgot-password(.*)',
-    '/reset-password(.*)',
-    '/api/applications(.*)',
-    '/api/mortgage-rate(.*)',
-    '/api/property/(.*)',
-    '/api/rentcast/(.*)',
+    '/admin/(.*)',        // Admin pages (but NOT /admin-login)
+    '/api/admin/(.*)',    // Admin API routes
 ])
 
 export default clerkMiddleware(async (auth, req) => {

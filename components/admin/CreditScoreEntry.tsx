@@ -15,17 +15,17 @@ interface CreditScoreEntryProps {
 }
 
 const creditSources: { value: CreditScoreSource; label: string }[] = [
-    { value: 'experian', label: 'Experian' },
-    { value: 'equifax', label: 'Equifax' },
-    { value: 'transunion', label: 'TransUnion' },
-    { value: 'tri_merge', label: 'Tri-Merge' },
+    { value: 'self_reported', label: 'Self-Reported' },
+    { value: 'soft_pull', label: 'Soft Pull' },
+    { value: 'hard_pull', label: 'Hard Pull' },
+    { value: 'estimated', label: 'Estimated' },
 ]
 
 export function CreditScoreEntry({ applicationId, initialData }: CreditScoreEntryProps) {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [score, setScore] = useState(initialData?.credit_score?.toString() || '')
-    const [source, setSource] = useState<CreditScoreSource>(initialData?.credit_score_source || 'experian')
+    const [source, setSource] = useState<CreditScoreSource>(initialData?.credit_score_source || 'self_reported')
     const [date, setDate] = useState(initialData?.credit_score_date || new Date().toISOString().split('T')[0])
     const [notes, setNotes] = useState(initialData?.credit_notes || '')
     const [error, setError] = useState('')

@@ -4,6 +4,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type ProductType = 'purchase' | 'refinance' | 'heloc' | null
+// Store uses hyphenated values for UI; API normalizes to underscores before DB write
 export type PropertyType = 'single-family' | 'condo' | 'townhome' | 'multi-family' | null
 export type PropertyUsage = 'primary' | 'secondary' | 'investment' | null
 export type CreditScore = 'excellent' | 'good' | 'fair' | 'poor' | null
@@ -23,9 +24,7 @@ export interface ApplicationState {
     employmentStatus: EmploymentStatus
     annualIncome: number
     liquidAssets: number
-    ssn: string
     email: string
-    password: string
     currentStep: number
     isCompleted: boolean
     setProductType: (type: ProductType) => void
@@ -41,9 +40,7 @@ export interface ApplicationState {
     setEmploymentStatus: (status: EmploymentStatus) => void
     setAnnualIncome: (income: number) => void
     setLiquidAssets: (assets: number) => void
-    setSSN: (ssn: string) => void
     setEmail: (email: string) => void
-    setPassword: (password: string) => void
     setCurrentStep: (step: number) => void
     nextStep: () => void
     prevStep: () => void
@@ -65,9 +62,7 @@ const initialState = {
     employmentStatus: null as EmploymentStatus,
     annualIncome: 0,
     liquidAssets: 0,
-    ssn: '',
     email: '',
-    password: '',
     currentStep: 1,
     isCompleted: false,
 }
@@ -89,9 +84,7 @@ export const useApplicationStore = create<ApplicationState>()(
             setEmploymentStatus: (status) => set({ employmentStatus: status }),
             setAnnualIncome: (income) => set({ annualIncome: income }),
             setLiquidAssets: (assets) => set({ liquidAssets: assets }),
-            setSSN: (ssn) => set({ ssn: ssn }),
             setEmail: (email) => set({ email: email }),
-            setPassword: (password) => set({ password: password }),
             setCurrentStep: (step) => set({ currentStep: step }),
             nextStep: () => set((state) => ({ currentStep: state.currentStep + 1 })),
             prevStep: () => set((state) => ({ currentStep: Math.max(state.currentStep - 1, 1) })),
@@ -100,12 +93,6 @@ export const useApplicationStore = create<ApplicationState>()(
         }),
         {
             name: 'lumina-application',
-            partialize: (state) => {
-                // Never persist sensitive fields to localStorage
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { ssn, password, ...safe } = state
-                return safe
-            },
         }
     )
 )

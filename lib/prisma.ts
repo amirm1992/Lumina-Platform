@@ -1,26 +1,37 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool, PoolConfig } from 'pg'
-
-// DigitalOcean PostgreSQL uses a self-signed certificate chain
-// This is safe because we're connecting to a trusted managed database service
-// Set this BEFORE any connections are made
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
+import fs from 'fs'
+import path from 'path'
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined
     connectionPool: Pool | undefined
 }
 
+// Load DigitalOcean CA certificate for secure TLS verification
+function getCaCertificate(): string | undefined {
+    try {
+        const certPath = path.join(process.cwd(), 'ca-certificate.crt')
+        if (fs.existsSync(certPath)) {
+            return fs.readFileSync(certPath, 'utf-8')
+        }
+    } catch {
+        console.warn('Could not load CA certificate, falling back to rejectUnauthorized: false')
+    }
+    return undefined
+}
+
 // Create connection pool with proper SSL config
 function getPool() {
     if (!globalForPrisma.connectionPool) {
+        const ca = getCaCertificate()
+
         const poolConfig: PoolConfig = {
             connectionString: process.env.DATABASE_URL,
-            ssl: {
-                rejectUnauthorized: false
-            },
+            ssl: ca
+                ? { rejectUnauthorized: true, ca }
+                : { rejectUnauthorized: false },
             max: 10,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 10000,
@@ -30,7 +41,7 @@ function getPool() {
 
         // Handle pool errors
         globalForPrisma.connectionPool.on('error', (err) => {
-            console.error('Unexpected error on idle client', err)
+            console.error('Database pool error:', err.message)
         })
     }
     return globalForPrisma.connectionPool
@@ -51,5 +62,11 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 if (process.env.NODE_ENV !== 'production') {
     globalForPrisma.prisma = prisma
 }
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+    await globalForPrisma.connectionPool?.end()
+    await globalForPrisma.prisma?.$disconnect()
+})
 
 export default prisma

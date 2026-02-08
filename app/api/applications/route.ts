@@ -2,6 +2,81 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import prisma from '@/lib/prisma'
 
+// Prevent Next.js from caching this route — admin updates must be reflected immediately
+export const dynamic = 'force-dynamic'
+
+// ── Validation helpers ──
+
+const VALID_PRODUCT_TYPES = ['purchase', 'refinance', 'heloc']
+const VALID_PROPERTY_TYPES = ['single_family', 'single-family', 'condo', 'townhouse', 'townhome', 'multi_family', 'multi-family', 'other']
+const VALID_PROPERTY_USAGE = ['primary', 'secondary', 'investment']
+const VALID_EMPLOYMENT = ['salaried', 'self-employed', 'retired', 'military']
+const VALID_CREDIT_SCORES = ['excellent', 'good', 'fair', 'poor']
+
+function normalizePropertyType(raw: string): string {
+    // Accept both hyphen and underscore variants
+    return raw.replaceAll('-', '_').replace('townhome', 'townhouse')
+}
+
+function validateApplicationBody(body: Record<string, unknown>): string | null {
+    // Product type
+    if (!body.productType || !VALID_PRODUCT_TYPES.includes(body.productType as string)) {
+        return `Product type must be one of: ${VALID_PRODUCT_TYPES.join(', ')}`
+    }
+    // Property type
+    if (!body.propertyType || !VALID_PROPERTY_TYPES.includes(body.propertyType as string)) {
+        return `Property type must be one of: ${VALID_PROPERTY_TYPES.join(', ')}`
+    }
+    // Property usage
+    if (!body.propertyUsage || !VALID_PROPERTY_USAGE.includes(body.propertyUsage as string)) {
+        return `Property usage must be one of: ${VALID_PROPERTY_USAGE.join(', ')}`
+    }
+    // Estimated value
+    if (body.estimatedValue == null || typeof body.estimatedValue !== 'number' || body.estimatedValue <= 0 || body.estimatedValue > 100_000_000) {
+        return 'Estimated property value must be a positive number up to $100M'
+    }
+    // Loan amount
+    if (body.loanAmount == null || typeof body.loanAmount !== 'number' || body.loanAmount <= 0 || body.loanAmount > 100_000_000) {
+        return 'Loan amount must be a positive number up to $100M'
+    }
+    if (body.loanAmount > body.estimatedValue) {
+        return 'Loan amount cannot exceed estimated property value'
+    }
+    // Zip code
+    if (!body.zipCode || typeof body.zipCode !== 'string' || !/^\d{5}$/.test(body.zipCode)) {
+        return 'Zip code must be exactly 5 digits'
+    }
+    // Employment
+    if (!body.employmentStatus || !VALID_EMPLOYMENT.includes(body.employmentStatus as string)) {
+        return `Employment status must be one of: ${VALID_EMPLOYMENT.join(', ')}`
+    }
+    // Annual income
+    if (body.annualIncome == null || typeof body.annualIncome !== 'number' || body.annualIncome < 0 || body.annualIncome > 100_000_000) {
+        return 'Annual income must be a non-negative number'
+    }
+    // Liquid assets
+    if (body.liquidAssets == null || typeof body.liquidAssets !== 'number' || body.liquidAssets < 0 || body.liquidAssets > 1_000_000_000) {
+        return 'Liquid assets must be a non-negative number'
+    }
+    // Credit score (optional but must be valid if provided)
+    if (body.creditScore && !VALID_CREDIT_SCORES.includes(body.creditScore as string)) {
+        return `Credit score must be one of: ${VALID_CREDIT_SCORES.join(', ')}`
+    }
+    // Email
+    if (!body.email || typeof body.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+        return 'A valid email address is required'
+    }
+    // Name fields
+    if (body.firstName && typeof body.firstName === 'string' && body.firstName.length > 100) {
+        return 'First name must be under 100 characters'
+    }
+    if (body.lastName && typeof body.lastName === 'string' && body.lastName.length > 100) {
+        return 'Last name must be under 100 characters'
+    }
+
+    return null // validation passed
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
@@ -14,7 +89,14 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        console.log(`[App Submission] Received application for User ID: ${userId}`)
+        // Validate input
+        const validationError = validateApplicationBody(body)
+        if (validationError) {
+            return NextResponse.json(
+                { error: validationError },
+                { status: 400 }
+            )
+        }
 
         // Map categorical credit score to a representative numeric value
         const creditScoreMap: Record<string, number> = {
@@ -27,71 +109,66 @@ export async function POST(request: NextRequest) {
             ? creditScoreMap[body.creditScore] ?? null
             : null
 
-        // Create the application using Prisma
-        const application = await prisma.application.create({
-            data: {
-                userId: userId,
-                newUserId: userId,
-                productType: body.productType,
-                propertyType: body.propertyType?.replaceAll('-', '_'),
-                propertyUsage: body.propertyUsage,
-                propertyValue: body.estimatedValue,
-                loanAmount: body.loanAmount,
-                zipCode: body.zipCode,
-                employmentStatus: body.employmentStatus,
-                annualIncome: body.annualIncome,
-                liquidAssets: body.liquidAssets,
-                creditScore: creditScoreNumeric,
-                status: 'pending'
-            }
-        })
-
-        console.log(`[App Submission] Application created in DB: ${application.id}`)
-
-        // Sync User Data to Clerk (Name & Phone)
         const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : ''
         const lastName = typeof body.lastName === 'string' ? body.lastName.trim() : ''
         const fullName = `${firstName} ${lastName}`.trim()
         const email = typeof body.email === 'string' ? body.email.trim() : null
         const phone = typeof body.phone === 'string' ? body.phone.trim() : null
 
-        // Update Prisma Profile
-        await prisma.profile.upsert({
-            where: { id: userId },
-            update: {
-                fullName: fullName || undefined,
-                phone: phone ?? undefined,
-                ...(email ? { email } : {})
-            },
-            create: {
-                id: userId,
-                email: email || undefined,
-                fullName: fullName || undefined,
-                phone: phone || undefined
-            }
+        // Create application and profile in a single transaction
+        const application = await prisma.$transaction(async (tx) => {
+            const app = await tx.application.create({
+                data: {
+                    userId: userId,
+                    newUserId: userId,
+                    productType: body.productType,
+                    propertyType: normalizePropertyType(body.propertyType),
+                    propertyUsage: body.propertyUsage,
+                    propertyValue: body.estimatedValue,
+                    loanAmount: body.loanAmount,
+                    zipCode: body.zipCode,
+                    employmentStatus: body.employmentStatus,
+                    annualIncome: body.annualIncome,
+                    liquidAssets: body.liquidAssets,
+                    creditScore: creditScoreNumeric,
+                    status: 'pending'
+                }
+            })
+
+            await tx.profile.upsert({
+                where: { id: userId },
+                update: {
+                    fullName: fullName || undefined,
+                    phone: phone ?? undefined,
+                    ...(email ? { email } : {})
+                },
+                create: {
+                    id: userId,
+                    email: email || undefined,
+                    fullName: fullName || undefined,
+                    phone: phone || undefined
+                }
+            })
+
+            return app
         })
 
-        // Sync to Clerk
+        // Sync to Clerk (non-blocking — application already saved)
         try {
             const clerk = await clerkClient()
 
-            // 1. Update Name
             if (firstName || lastName) {
                 await clerk.users.updateUser(userId, {
                     firstName: firstName || undefined,
                     lastName: lastName || undefined
                 })
-                console.log(`[App Submission] Updated Clerk user name for ${userId}`)
             }
 
-            // 2. Sync Phone Number
             if (phone) {
-                // Convert formatted phone like "(555) 123-4567" to E.164 "+15551234567"
                 const digits = phone.replace(/\D/g, '')
                 const e164Phone = digits.length === 10 ? `+1${digits}` : digits.length === 11 && digits[0] === '1' ? `+${digits}` : null
 
                 if (e164Phone) {
-                    // Check for existing phone to avoid duplicates
                     const user = await clerk.users.getUser(userId)
                     const existingPhone = user.phoneNumbers.find(p => p.phoneNumber === e164Phone)
 
@@ -99,18 +176,14 @@ export async function POST(request: NextRequest) {
                         await clerk.phoneNumbers.createPhoneNumber({
                             userId,
                             phoneNumber: e164Phone,
-                            verified: true
+                            verified: false // Don't mark as verified without actual verification
                         })
-                        console.log(`[App Submission] Added phone number to Clerk for ${userId}`)
-                    } else {
-                        console.log(`[App Submission] Phone number already exists in Clerk for ${userId}`)
                     }
                 }
             }
-
         } catch (clerkError) {
-            console.error('[App Submission] Clerk Sync Warning:', clerkError)
-            // We do NOT fail the request here, just log the warning
+            console.error('Clerk sync warning:', clerkError)
+            // Don't fail the request — application is already saved
         }
 
         return NextResponse.json({
@@ -119,7 +192,7 @@ export async function POST(request: NextRequest) {
         })
 
     } catch (error) {
-        console.error('[App Submission] Critical Error:', error)
+        console.error('Application submission error:', error)
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -199,7 +272,10 @@ export async function GET() {
             }))
         }))
 
-        return NextResponse.json({ applications: formattedApplications })
+        return NextResponse.json(
+            { applications: formattedApplications },
+            { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+        )
 
     } catch (error) {
         console.error('Error:', error)

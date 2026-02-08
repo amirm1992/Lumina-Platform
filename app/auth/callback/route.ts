@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
-// Legacy auth callback (Supabase). Clerk handles auth; redirect to dashboard.
+// Legacy auth callback redirect — Clerk handles auth natively.
+// Kept for backwards compatibility with any old bookmarked/emailed links.
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const next = searchParams.get('next') ?? '/dashboard'

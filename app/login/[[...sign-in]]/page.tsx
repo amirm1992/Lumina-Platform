@@ -71,6 +71,7 @@ export default function LoginPage() {
                                 },
                                 elements: {
                                     rootBox: "w-full !bg-transparent",
+                                    cardBox: "!bg-transparent !shadow-none !border-none w-full",
                                     card: "!bg-transparent !shadow-none !border-none !p-8 w-full",
                                     headerTitle: "hidden",
                                     headerSubtitle: "hidden",
@@ -84,6 +85,8 @@ export default function LoginPage() {
                                     dividerLine: "!bg-white/10",
                                     dividerText: "!text-white/40",
                                     // Footer
+                                    footer: "!bg-transparent !border-none",
+                                    footerAction: "!bg-transparent",
                                     footerActionLink: "!text-blue-400 hover:!text-blue-300 !font-medium",
                                     identityPreviewEditButton: "!text-blue-400 hover:!text-blue-300",
                                     formButtonPrimary: "!bg-blue-600 hover:!bg-blue-500 !text-white !shadow-lg !shadow-blue-500/20 !border-0"

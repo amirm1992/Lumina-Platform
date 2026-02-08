@@ -15,9 +15,10 @@ function getResendClient() {
     return resendClient
 }
 
-export type EmailStatus = 'pending' | 'approved' | 'rejected' | 'documents_needed' | 'in_review' | 'offers_ready'
+import type { ApplicationStatus } from '@/types/database'
 
-const STATUS_MESSAGES: Record<EmailStatus, { subject: string; heading: string; message: string }> = {
+// Only statuses that should trigger an email notification
+const STATUS_MESSAGES: Partial<Record<ApplicationStatus, { subject: string; heading: string; message: string }>> = {
     pending: {
         subject: 'Application Received',
         heading: 'We have received your application',
@@ -28,26 +29,31 @@ const STATUS_MESSAGES: Record<EmailStatus, { subject: string; heading: string; m
         heading: 'Your application is under review',
         message: 'Our team is currently reviewing your mortgage application. You will hear from us soon.'
     },
-    documents_needed: {
-        subject: 'Additional Documents Required',
-        heading: 'We need additional documents',
-        message: 'To proceed with your application, please upload the requested documents in your dashboard.'
+    approved: {
+        subject: 'Congratulations! Application Approved',
+        heading: 'Your application has been approved!',
+        message: 'Congratulations! Your mortgage application has been approved. Next steps will be provided in your dashboard.'
     },
     offers_ready: {
         subject: 'Your Mortgage Offers Are Ready!',
         heading: 'Great news! Your offers are ready',
         message: 'We have matched you with lenders. View your personalized mortgage offers in your dashboard.'
     },
-    approved: {
-        subject: 'Congratulations! Application Approved',
-        heading: 'Your application has been approved!',
-        message: 'Congratulations! Your mortgage application has been approved. Next steps will be provided in your dashboard.'
+    completed: {
+        subject: 'Application Complete',
+        heading: 'Your application is complete',
+        message: 'Your mortgage application process is now complete. Check your dashboard for details.'
     },
-    rejected: {
+    denied: {
         subject: 'Application Status Update',
         heading: 'Application Update',
         message: 'We regret to inform you that we were unable to proceed with your application at this time.'
-    }
+    },
+}
+
+// Escape HTML entities to prevent injection in email templates
+function escapeHtml(str: string): string {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 export async function sendStatusUpdateEmail({
@@ -58,10 +64,16 @@ export async function sendStatusUpdateEmail({
 }: {
     to: string
     name: string
-    status: EmailStatus
+    status: ApplicationStatus
     applicationId: string
 }) {
     const statusInfo = STATUS_MESSAGES[status]
+    if (!statusInfo) {
+        console.warn(`No email template for status: ${status}`)
+        return { success: false, error: `No email template for status: ${status}` }
+    }
+
+    const safeName = escapeHtml(name)
     const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://lumina.finance'}/dashboard`
 
     const resend = getResendClient()
@@ -98,7 +110,7 @@ export async function sendStatusUpdateEmail({
                     <tr>
                         <td style="padding: 40px 30px;">
                             <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
-                                Hello ${name},
+                                Hello ${safeName},
                             </h2>
                             
                             <div style="background-color: #f3f4f6; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 8px;">

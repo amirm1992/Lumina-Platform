@@ -8,6 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ==========================================
@@ -23,7 +24,7 @@ model User {
   password      String?
   isAdmin       Boolean   @default(false) @map("is_admin")
   createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @default(now()) @map("updated_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   accounts      Account[]
   sessions      Session[]
@@ -77,12 +78,12 @@ model VerificationToken {
 
 model Profile {
   id          String   @id
-  email       String?
+  email       String?  @unique
   fullName    String?  @map("full_name")
   phone       String?
   isAdmin     Boolean  @default(false) @map("is_admin")
   createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @map("updated_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("profiles")
 }
@@ -108,13 +109,15 @@ model Application {
   status              String    @default("pending")
   adminNotes          String?   @map("admin_notes")
   createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @default(now()) @map("updated_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
   offersPublishedAt   DateTime? @map("offers_published_at")
 
   lenderOffers LenderOffer[]
 
   @@index([status], name: "idx_applications_status")
   @@index([userId], name: "idx_applications_user_id")
+  @@index([newUserId], name: "idx_applications_new_user_id")
+  @@index([createdAt], name: "idx_applications_created_at")
   @@map("applications")
 }
 
@@ -140,10 +143,11 @@ model LenderOffer {
   source            String?   @default("manual") @map("source")
   externalId        String?   @map("external_id")
   createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @default(now()) @map("updated_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
+  @@index([applicationId], name: "idx_lender_offers_application_id")
   @@map("lender_offers")
 }
 
@@ -156,6 +160,8 @@ model AdminActivityLog {
   details     Json?
   createdAt   DateTime @default(now()) @map("created_at")
 
+  @@index([adminId], name: "idx_admin_activity_admin_id")
+  @@index([createdAt], name: "idx_admin_activity_created_at")
   @@map("admin_activity_log")
 }
 

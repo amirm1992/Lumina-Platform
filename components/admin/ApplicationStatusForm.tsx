@@ -13,8 +13,10 @@ interface ApplicationStatusFormProps {
 const statuses: { value: ApplicationStatus; label: string; description: string }[] = [
     { value: 'pending', label: '⏳ Pending', description: 'Awaiting review' },
     { value: 'in_review', label: '🔄 In Review', description: 'Currently being processed' },
+    { value: 'approved', label: '👍 Approved', description: 'Application approved' },
     { value: 'offers_ready', label: '✅ Offers Ready', description: 'Client can view offers' },
     { value: 'completed', label: '✓ Completed', description: 'Loan closed' },
+    { value: 'denied', label: '✗ Denied', description: 'Application not approved' },
     { value: 'cancelled', label: '✕ Cancelled', description: 'Application withdrawn' },
 ]
 
@@ -105,7 +107,7 @@ export function ApplicationStatusForm({
             </div>
 
             {/* Notify Client Option */}
-            {status === 'offers_ready' && (
+            {['offers_ready', 'approved', 'denied', 'completed'].includes(status) && (
                 <label className="flex items-center gap-3 cursor-pointer p-4 bg-blue-50 rounded-lg border border-blue-100">
                     <input
                         type="checkbox"

@@ -97,7 +97,7 @@ export async function isUserAdmin(): Promise<boolean> {
     const email = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress
     if (!email) return false
 
-    // Check Prisma Profile
+    // Check Prisma Profile (email has @unique constraint in schema)
     const profile = await prisma.profile.findFirst({
         where: { email }
     })
@@ -246,19 +246,23 @@ export async function updateApplicationCreditScore(
     data: CreditScoreFormData
 ): Promise<boolean> {
     try {
+        const parsedDate = data.credit_score_date ? new Date(data.credit_score_date) : null
+        // Guard against Invalid Date
+        const creditScoreDate = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : null
+
         await prisma.application.update({
             where: { id: applicationId },
             data: {
                 creditScore: data.credit_score,
                 creditScoreSource: data.credit_score_source,
-                creditScoreDate: new Date(data.credit_score_date),
+                creditScoreDate: creditScoreDate,
                 creditNotes: data.credit_notes
             }
         })
         await logAdminActivity('updated_credit', 'application', applicationId, data)
         return true
     } catch (e) {
-        console.error(e)
+        console.error('Failed to update credit score:', e)
         return false
     }
 }
@@ -424,8 +428,8 @@ async function logAdminActivity(
         const user = await currentUser()
         if (!user) return
 
-        // Need admin ID (Profile ID). 
-        const email = user.emailAddresses[0]?.emailAddress
+        // Use primary email address for consistency with isUserAdmin()
+        const email = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || user.emailAddresses[0]?.emailAddress
         const profile = await prisma.profile.findFirst({ where: { email } })
 
         if (profile) {

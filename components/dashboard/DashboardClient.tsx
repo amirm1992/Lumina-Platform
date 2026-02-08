@@ -65,6 +65,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
     const [application, setApplication] = useState<Application | null>(null)
     const [offers, setOffers] = useState<Lender[]>(getPlaceholderLenders())
     const [loading, setLoading] = useState(true)
+    const [fetchError, setFetchError] = useState<string | null>(null)
     const [applicationStatus, setApplicationStatus] = useState<string>('pending')
 
     const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -80,7 +81,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await fetch('/api/applications', { cache: 'no-store' })
+                const response = await fetch(`/api/applications?t=${Date.now()}`, { cache: 'no-store' })
                 if (response.ok) {
                     const data = await response.json()
                     if (data.applications && data.applications.length > 0) {
@@ -149,6 +150,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                 }
             } catch (error) {
                 console.error('Error fetching application:', error)
+                setFetchError('Unable to load your application data. Please try refreshing the page.')
             } finally {
                 setLoading(false)
             }
@@ -196,6 +198,28 @@ export function DashboardClient({ user }: DashboardClientProps) {
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-gray-500">Loading your dashboard...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (fetchError) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center max-w-md">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to load dashboard</h2>
+                    <p className="text-gray-500 mb-6 text-sm">{fetchError}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition font-medium"
+                    >
+                        Try again
+                    </button>
                 </div>
             </div>
         )

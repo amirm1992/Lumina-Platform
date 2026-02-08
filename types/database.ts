@@ -1,7 +1,7 @@
 // Database types for Admin Portal MVP
 // These types mirror the Prisma schema
 
-export type ApplicationStatus = 'pending' | 'in_review' | 'offers_ready' | 'completed' | 'cancelled'
+export type ApplicationStatus = 'pending' | 'in_review' | 'approved' | 'offers_ready' | 'completed' | 'denied' | 'cancelled'
 
 export type ProductType = 'purchase' | 'refinance' | 'heloc'
 
@@ -11,7 +11,7 @@ export type PropertyUsage = 'primary' | 'secondary' | 'investment'
 
 export type LoanType = 'conventional' | 'fha' | 'va' | 'jumbo' | 'usda'
 
-export type CreditScoreSource = 'experian' | 'equifax' | 'transunion' | 'tri_merge'
+export type CreditScoreSource = 'self_reported' | 'soft_pull' | 'hard_pull' | 'estimated'
 
 // Profile (extends auth.users)
 export interface Profile {

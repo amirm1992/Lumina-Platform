@@ -5,7 +5,7 @@ interface StatusBadgeProps {
     size?: 'sm' | 'md'
 }
 
-const statusConfig = {
+const statusConfig: Record<ApplicationStatus, { label: string; bgColor: string; textColor: string; icon: string }> = {
     pending: {
         label: 'Pending',
         bgColor: 'bg-amber-100',
@@ -18,6 +18,12 @@ const statusConfig = {
         textColor: 'text-blue-700',
         icon: '🔄'
     },
+    approved: {
+        label: 'Approved',
+        bgColor: 'bg-emerald-100',
+        textColor: 'text-emerald-700',
+        icon: '👍'
+    },
     offers_ready: {
         label: 'Offers Ready',
         bgColor: 'bg-green-100',
@@ -29,6 +35,12 @@ const statusConfig = {
         bgColor: 'bg-gray-100',
         textColor: 'text-gray-700',
         icon: '✓'
+    },
+    denied: {
+        label: 'Denied',
+        bgColor: 'bg-rose-100',
+        textColor: 'text-rose-700',
+        icon: '✗'
     },
     cancelled: {
         label: 'Cancelled',

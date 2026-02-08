@@ -9,7 +9,7 @@ export function CreateAccount() {
     const { isLoaded, signUp, setActive } = useSignUp()
     const { user, isSignedIn, isLoaded: isUserLoaded } = useUser()
     const { signOut } = useClerk()
-    const { email, setEmail, setPassword, completeApplication, prevStep, isCompleted } = useApplicationStore()
+    const { email, setEmail, completeApplication, prevStep, isCompleted } = useApplicationStore()
 
     const [localEmail, setLocalEmail] = useState(email)
     const [localPassword, setLocalPassword] = useState('')
@@ -70,7 +70,6 @@ export function CreateAccount() {
     // ── Shared helper: finalize after successful save ──
     const finalizeSuccess = () => {
         setEmail(localEmail)
-        setPassword(localPassword)
         completeApplication()
         setSuccess(true)
         setLoading(false)
@@ -141,12 +140,11 @@ export function CreateAccount() {
             setPendingVerification(true)
             setLoading(false)
 
-        } catch (err: any) {
-            console.error('Sign up error:', err)
-
-            const clerkError = err?.errors?.[0]
+        } catch (err: unknown) {
+            const clerkErr = err as { errors?: Array<{ code?: string; message?: string }>; message?: string }
+            const clerkError = clerkErr?.errors?.[0]
             const code = clerkError?.code
-            const message = clerkError?.message || err?.message || ''
+            const message = clerkError?.message || clerkErr?.message || ''
 
             if (code === 'form_identifier_exists') {
                 setShowExistingAccount(true)
@@ -191,9 +189,9 @@ export function CreateAccount() {
 
             finalizeSuccess()
 
-        } catch (err: any) {
-            console.error('Verification error:', err)
-            setError(err.errors?.[0]?.message || 'Invalid verification code')
+        } catch (err: unknown) {
+            const clerkErr = err as { errors?: Array<{ message?: string }>; message?: string }
+            setError(clerkErr?.errors?.[0]?.message || 'Invalid verification code')
             setLoading(false)
         }
     }
@@ -216,9 +214,9 @@ export function CreateAccount() {
             setLoading(false)
             router.push('/dashboard')
 
-        } catch (err: any) {
-            console.error('Submission error:', err)
-            setError(err.message || 'Failed to submit application.')
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to submit application.'
+            setError(message)
             setLoading(false)
         }
     }
