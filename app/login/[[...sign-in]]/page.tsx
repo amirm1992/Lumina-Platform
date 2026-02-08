@@ -1,6 +1,7 @@
 'use client'
 
 import { SignIn } from '@clerk/nextjs'
+import { dark } from '@clerk/themes'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
@@ -8,15 +9,13 @@ import { useSearchParams } from 'next/navigation'
 export default function LoginPage() {
     const searchParams = useSearchParams()
     const redirectTo = searchParams.get('redirect') || '/dashboard'
+
     return (
-        <div
-            className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-hidden"
-            style={{ backgroundColor: '#0F172A' }}
-        >
-            {/* Abstract Background - inline bg prevents white flash before Tailwind */}
-            <div className="absolute inset-0 bg-[#0F172A] z-0">
-                <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-hidden bg-[#0F172A]">
+            {/* Abstract Background */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] animate-pulse delay-1000" />
             </div>
 
             {/* Back to Home Link */}
@@ -24,18 +23,18 @@ export default function LoginPage() {
                 href="/"
                 className="absolute top-8 left-8 text-white/60 hover:text-white text-sm flex items-center gap-2 transition-all hover:-translate-x-1 z-20 group"
             >
-                <span className="bg-white/10 p-1.5 rounded-full group-hover:bg-white/20 transition-colors">
+                <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
-                </span>
-                Back to Home
+                </div>
+                <span className="font-medium tracking-wide">Back to Home</span>
             </Link>
 
-            <div className="w-full max-w-md z-10 flex flex-col items-center">
+            <div className="w-full max-w-[440px] z-10 flex flex-col items-center animate-in fade-in zoom-in duration-500">
                 {/* Logo Section */}
-                <div className="flex flex-col items-center mb-8">
-                    <div className="relative w-16 h-16 mb-4">
+                <div className="flex flex-col items-center mb-10 text-center">
+                    <div className="relative w-16 h-16 mb-6 drop-shadow-2xl">
                         <Image
                             src="/logo-transparent.png"
                             alt="Lumina"
@@ -44,58 +43,53 @@ export default function LoginPage() {
                             priority
                         />
                     </div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Welcome Back</h1>
-                    <p className="text-white/50 mt-2 text-sm">
-                        {redirectTo.startsWith('/admin') ? 'Sign in to access the Admin Portal' : 'Sign in to access your financial dashboard'}
+                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Welcome Back</h1>
+                    <p className="text-white/60 text-sm max-w-xs leading-relaxed">
+                        {redirectTo.startsWith('/admin')
+                            ? 'Secure access to the Lumina Admin Portal'
+                            : 'Log in to manage your mortgage applications'}
                     </p>
                 </div>
 
                 {/* Glassmorphism Card Container */}
-                <div className="relative group w-full flex justify-center">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 shadow-2xl inline-block">
+                <div className="relative w-full">
+                    {/* Glowing border effect */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl blur opacity-75 animate-pulse" />
+
+                    <div className="relative bg-[#0F172A]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                         <SignIn
-                            /* appearance={{
+                            appearance={{
+                                baseTheme: dark,
+                                variables: {
+                                    colorPrimary: '#2563EB',
+                                    colorBackground: 'transparent',
+                                    colorInputBackground: 'rgba(255, 255, 255, 0.05)',
+                                    colorInputText: '#fff',
+                                    colorText: '#fff',
+                                    colorTextSecondary: 'rgba(255, 255, 255, 0.6)',
+                                    borderRadius: '0.75rem',
+                                },
                                 elements: {
                                     rootBox: "w-full",
-                                    card: "bg-transparent shadow-none border-0 p-6",
+                                    card: "shadow-none p-8 w-full bg-transparent",
                                     headerTitle: "hidden",
                                     headerSubtitle: "hidden",
-                                    // Primary Button
-                                    formButtonPrimary: "bg-white text-black hover:bg-gray-100 transition-all transform hover:scale-[1.02] active:scale-[0.98] font-medium h-10 rounded-lg",
-                                    // Inputs
-                                    formFieldInput: "!bg-white/10 !border-white/10 !text-white placeholder:text-white/30 focus:!border-blue-500 focus:!ring-blue-500 rounded-lg",
-                                    formFieldLabel: "!text-white/80",
-                                    // Links
-                                    footerActionLink: "!text-blue-400 hover:!text-blue-300",
-                                    identityPreviewEditButton: "!text-blue-400 hover:!text-blue-300",
-                                    formFieldAction: "!text-blue-400 hover:!text-blue-300",
-                                    formResendCodeLink: "!text-blue-400 hover:!text-blue-300",
+                                    // Make inputs pop slightly
+                                    formFieldInput: "border border-white/10 focus:border-blue-500/50 transition-colors",
+                                    // Social buttons
+                                    socialButtonsBlockButton: "bg-white/5 hover:bg-white/10 border border-white/10 transition-colors",
+                                    socialButtonsBlockButtonText: "text-white/90 font-medium",
                                     // Divider
                                     dividerLine: "bg-white/10",
-                                    dividerText: "!text-white/50",
-                                    // Social / Alternative Methods
-                                    socialButtonsBlockButton: "!bg-white/5 !border-white/10 hover:!bg-white/10",
-                                    socialButtonsBlockButtonText: "!text-white",
-                                    socialButtonsBlockButtonArrow: "!text-white/50",
-                                    alternativeMethodsBlockButton: "!bg-white/5 !border-white/10 hover:!bg-white/10 !text-white",
-                                    alternativeMethodsBlockButtonText: "!text-white",
-                                    alternativeMethodsBlockButtonArrow: "!text-white/50",
-                                    // Alerts & Errors
-                                    formFieldErrorText: "!text-red-300",
-                                    alertText: "!text-red-200",
-                                    alert: "!bg-red-900/50 !border-red-800",
-                                    // OTP
-                                    otpCodeFieldInput: "!bg-white/10 !border-white/10 !text-white"
-                                },
-                                layout: {
-                                    socialButtonsPlacement: "bottom",
-                                    socialButtonsVariant: "blockButton",
+                                    dividerText: "text-white/40",
+                                    // Footer
+                                    footerActionLink: "text-blue-400 hover:text-blue-300 font-medium",
+                                    identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
                                 }
-                            }} */
+                            }}
                             routing="path"
                             path="/login"
-                            signUpUrl="/signup"
+                            signUpUrl="/signup" // Redirects to /apply anyway, but good to have
                             afterSignInUrl={redirectTo}
                         />
                     </div>
@@ -104,9 +98,8 @@ export default function LoginPage() {
 
             {/* Footer */}
             <div className="mt-12 text-center z-10">
-                <p className="text-white/30 text-xs">
-                    © 2026 Lumina Financial Technologies. <br />
-                    Bank-level security. NMLS #1631748.
+                <p className="text-white/20 text-xs font-light tracking-wider">
+                    SECURE & ENCRYPTED • NMLS #1631748
                 </p>
             </div>
         </div>
