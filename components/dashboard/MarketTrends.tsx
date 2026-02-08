@@ -77,7 +77,7 @@ export function MarketTrends() {
     const change = calculateChange()
 
     return (
-        <div className="glass p-6 rounded-2xl border border-gray-100 bg-white relative min-h-[300px] flex flex-col shadow-sm">
+        <div className="glass p-6 rounded-2xl border border-white/50 bg-white/70 backdrop-blur-md relative min-h-[300px] flex flex-col shadow-lg">
             <div className="flex justify-between items-center mb-6 px-2">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Market Rate Trends</h3>
 

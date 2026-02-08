@@ -18,13 +18,25 @@ interface DashboardClientProps {
 }
 
 // Convert database offer to Lender type for display
-function offerToLender(offer: LenderOffer): Lender {
+// Helper to calculate monthly payment
+function calculateMonthlyPayment(principal: number, annualRate: number, years: number): number {
+    const r = annualRate / 100 / 12
+    const n = years * 12
+    if (!principal || !r || !n) return 0
+    return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
+}
+
+// Convert database offer to Lender type for display
+function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
+    // Calculate payment dynamically if rate exists
+    const calculatedPayment = calculateMonthlyPayment(loanAmount, offer.interest_rate, offer.loan_term || 30)
+
     return {
         id: offer.id,
         name: offer.lender_name,
         rate: offer.interest_rate,
         apr: offer.apr || offer.interest_rate,
-        monthlyPayment: offer.monthly_payment || 0,
+        monthlyPayment: calculatedPayment || offer.monthly_payment || 0,
         loanTerm: offer.loan_term || 30,
         loanType: (offer.loan_type?.toUpperCase() || 'CONVENTIONAL') as 'CONVENTIONAL' | 'FHA' | 'VA' | 'JUMBO',
         points: offer.points || 0,
@@ -74,14 +86,22 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                         // Convert offers if available
                         if (app.lender_offers && app.lender_offers.length > 0) {
-                            const dbOffers = app.lender_offers.map(offerToLender)
+                            const dbOffers = app.lender_offers.map(o => offerToLender(o, app.loan_amount || 0))
 
                             // Merge with Constants
                             const mergedOffers = CONSTANT_LENDERS.map((constant, index) => {
-                                // Find matching DB offer
-                                const match = dbOffers.find(o =>
-                                    o.name.toLowerCase().trim() === constant.name.toLowerCase().trim()
-                                )
+                                // Find matching DB offer (normalize whitespace and check aliases)
+                                const match = dbOffers.find(o => {
+                                    const dbName = o.name.toLowerCase().trim()
+                                    const constName = constant.name.toLowerCase().trim()
+
+                                    if (dbName === constName) return true
+
+                                    // Handle UWM alias explicitly
+                                    if (constant.name === 'UWM' && (dbName.includes('united wholesale') || dbName.includes('uwm'))) return true
+
+                                    return false
+                                })
 
                                 if (match) return match
 
@@ -285,9 +305,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                         {/* Closing Info */}
                         {selectedLender && (
-                            <div className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                            <div className="p-6 rounded-2xl bg-white/70 backdrop-blur-md border border-white/50 shadow-lg transition-all hover:shadow-xl">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="p-2 bg-black rounded-lg shadow-lg shadow-black/20">
+                                    <div className="p-2 bg-black/90 rounded-lg shadow-lg shadow-black/10">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
@@ -307,7 +327,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                         {/* Application Info */}
                         {application && (
-                            <div className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                            <div className="p-6 rounded-2xl bg-white/70 backdrop-blur-md border border-white/50 shadow-lg">
                                 <h4 className="font-bold text-black mb-4">Your Application</h4>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex justify-between">

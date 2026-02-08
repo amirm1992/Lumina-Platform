@@ -16,10 +16,11 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
         <div
             onClick={onSelect}
             className={`
-                relative p-6 rounded-2xl border cursor-pointer transition-all duration-300 group
+                relative p-6 rounded-2xl border cursor-pointer transition-all duration-300 group overflow-hidden
+                backdrop-blur-md
                 ${isSelected
-                    ? 'bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] border-[#3B82F6] shadow-[0_0_30px_rgba(37,99,235,0.15)]'
-                    : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-lg'
+                    ? 'bg-blue-50/80 border-blue-500/30 shadow-[0_8px_30px_rgba(37,99,235,0.15)] ring-1 ring-blue-500/20'
+                    : 'bg-white/70 border-white/40 hover:bg-white/90 hover:shadow-xl hover:-translate-y-1'
                 }
                 ${lender.isPlaceholder ? 'opacity-70 grayscale' : ''}
             `}

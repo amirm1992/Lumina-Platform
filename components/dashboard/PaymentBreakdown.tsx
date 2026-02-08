@@ -21,7 +21,7 @@ export function PaymentBreakdown({ monthlyPayment, propertyTax, homeInsurance }:
     ]
 
     return (
-        <div className="glass p-8 rounded-3xl border border-gray-100 bg-white relative overflow-hidden shadow-sm">
+        <div className="glass p-8 rounded-3xl border border-white/50 bg-white/70 backdrop-blur-md relative overflow-hidden shadow-lg">
             {/* Chart Background */}
             <div className="absolute inset-x-0 bottom-0 h-64 opacity-20 pointer-events-none">
                 <ResponsiveContainer width="100%" height="100%">
