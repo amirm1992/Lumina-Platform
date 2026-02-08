@@ -68,12 +68,20 @@ export function CreateAccount() {
         } catch (err: any) {
             console.error('Sign up error:', err)
 
+            const clerkError = err?.errors?.[0]
+            const code = clerkError?.code
+            const message = clerkError?.message || err?.message || ''
+
             // Handle specific Clerk errors
-            if (err.errors?.[0]?.code === 'form_identifier_exists') {
+            if (code === 'form_identifier_exists') {
                 setShowExistingAccount(true)
                 setError('An account with this email already exists.')
+            } else if (message.toLowerCase().includes('invalid action') || code === 'invalid_action') {
+                // Clerk can return this after creating the user (e.g. verification step fails). Offer sign-in.
+                setShowExistingAccount(true)
+                setError('Your account may have been created. Try signing in below with your email and password.')
             } else {
-                setError(err.errors?.[0]?.message || 'Something went wrong. Please try again.')
+                setError(message || 'Something went wrong. Please try again.')
             }
             setLoading(false)
         }

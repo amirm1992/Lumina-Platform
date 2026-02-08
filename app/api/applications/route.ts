@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import prisma from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
@@ -50,6 +50,17 @@ export async function POST(request: NextRequest) {
                 phone: phone || undefined
             }
         })
+
+        // Sync phone to Clerk user metadata so it appears in Clerk Dashboard
+        if (phone) {
+            try {
+                await clerkClient.users.updateUserMetadata(userId, {
+                    unsafeMetadata: { phone }
+                })
+            } catch (e) {
+                console.warn('Could not sync phone to Clerk metadata:', e)
+            }
+        }
 
         return NextResponse.json({
             success: true,
