@@ -1,12 +1,14 @@
 'use client'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSignUp } from '@clerk/nextjs'
+import { useSignUp, useUser, useClerk } from '@clerk/nextjs'
 import { useApplicationStore } from '@/store/applicationStore'
 
 export function CreateAccount() {
     const router = useRouter()
     const { isLoaded, signUp, setActive } = useSignUp()
+    const { user, isSignedIn, isLoaded: isUserLoaded } = useUser()
+    const { signOut } = useClerk()
     const { email, setEmail, setPassword, completeApplication, prevStep, isCompleted } = useApplicationStore()
 
     const [localEmail, setLocalEmail] = useState(email)
@@ -175,9 +177,97 @@ export function CreateAccount() {
         }
     }
 
+    const handleContinueWithCurrentAccount = async () => {
+        if (!user) return
+        setLoading(true)
+        setError('')
+
+        try {
+            const applicationState = useApplicationStore.getState()
+            const payload = {
+                email: user.primaryEmailAddress?.emailAddress || email,
+                productType: applicationState.productType,
+                propertyType: applicationState.propertyType,
+                propertyUsage: applicationState.propertyUsage,
+                zipCode: applicationState.zipCode,
+                estimatedValue: applicationState.estimatedValue,
+                loanAmount: applicationState.loanAmount,
+                firstName: applicationState.firstName,
+                lastName: applicationState.lastName,
+                phone: applicationState.phone || '',
+                employmentStatus: applicationState.employmentStatus,
+                annualIncome: applicationState.annualIncome,
+                liquidAssets: applicationState.liquidAssets,
+            }
+
+            // Submit application to database
+            const response = await fetch('/api/applications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({ error: 'Request failed' }))
+                throw new Error(data.error || `Request failed (${response.status})`)
+            }
+
+            // Sync state
+            setEmail(user.primaryEmailAddress?.emailAddress || email)
+            completeApplication()
+            setSuccess(true)
+            setLoading(false)
+            router.push('/dashboard')
+
+        } catch (err: any) {
+            console.error('Submission error:', err)
+            setError(err.message || 'Failed to submit application.')
+            setLoading(false)
+        }
+    }
+
     const handleBack = () => {
         prevStep()
         router.push('/apply/step/11')
+    }
+
+    // Existing User State
+    if (isUserLoaded && isSignedIn && user) {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold text-black mb-2">You are already signed in</h1>
+                    <p className="text-gray-600">
+                        You are currently signed in as <span className="font-semibold text-[#1D4ED8]">{user.primaryEmailAddress?.emailAddress}</span>.
+                    </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-sm text-[#1D4ED8]">
+                    ℹ️ Do you want to submit this application with your existing account?
+                </div>
+
+                {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+
+                <div className="pt-4 flex flex-col gap-3">
+                    <button
+                        type="button"
+                        onClick={() => handleContinueWithCurrentAccount()}
+                        disabled={loading}
+                        className="w-full px-8 py-4 rounded-full bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 shadow-md transition-all"
+                    >
+                        {loading ? 'Submitting Application...' : 'Yes, Submit Application'}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => signOut(() => window.location.reload())}
+                        className="w-full px-8 py-4 rounded-full bg-white border border-gray-200 text-black font-semibold hover:bg-gray-50 transition-all"
+                    >
+                        Sign out and create new account
+                    </button>
+                </div>
+            </div>
+        )
     }
 
     // Success state
