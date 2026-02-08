@@ -32,18 +32,22 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        // Update or create the user's profile
+        // Update or create the user's profile (email, phone from application)
+        const fullName = `${body.firstName || ''} ${body.lastName || ''}`.trim()
+        const email = typeof body.email === 'string' ? body.email.trim() : null
+        const phone = typeof body.phone === 'string' ? body.phone.trim() : null
         await prisma.profile.upsert({
             where: { id: userId },
             update: {
-                fullName: `${body.firstName} ${body.lastName}`.trim(),
-                phone: body.phone
+                fullName: fullName || undefined,
+                phone: phone ?? undefined,
+                ...(email ? { email } : {})
             },
             create: {
                 id: userId,
-                email: body.email,
-                fullName: `${body.firstName} ${body.lastName}`.trim(),
-                phone: body.phone
+                email: email || undefined,
+                fullName: fullName || undefined,
+                phone: phone || undefined
             }
         })
 

@@ -100,35 +100,55 @@ export function CreateAccount() {
             // Set the session as active
             await setActive({ session: completeSignUp.createdSessionId })
 
-            // Get full application state to submit
+            // Brief delay so the session cookie is sent on the next request (avoids 401 race)
+            await new Promise((r) => setTimeout(r, 400))
+
             const applicationState = useApplicationStore.getState()
+            const payload = {
+                email: localEmail,
+                productType: applicationState.productType,
+                propertyType: applicationState.propertyType,
+                propertyUsage: applicationState.propertyUsage,
+                zipCode: applicationState.zipCode,
+                estimatedValue: applicationState.estimatedValue,
+                loanAmount: applicationState.loanAmount,
+                firstName: applicationState.firstName,
+                lastName: applicationState.lastName,
+                phone: applicationState.phone || '',
+                employmentStatus: applicationState.employmentStatus,
+                annualIncome: applicationState.annualIncome,
+                liquidAssets: applicationState.liquidAssets,
+            }
 
-            // Submit application to database
-            try {
-                const response = await fetch('/api/applications', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        productType: applicationState.productType,
-                        propertyType: applicationState.propertyType,
-                        propertyUsage: applicationState.propertyUsage,
-                        zipCode: applicationState.zipCode,
-                        estimatedValue: applicationState.estimatedValue,
-                        loanAmount: applicationState.loanAmount,
-                        firstName: applicationState.firstName,
-                        lastName: applicationState.lastName,
-                        phone: applicationState.phone,
-                        employmentStatus: applicationState.employmentStatus,
-                        annualIncome: applicationState.annualIncome,
-                        liquidAssets: applicationState.liquidAssets,
+            // Submit application to database (retry if 401 - session might not be ready yet)
+            let lastError: string | null = null
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const response = await fetch('/api/applications', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
                     })
-                })
-
-                if (!response.ok) {
-                    console.error('Failed to submit application')
+                    if (response.ok) {
+                        lastError = null
+                        break
+                    }
+                    const data = await response.json().catch(() => ({}))
+                    lastError = data?.error || `Request failed (${response.status})`
+                    if (response.status === 401 && attempt < 2) {
+                        await new Promise((r) => setTimeout(r, 500))
+                        continue
+                    }
+                    break
+                } catch (err) {
+                    lastError = err instanceof Error ? err.message : 'Network error'
                 }
-            } catch (err) {
-                console.error('Error submitting application:', err)
+            }
+
+            if (lastError) {
+                setError(`We couldn't save your application. Please try again from your dashboard. (${lastError})`)
+                setLoading(false)
+                return
             }
 
             setEmail(localEmail)
