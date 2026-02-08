@@ -21,6 +21,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                     ? 'bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] border-[#3B82F6] shadow-[0_0_30px_rgba(37,99,235,0.15)]'
                     : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-lg'
                 }
+                ${lender.isPlaceholder ? 'opacity-70 grayscale' : ''}
             `}
         >
             {/* Header */}
@@ -37,7 +38,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                                 className="w-full h-full object-contain p-1"
                             />
                         ) : (
-                            <span className={`text-lg font-bold ${isSelected ? 'text-[#2563EB]' : 'text-gray-500'}`}>
+                            <span className={`text - lg font - bold ${isSelected ? 'text-[#2563EB]' : 'text-gray-500'} `}>
                                 {lender.name[0]}
                             </span>
                         )}
@@ -56,35 +57,44 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                 )}
             </div>
 
-            {/* Rates */}
-            <div className="grid grid-cols-2 gap-8 mb-6">
-                <div>
-                    <p className="text-xs text-gray-500 mb-1">Interest Rate</p>
-                    <p className="text-3xl font-bold text-black tracking-tight">{lender.rate.toFixed(3)}%</p>
+            {lender.isPlaceholder ? (
+                <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                    <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm font-medium text-gray-500 animate-pulse">Crunching numbers...</p>
                 </div>
-                <div>
-                    <p className="text-xs text-gray-500 mb-1">APR</p>
-                    <p className="text-3xl font-bold text-black tracking-tight opacity-80">{lender.apr.toFixed(3)}%</p>
-                </div>
-            </div>
-
-            {/* Details */}
-            <div className="space-y-3 mb-8 border-t border-gray-100 pt-6">
-                <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Monthly P&I</span>
-                    <span className="font-semibold text-black">${lender.monthlyPayment.toLocaleString()}</span>
-                </div>
-                {lender.closingCosts && (
-                    <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Closing Costs</span>
-                        <span className="font-semibold text-black">${lender.closingCosts.toLocaleString()}</span>
+            ) : (
+                <>
+                    {/* Rates */}
+                    <div className="grid grid-cols-2 gap-8 mb-6">
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">Interest Rate</p>
+                            <p className="text-3xl font-bold text-black tracking-tight">{lender.rate.toFixed(3)}%</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">APR</p>
+                            <p className="text-3xl font-bold text-black tracking-tight opacity-80">{lender.apr.toFixed(3)}%</p>
+                        </div>
                     </div>
-                )}
-                <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Points</span>
-                    <span className="font-semibold text-black">{lender.points}</span>
-                </div>
-            </div>
+
+                    {/* Details */}
+                    <div className="space-y-3 mb-8 border-t border-gray-100 pt-6">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Monthly P&I</span>
+                            <span className="font-semibold text-black">${lender.monthlyPayment.toLocaleString()}</span>
+                        </div>
+                        {lender.closingCosts && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">Closing Costs</span>
+                                <span className="font-semibold text-black">${lender.closingCosts.toLocaleString()}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Points</span>
+                            <span className="font-semibold text-black">{lender.points}</span>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Action Button */}
             <button
@@ -93,7 +103,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                         ? 'bg-[#1E3A5F] text-white shadow-[0_4px_20px_rgba(30,58,95,0.25)] hover:bg-[#162D4A]'
                         : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black'
                     }
-                `}
+                    `}
             >
                 {isSelected ? 'Pre-Approve Now' : 'Select Offer'}
             </button>

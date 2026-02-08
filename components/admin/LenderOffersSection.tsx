@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LenderOffer, LoanType } from '@/types/database'
 import { Plus, Edit2, Trash2, Star, X } from 'lucide-react'
+import { CONSTANT_LENDERS } from '@/constants/lenders'
 
 interface LenderOffersSectionProps {
     applicationId: string
@@ -134,6 +135,16 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
         }
     }
 
+    const handleLenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedName = e.target.value
+        const lender = CONSTANT_LENDERS.find(l => l.name === selectedName)
+        setFormData(prev => ({
+            ...prev,
+            lender_name: selectedName,
+            lender_logo: lender?.logo || prev.lender_logo
+        }))
+    }
+
     return (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
@@ -227,14 +238,37 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
                                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                                     Lender Name *
                                 </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.lender_name}
-                                    onChange={(e) => setFormData({ ...formData, lender_name: e.target.value })}
-                                    placeholder="e.g., Wells Fargo"
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white"
-                                />
+                                <div className="relative">
+                                    <select
+                                        required
+                                        value={formData.lender_name}
+                                        onChange={handleLenderChange}
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white appearance-none"
+                                    >
+                                        <option value="">Select a Lender</option>
+                                        {CONSTANT_LENDERS.map(lender => (
+                                            <option key={lender.name} value={lender.name}>
+                                                {lender.name}
+                                            </option>
+                                        ))}
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                {formData.lender_name === 'Other' && (
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.lender_name === 'Other' ? '' : formData.lender_name}
+                                        onChange={(e) => setFormData({ ...formData, lender_name: e.target.value })}
+                                        placeholder="Enter Lender Name"
+                                        className="mt-2 w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white"
+                                    />
+                                )}
                             </div>
 
                             {/* Lender Logo URL */}

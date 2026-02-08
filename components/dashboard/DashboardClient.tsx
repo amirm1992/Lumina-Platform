@@ -11,6 +11,7 @@ import { RATE_TRENDS } from './constants'
 import { UserProfile, Lender } from './types'
 import { Application, LenderOffer } from '@/types/database'
 import { AuthUser } from '@/types/auth'
+import { CONSTANT_LENDERS, getPlaceholderLenders } from '@/constants/lenders'
 
 interface DashboardClientProps {
     user: AuthUser | null
@@ -36,7 +37,7 @@ function offerToLender(offer: LenderOffer): Lender {
 export function DashboardClient({ user }: DashboardClientProps) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [application, setApplication] = useState<Application | null>(null)
-    const [offers, setOffers] = useState<Lender[]>([])
+    const [offers, setOffers] = useState<Lender[]>(getPlaceholderLenders())
     const [loading, setLoading] = useState(true)
     const [applicationStatus, setApplicationStatus] = useState<string>('pending')
 
@@ -73,7 +74,50 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                         // Convert offers if available
                         if (app.lender_offers && app.lender_offers.length > 0) {
-                            setOffers(app.lender_offers.map(offerToLender))
+                            const dbOffers = app.lender_offers.map(offerToLender)
+
+                            // Merge with Constants
+                            const mergedOffers = CONSTANT_LENDERS.map((constant, index) => {
+                                // Find matching DB offer
+                                const match = dbOffers.find(o =>
+                                    o.name.toLowerCase() === constant.name.toLowerCase()
+                                )
+
+                                if (match) return match
+
+                                // Return Placeholder
+                                return {
+                                    id: `placeholder-${index}`,
+                                    name: constant.name,
+                                    logo: constant.logo,
+                                    rate: 0,
+                                    apr: 0,
+                                    monthlyPayment: 0,
+                                    loanTerm: 30,
+                                    loanType: 'CONVENTIONAL',
+                                    points: 0,
+                                    closingCosts: 0,
+                                    isRecommended: false,
+                                    isPlaceholder: true
+                                } as Lender
+                            })
+
+                            // Add any other DB offers that aren't in constants
+                            const otherOffers = dbOffers.filter(o =>
+                                !CONSTANT_LENDERS.some(c => c.name.toLowerCase() === o.name.toLowerCase())
+                            )
+
+                            // Sort: Real offers first (lowest rate), then placeholders
+                            const sortedOffers = [...mergedOffers, ...otherOffers].sort((a, b) => {
+                                if (a.isPlaceholder && !b.isPlaceholder) return 1
+                                if (!a.isPlaceholder && b.isPlaceholder) return -1
+                                return a.rate - b.rate
+                            })
+
+                            setOffers(sortedOffers)
+                        } else {
+                            // No offers yet - show placeholders
+                            setOffers(getPlaceholderLenders())
                         }
                     }
                 }
@@ -100,9 +144,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
     useEffect(() => {
         if (offers.length > 0 && !selectedLenderId) {
-            // Select recommended offer first, or first offer
-            const recommended = offers.find(o => o.isRecommended)
-            setSelectedLenderId(recommended?.id || offers[0].id)
+            // Select first REAL offer, or first placeholder
+            const firstReal = offers.find(o => !o.isPlaceholder)
+            setSelectedLenderId(firstReal?.id || offers[0].id)
         }
     }, [offers, selectedLenderId])
 
@@ -190,9 +234,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                     Welcome back, {userProfile.name}
                                 </h1>
                                 <p className="text-gray-500">
-                                    {offers.length > 0
+                                    {offers.some(o => !o.isPlaceholder)
                                         ? 'Based on your verified credit, here are your personalized offers.'
-                                        : 'Your application is being processed. Offers will appear here soon.'}
+                                        : 'We are crunching the numbers with our top lenders for you.'}
                                 </p>
                             </div>
                             <div className="flex gap-4">

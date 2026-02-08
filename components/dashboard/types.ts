@@ -21,6 +21,8 @@ export interface Lender {
     loanType?: 'CONVENTIONAL' | 'FHA' | 'VA' | 'JUMBO' | 'USDA';
     closingCosts?: number;
     isRecommended?: boolean;
+    isPlaceholder?: boolean;
+    description?: string;
 }
 
 export interface RateTrend {
