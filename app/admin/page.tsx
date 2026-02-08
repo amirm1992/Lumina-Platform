@@ -3,6 +3,8 @@ import { StatsCard } from '@/components/admin/StatsCard'
 import { ApplicationsTable } from '@/components/admin/ApplicationsTable'
 import { ClipboardList, Clock, CheckCircle, TrendingUp } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
     const stats = await getAdminDashboardStats()
     const recentApplications = await getApplications()

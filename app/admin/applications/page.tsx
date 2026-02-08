@@ -4,6 +4,8 @@ import { ApplicationFilters } from '@/components/admin/ApplicationFilters'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ApplicationsPage({
     searchParams,
 }: {
