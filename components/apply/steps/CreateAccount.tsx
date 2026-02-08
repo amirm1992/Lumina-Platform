@@ -66,7 +66,7 @@ export function CreateAccount() {
             setLoading(false)
 
         } catch (err: any) {
-            console.error('Sign up error:', err)
+            console.error('Sign up error full:', JSON.stringify(err, null, 2))
 
             const clerkError = err?.errors?.[0]
             const code = clerkError?.code
@@ -77,11 +77,11 @@ export function CreateAccount() {
                 setShowExistingAccount(true)
                 setError('An account with this email already exists.')
             } else if (message.toLowerCase().includes('invalid action') || code === 'invalid_action') {
-                // Clerk can return this after creating the user (e.g. verification step fails). Offer sign-in.
+                // This often happens if the hook state is stale
                 setShowExistingAccount(true)
-                setError('Your account may have been created. Try signing in below with your email and password.')
+                setError(`Sign up failed (invalid_action). Please REFRESH the page and try again with a new email.`)
             } else {
-                setError(message || 'Something went wrong. Please try again.')
+                setError(`${message} (${code || 'unknown'})`)
             }
             setLoading(false)
         }
