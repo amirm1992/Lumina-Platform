@@ -26,23 +26,37 @@ function calculateMonthlyPayment(principal: number, annualRate: number, years: n
     return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
 }
 
+// Normalize lender name for matching (handles UWM and other aliases)
+function normalizeLenderName(name: string): string {
+    return (name || '').toLowerCase().trim().replace(/\s+/g, ' ')
+}
+
+function dbOfferMatchesConstant(dbName: string, constantName: string): boolean {
+    const d = normalizeLenderName(dbName)
+    const c = normalizeLenderName(constantName)
+    if (d === c) return true
+    if (c === 'uwm' && (d.includes('united wholesale') || d.includes('uwm') || d === 'u.w.m.')) return true
+    return false
+}
+
 // Convert database offer to Lender type for display
 function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
-    // Calculate payment dynamically if rate exists
-    const calculatedPayment = calculateMonthlyPayment(loanAmount, offer.interest_rate, offer.loan_term || 30)
+    const rate = offer.interest_rate ?? 0
+    const term = offer.loan_term ?? 30
+    const calculatedPayment = calculateMonthlyPayment(loanAmount, rate, term)
     return {
         id: offer.id,
         name: offer.lender_name,
-        rate: offer.interest_rate,
-        apr: offer.apr || offer.interest_rate,
-        monthlyPayment: calculatedPayment || offer.monthly_payment || 0,
-        loanTerm: offer.loan_term || 30,
+        rate,
+        apr: offer.apr ?? rate,
+        monthlyPayment: calculatedPayment || (offer.monthly_payment ?? 0),
+        loanTerm: term,
         loanType: (offer.loan_type?.toUpperCase() || 'CONVENTIONAL') as 'CONVENTIONAL' | 'FHA' | 'VA' | 'JUMBO',
-        points: offer.points || 0,
-        closingCosts: offer.closing_costs || 0,
+        points: offer.points ?? 0,
+        closingCosts: offer.closing_costs ?? 0,
         isRecommended: offer.is_recommended,
         bestMatch: offer.is_best_match ?? false,
-        logo: offer.lender_logo || undefined
+        logo: offer.lender_logo ?? undefined
     }
 }
 
@@ -66,11 +80,14 @@ export function DashboardClient({ user }: DashboardClientProps) {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await fetch('/api/applications')
+                const response = await fetch('/api/applications', { cache: 'no-store' })
                 if (response.ok) {
                     const data = await response.json()
                     if (data.applications && data.applications.length > 0) {
-                        const app = data.applications[0] as Application
+                        // Prefer application that has offers (admin may have added to a specific one)
+                        const apps = data.applications as Application[]
+                        const appWithOffers = apps.find(a => a.lender_offers && a.lender_offers.length > 0)
+                        const app = (appWithOffers ?? apps[0]) as Application
                         setApplication(app)
                         setApplicationStatus(app.status)
 
@@ -90,18 +107,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                             // Merge with Constants
                             const mergedOffers = CONSTANT_LENDERS.map((constant, index) => {
-                                // Find matching DB offer (normalize whitespace and check aliases)
-                                const match = dbOffers.find(o => {
-                                    const dbName = o.name.toLowerCase().trim()
-                                    const constName = constant.name.toLowerCase().trim()
-
-                                    if (dbName === constName) return true
-
-                                    // Handle UWM alias explicitly
-                                    if (constant.name === 'UWM' && (dbName.includes('united wholesale') || dbName.includes('uwm'))) return true
-
-                                    return false
-                                })
+                                const match = dbOffers.find(o => dbOfferMatchesConstant(o.name, constant.name))
 
                                 if (match) return match
 
@@ -124,7 +130,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                             // Add any other DB offers that aren't in constants
                             const otherOffers = dbOffers.filter(o =>
-                                !CONSTANT_LENDERS.some(c => c.name.toLowerCase().trim() === o.name.toLowerCase().trim())
+                                !CONSTANT_LENDERS.some(c => dbOfferMatchesConstant(o.name, c.name))
                             )
 
                             // Sort: Real offers first (lowest rate), then placeholders
