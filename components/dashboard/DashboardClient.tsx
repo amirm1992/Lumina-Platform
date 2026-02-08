@@ -80,7 +80,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                             const mergedOffers = CONSTANT_LENDERS.map((constant, index) => {
                                 // Find matching DB offer
                                 const match = dbOffers.find(o =>
-                                    o.name.toLowerCase() === constant.name.toLowerCase()
+                                    o.name.toLowerCase().trim() === constant.name.toLowerCase().trim()
                                 )
 
                                 if (match) return match
@@ -104,7 +104,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                             // Add any other DB offers that aren't in constants
                             const otherOffers = dbOffers.filter(o =>
-                                !CONSTANT_LENDERS.some(c => c.name.toLowerCase() === o.name.toLowerCase())
+                                !CONSTANT_LENDERS.some(c => c.name.toLowerCase().trim() === o.name.toLowerCase().trim())
                             )
 
                             // Sort: Real offers first (lowest rate), then placeholders
@@ -159,47 +159,8 @@ export function DashboardClient({ user }: DashboardClientProps) {
         return ((userProfile.estimatedLoanAmount / userProfile.homeValue) * 100).toFixed(1)
     }, [userProfile])
 
-    // Status banner component
+    // Status banner component - Disabled as per user request
     const StatusBanner = () => {
-        if (applicationStatus === 'pending') {
-            return (
-                <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">⏳</span>
-                        <div>
-                            <p className="font-semibold text-amber-800">Application Under Review</p>
-                            <p className="text-sm text-amber-600">We're reviewing your application. You'll receive offers soon!</p>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-        if (applicationStatus === 'in_review') {
-            return (
-                <div className="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">🔄</span>
-                        <div>
-                            <p className="font-semibold text-blue-800">Processing Your Rates</p>
-                            <p className="text-sm text-blue-600">We're pulling rates from our lender network. Check back shortly!</p>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-        if (applicationStatus === 'offers_ready' && offers.length > 0) {
-            return (
-                <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">🎉</span>
-                        <div>
-                            <p className="font-semibold text-green-800">Your Rates Are Ready!</p>
-                            <p className="text-sm text-green-600">We found {offers.length} lender offers for you. Compare and choose the best one.</p>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
         return null
     }
 

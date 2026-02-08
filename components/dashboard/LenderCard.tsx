@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Lender } from './types'
-import { Check } from 'lucide-react'
+import { Check, Calculator } from 'lucide-react'
 /* eslint-disable @next/next/no-img-element */
 
 interface LenderCardProps {
@@ -58,9 +58,14 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
             </div>
 
             {lender.isPlaceholder ? (
-                <div className="flex flex-col items-center justify-center py-8 space-y-3">
-                    <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm font-medium text-gray-500 animate-pulse">Crunching numbers...</p>
+                <div className="flex flex-col items-center justify-center py-8 space-y-3 px-4 text-center">
+                    <div className="p-3 bg-blue-50 rounded-full mb-1">
+                        <Calculator className="w-5 h-5 text-blue-600 animate-pulse" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-gray-900 mb-1">Calculating your savings...</p>
+                        <p className="text-xs text-gray-400">Negotiating the best rates for your unique scenario.</p>
+                    </div>
                 </div>
             ) : (
                 <>
