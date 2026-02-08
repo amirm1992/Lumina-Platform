@@ -22,6 +22,60 @@ export function CreateAccount() {
     const [pendingVerification, setPendingVerification] = useState(false)
     const [verificationCode, setVerificationCode] = useState('')
 
+    // ── Shared helper: save application to DB with retry ──
+    const saveApplication = async (emailToUse: string): Promise<string | null> => {
+        const applicationState = useApplicationStore.getState()
+        const payload = {
+            email: emailToUse,
+            productType: applicationState.productType,
+            propertyType: applicationState.propertyType,
+            propertyUsage: applicationState.propertyUsage,
+            zipCode: applicationState.zipCode,
+            estimatedValue: applicationState.estimatedValue,
+            loanAmount: applicationState.loanAmount,
+            firstName: applicationState.firstName,
+            lastName: applicationState.lastName,
+            phone: applicationState.phone || '',
+            employmentStatus: applicationState.employmentStatus,
+            annualIncome: applicationState.annualIncome,
+            liquidAssets: applicationState.liquidAssets,
+        }
+
+        let lastError: string | null = null
+        for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+                const response = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                })
+                if (response.ok) {
+                    return null // success
+                }
+                const data = await response.json().catch(() => ({}))
+                lastError = data?.error || `Request failed (${response.status})`
+                if (response.status === 401 && attempt < 2) {
+                    await new Promise((r) => setTimeout(r, 500))
+                    continue
+                }
+                break
+            } catch (err) {
+                lastError = err instanceof Error ? err.message : 'Network error'
+            }
+        }
+        return lastError
+    }
+
+    // ── Shared helper: finalize after successful save ──
+    const finalizeSuccess = () => {
+        setEmail(localEmail)
+        setPassword(localPassword)
+        completeApplication()
+        setSuccess(true)
+        setLoading(false)
+        router.push('/dashboard')
+    }
+
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) {
             e.preventDefault()
@@ -54,36 +108,50 @@ export function CreateAccount() {
         setShowExistingAccount(false)
 
         try {
-            // Start sign up with Clerk
-            await signUp.create({
+            // Create user in Clerk
+            const result = await signUp.create({
                 emailAddress: localEmail,
                 password: localPassword,
             })
 
-            // Send email verification code
-            await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+            // ── Branch based on sign-up status ──
+            if (result.status === 'complete') {
+                // Email verification is NOT required — sign-up already done
+                // Activate the session immediately
+                await setActive({ session: result.createdSessionId })
 
-            // Move to verification step
+                // Brief delay so the session cookie is available
+                await new Promise((r) => setTimeout(r, 400))
+
+                // Save application to DB
+                const saveError = await saveApplication(localEmail)
+                if (saveError) {
+                    setError(`We couldn't save your application. Please try again from your dashboard. (${saveError})`)
+                    setLoading(false)
+                    return
+                }
+
+                finalizeSuccess()
+                return
+            }
+
+            // Email verification IS required — send code
+            await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
             setPendingVerification(true)
             setLoading(false)
 
         } catch (err: any) {
-            console.error('Sign up error full:', JSON.stringify(err, null, 2))
+            console.error('Sign up error:', err)
 
             const clerkError = err?.errors?.[0]
             const code = clerkError?.code
             const message = clerkError?.message || err?.message || ''
 
-            // Handle specific Clerk errors
             if (code === 'form_identifier_exists') {
                 setShowExistingAccount(true)
                 setError('An account with this email already exists.')
-            } else if (message.toLowerCase().includes('invalid action') || code === 'invalid_action') {
-                // This often happens if the hook state is stale
-                setShowExistingAccount(true)
-                setError(`Sign up failed (invalid_action). Please REFRESH the page and try again with a new email.`)
             } else {
-                setError(`${message} (${code || 'unknown'})`)
+                setError(message || 'Something went wrong. Please try again.')
             }
             setLoading(false)
         }
@@ -96,7 +164,6 @@ export function CreateAccount() {
         setError('')
 
         try {
-            // Verify the email code
             const completeSignUp = await signUp.attemptEmailAddressVerification({
                 code: verificationCode,
             })
@@ -110,65 +177,18 @@ export function CreateAccount() {
             // Set the session as active
             await setActive({ session: completeSignUp.createdSessionId })
 
-            // Brief delay so the session cookie is sent on the next request (avoids 401 race)
+            // Brief delay so the session cookie is available
             await new Promise((r) => setTimeout(r, 400))
 
-            const applicationState = useApplicationStore.getState()
-            const payload = {
-                email: localEmail,
-                productType: applicationState.productType,
-                propertyType: applicationState.propertyType,
-                propertyUsage: applicationState.propertyUsage,
-                zipCode: applicationState.zipCode,
-                estimatedValue: applicationState.estimatedValue,
-                loanAmount: applicationState.loanAmount,
-                firstName: applicationState.firstName,
-                lastName: applicationState.lastName,
-                phone: applicationState.phone || '',
-                employmentStatus: applicationState.employmentStatus,
-                annualIncome: applicationState.annualIncome,
-                liquidAssets: applicationState.liquidAssets,
-            }
-
-            // Submit application to database (retry if 401 - session might not be ready yet)
-            let lastError: string | null = null
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    const response = await fetch('/api/applications', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                    })
-                    if (response.ok) {
-                        lastError = null
-                        break
-                    }
-                    const data = await response.json().catch(() => ({}))
-                    lastError = data?.error || `Request failed (${response.status})`
-                    if (response.status === 401 && attempt < 2) {
-                        await new Promise((r) => setTimeout(r, 500))
-                        continue
-                    }
-                    break
-                } catch (err) {
-                    lastError = err instanceof Error ? err.message : 'Network error'
-                }
-            }
-
-            if (lastError) {
-                setError(`We couldn't save your application. Please try again from your dashboard. (${lastError})`)
+            // Save application to DB
+            const saveError = await saveApplication(localEmail)
+            if (saveError) {
+                setError(`We couldn't save your application. Please try again from your dashboard. (${saveError})`)
                 setLoading(false)
                 return
             }
 
-            setEmail(localEmail)
-            setPassword(localPassword)
-            completeApplication()
-            setSuccess(true)
-            setLoading(false)
-
-            // Redirect to dashboard
-            router.push('/dashboard')
+            finalizeSuccess()
 
         } catch (err: any) {
             console.error('Verification error:', err)
@@ -183,37 +203,13 @@ export function CreateAccount() {
         setError('')
 
         try {
-            const applicationState = useApplicationStore.getState()
-            const payload = {
-                email: user.primaryEmailAddress?.emailAddress || email,
-                productType: applicationState.productType,
-                propertyType: applicationState.propertyType,
-                propertyUsage: applicationState.propertyUsage,
-                zipCode: applicationState.zipCode,
-                estimatedValue: applicationState.estimatedValue,
-                loanAmount: applicationState.loanAmount,
-                firstName: applicationState.firstName,
-                lastName: applicationState.lastName,
-                phone: applicationState.phone || '',
-                employmentStatus: applicationState.employmentStatus,
-                annualIncome: applicationState.annualIncome,
-                liquidAssets: applicationState.liquidAssets,
+            const userEmail = user.primaryEmailAddress?.emailAddress || email
+            const saveError = await saveApplication(userEmail)
+            if (saveError) {
+                throw new Error(saveError)
             }
 
-            // Submit application to database
-            const response = await fetch('/api/applications', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            })
-
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({ error: 'Request failed' }))
-                throw new Error(data.error || `Request failed (${response.status})`)
-            }
-
-            // Sync state
-            setEmail(user.primaryEmailAddress?.emailAddress || email)
+            setEmail(userEmail)
             completeApplication()
             setSuccess(true)
             setLoading(false)
