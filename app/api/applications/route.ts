@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
         // Sync phone to Clerk user metadata so it appears in Clerk Dashboard
         if (phone) {
             try {
-                await clerkClient.users.updateUserMetadata(userId, {
+                const clerk = await clerkClient()
+                await clerk.users.updateUserMetadata(userId, {
                     unsafeMetadata: { phone }
                 })
             } catch (e) {
