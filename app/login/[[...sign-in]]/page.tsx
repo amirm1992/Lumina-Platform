@@ -70,21 +70,23 @@ export default function LoginPage() {
                                     borderRadius: '0.75rem',
                                 },
                                 elements: {
-                                    rootBox: "w-full",
-                                    card: "shadow-none p-8 w-full bg-transparent",
+                                    rootBox: "w-full !bg-transparent",
+                                    card: "!bg-transparent !shadow-none !border-none !p-8 w-full",
                                     headerTitle: "hidden",
                                     headerSubtitle: "hidden",
                                     // Make inputs pop slightly
-                                    formFieldInput: "border border-white/10 focus:border-blue-500/50 transition-colors",
+                                    formFieldInput: "!bg-white/5 !border-white/10 focus:!border-blue-500/50 !text-white placeholder:!text-white/30 !transition-all",
+                                    formFieldLabel: "!text-white/70",
                                     // Social buttons
-                                    socialButtonsBlockButton: "bg-white/5 hover:bg-white/10 border border-white/10 transition-colors",
-                                    socialButtonsBlockButtonText: "text-white/90 font-medium",
+                                    socialButtonsBlockButton: "!bg-white/5 hover:!bg-white/10 !border-white/10 !transition-colors",
+                                    socialButtonsBlockButtonText: "!text-white/90 !font-medium",
                                     // Divider
-                                    dividerLine: "bg-white/10",
-                                    dividerText: "text-white/40",
+                                    dividerLine: "!bg-white/10",
+                                    dividerText: "!text-white/40",
                                     // Footer
-                                    footerActionLink: "text-blue-400 hover:text-blue-300 font-medium",
-                                    identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
+                                    footerActionLink: "!text-blue-400 hover:!text-blue-300 !font-medium",
+                                    identityPreviewEditButton: "!text-blue-400 hover:!text-blue-300",
+                                    formButtonPrimary: "!bg-blue-600 hover:!bg-blue-500 !text-white !shadow-lg !shadow-blue-500/20 !border-0"
                                 }
                             }}
                             routing="path"
