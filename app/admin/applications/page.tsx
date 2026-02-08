@@ -7,11 +7,23 @@ import { Plus } from 'lucide-react'
 export default async function ApplicationsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ status?: string; search?: string }>
+    searchParams: Promise<{
+        status?: string
+        search?: string
+        sort?: string
+        order?: string
+        offers?: string
+    }>
 }) {
     const params = await searchParams
     const status = params.status as 'pending' | 'in_review' | 'offers_ready' | 'completed' | undefined
-    const applications = await getApplications(status)
+    const applications = await getApplications({
+        status,
+        search: params.search?.trim() || undefined,
+        sortBy: (params.sort as 'created_at' | 'updated_at' | 'status') || 'created_at',
+        sortOrder: params.order === 'asc' ? 'asc' : 'desc',
+        offersFilter: (params.offers as 'all' | 'incomplete' | 'none') || 'all'
+    })
 
     return (
         <div className="space-y-6">
@@ -31,7 +43,13 @@ export default async function ApplicationsPage({
             </div>
 
             {/* Filters */}
-            <ApplicationFilters currentStatus={status} />
+            <ApplicationFilters
+                currentStatus={status}
+                currentSearch={params.search ?? ''}
+                currentSort={params.sort ?? 'created_at'}
+                currentOrder={params.order ?? 'desc'}
+                currentOffersFilter={params.offers ?? 'all'}
+            />
 
             {/* Applications Table */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">

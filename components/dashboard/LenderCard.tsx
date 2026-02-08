@@ -12,9 +12,11 @@ interface LenderCardProps {
 }
 
 export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
+    const isPlaceholder = lender.isPlaceholder === true
     return (
         <div
-            onClick={onSelect}
+            onClick={isPlaceholder ? undefined : onSelect}
+            role={isPlaceholder ? undefined : 'button'}
             className={`
                 relative p-6 rounded-2xl border cursor-pointer transition-all duration-300 group overflow-hidden
                 backdrop-blur-md
@@ -22,7 +24,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                     ? 'bg-blue-50/80 border-blue-500/30 shadow-[0_8px_30px_rgba(37,99,235,0.15)] ring-1 ring-blue-500/20'
                     : 'bg-white/70 border-white/40 hover:bg-white/90 hover:shadow-xl hover:-translate-y-1'
                 }
-                ${lender.isPlaceholder ? 'opacity-70 grayscale' : ''}
+                ${isPlaceholder ? 'opacity-90 grayscale cursor-default' : 'cursor-pointer'}
             `}
         >
             {/* Header */}
@@ -58,14 +60,14 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                 )}
             </div>
 
-            {lender.isPlaceholder ? (
+            {isPlaceholder ? (
                 <div className="flex flex-col items-center justify-center py-8 space-y-3 px-4 text-center">
                     <div className="p-3 bg-blue-50 rounded-full mb-1">
                         <Calculator className="w-5 h-5 text-blue-600 animate-pulse" />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-gray-900 mb-1">Calculating your savings...</p>
-                        <p className="text-xs text-gray-400">Negotiating the best rates for your unique scenario.</p>
+                        <p className="text-sm font-bold text-gray-900 mb-1">Calculating your savings…</p>
+                        <p className="text-xs text-gray-400">We’re gathering your personalized offer from {lender.name}. You’ll see your rate here as soon as it’s ready.</p>
                     </div>
                 </div>
             ) : (
@@ -102,16 +104,20 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                 </>
             )}
 
-            {/* Action Button */}
+            {/* Action Button: disabled for placeholders so we don't imply an actual offer */}
             <button
+                type="button"
+                disabled={isPlaceholder}
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all
-                    ${isSelected
-                        ? 'bg-[#1E3A5F] text-white shadow-[0_4px_20px_rgba(30,58,95,0.25)] hover:bg-[#162D4A]'
-                        : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black'
+                    ${isPlaceholder
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : isSelected
+                            ? 'bg-[#1E3A5F] text-white shadow-[0_4px_20px_rgba(30,58,95,0.25)] hover:bg-[#162D4A]'
+                            : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black'
                     }
                     `}
             >
-                {isSelected ? 'Pre-Approve Now' : 'Select Offer'}
+                {isPlaceholder ? 'In progress' : isSelected ? 'Pre-Approve Now' : 'Select Offer'}
             </button>
 
             {/* Selection Ring (Visual Polish) */}

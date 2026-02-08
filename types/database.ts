@@ -89,7 +89,12 @@ export interface LenderOffer {
 
     // Admin flags
     is_recommended: boolean
+    is_best_match?: boolean
     admin_notes: string | null
+
+    // Import/source (for future Arive PPE)
+    source?: string | null
+    external_id?: string | null
 
     // Timestamps
     created_at: string
@@ -128,8 +133,12 @@ export interface LenderOfferFormData {
     origination_fee?: number
     closing_costs?: number
     rate_lock_days?: number
+    rate_lock_expires?: string
     is_recommended?: boolean
+    is_best_match?: boolean
     admin_notes?: string
+    source?: string
+    external_id?: string
 }
 
 export interface ApplicationStatusFormData {

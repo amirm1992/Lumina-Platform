@@ -62,28 +62,26 @@ function mapLenderOffer(o: any): LenderOffer {
         id: o.id,
         application_id: o.applicationId,
         lender_name: o.lenderName,
-        lender_nmls: null, // Schema doesn't have this?
-        product_name: o.productName,
+        lender_nmls: null,
+        lender_logo: o.lenderLogo ?? null,
         interest_rate: o.interestRate ? Number(o.interestRate) : 0,
-        apr: o.apr ? Number(o.apr) : null,
-        monthly_payment: o.monthlyPayment ? Number(o.monthlyPayment) : null,
-        loan_term: o.loanTerm,
-        loan_type: null, // Schema mismatch?
-        points: 0, // Schema mismatch?
-        origination_fee: null,
-        closing_costs: o.closingCosts ? Number(o.closingCosts) : null,
-        rate_lock_days: null,
-        rate_lock_expires: null,
-        is_recommended: o.isRecommended || false,
+        apr: o.apr != null ? Number(o.apr) : null,
+        monthly_payment: o.monthlyPayment != null ? Number(o.monthlyPayment) : null,
+        loan_term: o.loanTerm ?? null,
+        loan_type: (o.loanType || o.productName) ?? null,
+        points: o.points != null ? Number(o.points) : 0,
+        origination_fee: o.originationFee != null ? Number(o.originationFee) : null,
+        closing_costs: o.closingCosts != null ? Number(o.closingCosts) : null,
+        rate_lock_days: o.rateLockDays ?? null,
+        rate_lock_expires: o.rateLockExpires ? new Date(o.rateLockExpires).toISOString().slice(0, 10) : null,
+        is_recommended: o.isRecommended ?? false,
+        is_best_match: o.isBestMatch ?? false,
         admin_notes: null,
-        is_best_match: o.isBestMatch || false, // Specific to Prisma schema
-        is_visible: o.isVisible || true,      // Specific to Prisma schema
-        lender_logo: o.lenderLogo || null,     // Added field
-        // Missing fields in Prisma schema: loan_type, points, origination_fee
-        // We set defaults for now to satisfy TS interface
-        created_at: o.createdAt?.toISOString(),
-        updated_at: o.updatedAt?.toISOString()
-    } as any // Cast as any because of minor type mismatches between Schema and UI Type
+        source: o.source ?? null,
+        external_id: o.externalId ?? null,
+        created_at: o.createdAt?.toISOString() ?? new Date().toISOString(),
+        updated_at: o.updatedAt?.toISOString() ?? new Date().toISOString()
+    }
 }
 
 // ============================================
@@ -155,28 +153,72 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
 // APPLICATIONS
 // ============================================
 
-export async function getApplications(status?: ApplicationStatus): Promise<Application[]> {
-    const where = status ? { status } : {}
+export type ApplicationListSort = 'created_at' | 'updated_at' | 'status'
+export type ApplicationOffersFilter = 'all' | 'incomplete' | 'none'
+
+export interface GetApplicationsOptions {
+    status?: ApplicationStatus
+    search?: string
+    sortBy?: ApplicationListSort
+    sortOrder?: 'asc' | 'desc'
+    offersFilter?: ApplicationOffersFilter
+}
+
+export async function getApplications(
+    options?: ApplicationStatus | GetApplicationsOptions
+): Promise<Application[]> {
+    const opts: GetApplicationsOptions =
+        typeof options === 'string' || options == null
+            ? { status: typeof options === 'string' ? options : undefined }
+            : options
+
+    const where = opts.status ? { status: opts.status } : {}
+    const orderByField =
+        opts.sortBy === 'updated_at'
+            ? 'updatedAt'
+            : opts.sortBy === 'status'
+              ? 'status'
+              : 'createdAt'
+    const orderBy = { [orderByField]: opts.sortOrder ?? 'desc' }
 
     const apps = await prisma.application.findMany({
         where,
-        orderBy: { createdAt: 'desc' }
+        include: { lenderOffers: true },
+        orderBy
     })
 
-    // Fetch profiles for these apps (since userId is string, no relation)
     const userIds = apps.map(a => a.userId).filter(Boolean) as string[]
     const profiles = await prisma.profile.findMany({
         where: { id: { in: userIds } }
     })
     const profileMap = new Map(profiles.map(p => [p.id, mapProfile(p)]))
 
-    return apps.map(app => {
+    let results = apps.map(app => {
         const mapped = mapApplication(app)
         if (app.userId && profileMap.has(app.userId)) {
             mapped.profile = profileMap.get(app.userId)
         }
         return mapped
     })
+
+    if (opts.search?.trim()) {
+        const q = opts.search.trim().toLowerCase()
+        results = results.filter(app => {
+            const profile = app.profile as { full_name?: string; email?: string } | undefined
+            const matchName = profile?.full_name?.toLowerCase().includes(q)
+            const matchEmail = profile?.email?.toLowerCase().includes(q)
+            const matchId = app.id.toLowerCase().includes(q)
+            return matchName || matchEmail || matchId
+        })
+    }
+
+    if (opts.offersFilter === 'incomplete') {
+        results = results.filter(app => (app.lender_offers?.length ?? 0) < 6)
+    } else if (opts.offersFilter === 'none') {
+        results = results.filter(app => (app.lender_offers?.length ?? 0) === 0)
+    }
+
+    return results
 }
 
 export async function getApplicationById(id: string): Promise<Application | null> {
@@ -273,14 +315,22 @@ export async function createLenderOffer(
             data: {
                 applicationId,
                 lenderName: data.lender_name,
-                productName: data.loan_type, // Mapping loan_type to productName temporarily
+                lenderLogo: data.lender_logo,
+                productName: data.loan_type,
+                loanType: data.loan_type,
                 interestRate: data.interest_rate,
                 apr: data.apr,
                 monthlyPayment: data.monthly_payment,
                 loanTerm: data.loan_term,
                 closingCosts: data.closing_costs,
-                isRecommended: data.is_recommended || false,
-                lenderLogo: data.lender_logo
+                points: data.points,
+                originationFee: data.origination_fee,
+                rateLockDays: data.rate_lock_days,
+                rateLockExpires: data.rate_lock_expires ? new Date(data.rate_lock_expires) : undefined,
+                isRecommended: data.is_recommended ?? false,
+                isBestMatch: data.is_best_match ?? false,
+                source: data.source ?? 'manual',
+                externalId: data.external_id
             }
         })
         await logAdminActivity('created_offer', 'offer', offer.id, data)
@@ -297,15 +347,25 @@ export async function updateLenderOffer(
 ): Promise<boolean> {
     try {
         const updateData: any = {}
-        if (data.lender_name) updateData.lenderName = data.lender_name
-        if (data.interest_rate) updateData.interestRate = data.interest_rate
-        if (data.apr) updateData.apr = data.apr
-        if (data.monthly_payment) updateData.monthlyPayment = data.monthly_payment
-        if (data.loan_term) updateData.loanTerm = data.loan_term
-        if (data.closing_costs) updateData.closingCosts = data.closing_costs
-        if (data.closing_costs) updateData.closingCosts = data.closing_costs
+        if (data.lender_name !== undefined) updateData.lenderName = data.lender_name
+        if (data.interest_rate !== undefined) updateData.interestRate = data.interest_rate
+        if (data.apr !== undefined) updateData.apr = data.apr
+        if (data.monthly_payment !== undefined) updateData.monthlyPayment = data.monthly_payment
+        if (data.loan_term !== undefined) updateData.loanTerm = data.loan_term
+        if (data.closing_costs !== undefined) updateData.closingCosts = data.closing_costs
+        if (data.points !== undefined) updateData.points = data.points
+        if (data.origination_fee !== undefined) updateData.originationFee = data.origination_fee
+        if (data.rate_lock_days !== undefined) updateData.rateLockDays = data.rate_lock_days
+        if (data.rate_lock_expires !== undefined) updateData.rateLockExpires = data.rate_lock_expires ? new Date(data.rate_lock_expires) : null
+        if (data.loan_type !== undefined) {
+            updateData.loanType = data.loan_type
+            updateData.productName = data.loan_type
+        }
         if (data.is_recommended !== undefined) updateData.isRecommended = data.is_recommended
+        if (data.is_best_match !== undefined) updateData.isBestMatch = data.is_best_match
         if (data.lender_logo !== undefined) updateData.lenderLogo = data.lender_logo
+        if (data.source !== undefined) updateData.source = data.source
+        if (data.external_id !== undefined) updateData.externalId = data.external_id
 
         await prisma.lenderOffer.update({
             where: { id: offerId },

@@ -30,7 +30,6 @@ function calculateMonthlyPayment(principal: number, annualRate: number, years: n
 function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
     // Calculate payment dynamically if rate exists
     const calculatedPayment = calculateMonthlyPayment(loanAmount, offer.interest_rate, offer.loan_term || 30)
-
     return {
         id: offer.id,
         name: offer.lender_name,
@@ -42,6 +41,7 @@ function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
         points: offer.points || 0,
         closingCosts: offer.closing_costs || 0,
         isRecommended: offer.is_recommended,
+        bestMatch: offer.is_best_match ?? false,
         logo: offer.lender_logo || undefined
     }
 }
@@ -262,16 +262,23 @@ export function DashboardClient({ user }: DashboardClientProps) {
                             </div>
 
                             {offers.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {offers.map(lender => (
-                                        <LenderCard
-                                            key={lender.id}
-                                            lender={lender}
-                                            isSelected={selectedLenderId === lender.id}
-                                            onSelect={() => setSelectedLenderId(lender.id)}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {offers.map(lender => (
+                                            <LenderCard
+                                                key={lender.id}
+                                                lender={lender}
+                                                isSelected={selectedLenderId === lender.id}
+                                                onSelect={() => setSelectedLenderId(lender.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                    {offers.some(o => o.isPlaceholder) && (
+                                        <p className="mt-4 text-center text-sm text-gray-500">
+                                            We’re comparing offers from 6 lenders. You’ll see your personalized rates here as they’re ready.
+                                        </p>
+                                    )}
+                                </>
                             ) : (
                                 <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
                                     <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">

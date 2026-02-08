@@ -119,21 +119,28 @@ model Application {
 }
 
 model LenderOffer {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  applicationId   String   @map("application_id") @db.Uuid
-  lenderName      String   @map("lender_name")
-  lenderLogo      String?  @map("lender_logo")
-  productName     String?  @map("product_name")
-  interestRate    Decimal? @map("interest_rate")
-  apr             Decimal?
-  monthlyPayment  Decimal? @map("monthly_payment")
-  closingCosts    Decimal? @map("closing_costs")
-  loanTerm        Int?     @map("loan_term")
-  isRecommended   Boolean  @default(false) @map("is_recommended")
-  isBestMatch     Boolean  @default(false) @map("is_best_match")
-  isVisible       Boolean  @default(true) @map("is_visible")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @default(now()) @map("updated_at")
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId      String    @map("application_id") @db.Uuid
+  lenderName        String    @map("lender_name")
+  lenderLogo        String?   @map("lender_logo")
+  productName       String?   @map("product_name")
+  loanType          String?   @map("loan_type")
+  interestRate      Decimal?  @map("interest_rate")
+  apr               Decimal?
+  monthlyPayment    Decimal?  @map("monthly_payment")
+  closingCosts      Decimal?  @map("closing_costs")
+  points            Decimal?  @map("points")
+  originationFee    Decimal?  @map("origination_fee")
+  loanTerm          Int?      @map("loan_term")
+  rateLockDays      Int?      @map("rate_lock_days")
+  rateLockExpires   DateTime? @map("rate_lock_expires") @db.Date
+  isRecommended     Boolean   @default(false) @map("is_recommended")
+  isBestMatch       Boolean   @default(false) @map("is_best_match")
+  isVisible         Boolean   @default(true) @map("is_visible")
+  source            String?   @default("manual") @map("source")
+  externalId        String?   @map("external_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @map("updated_at")
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 

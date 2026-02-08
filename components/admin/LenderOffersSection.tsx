@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { LenderOffer, LoanType } from '@/types/database'
 import { Plus, Edit2, Trash2, Star, X } from 'lucide-react'
 import { CONSTANT_LENDERS } from '@/constants/lenders'
@@ -23,9 +23,55 @@ const loanTerms = [15, 20, 30]
 
 export function LenderOffersSection({ applicationId, offers }: LenderOffersSectionProps) {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingOffer, setEditingOffer] = useState<LenderOffer | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+
+    // Open add/edit modal from URL (?add=LenderName or ?edit=offerId)
+    useEffect(() => {
+        const add = searchParams.get('add')
+        const editId = searchParams.get('edit')
+        if (add) {
+            const decoded = decodeURIComponent(add)
+            const lender = CONSTANT_LENDERS.find((l) => l.name === decoded)
+            setEditingOffer(null)
+            setFormData({
+                lender_name: lender?.name ?? decoded,
+                lender_logo: lender?.logo ?? '',
+                interest_rate: '',
+                apr: '',
+                monthly_payment: '',
+                loan_term: 30,
+                loan_type: 'conventional',
+                points: '0',
+                closing_costs: '',
+                is_recommended: false
+            })
+            setIsModalOpen(true)
+            router.replace(pathname, { scroll: false })
+        } else if (editId) {
+            const offer = offers.find((o) => o.id === editId)
+            if (offer) {
+                setEditingOffer(offer)
+                setFormData({
+                    lender_name: offer.lender_name,
+                    lender_logo: offer.lender_logo || '',
+                    interest_rate: offer.interest_rate.toString(),
+                    apr: offer.apr?.toString() ?? '',
+                    monthly_payment: offer.monthly_payment?.toString() ?? '',
+                    loan_term: offer.loan_term ?? 30,
+                    loan_type: (offer.loan_type as LoanType) || 'conventional',
+                    points: (offer.points ?? 0).toString(),
+                    closing_costs: offer.closing_costs?.toString() ?? '',
+                    is_recommended: offer.is_recommended
+                })
+                setIsModalOpen(true)
+            }
+            router.replace(pathname, { scroll: false })
+        }
+    }, [pathname, searchParams])
 
     // Form state
     const [formData, setFormData] = useState({

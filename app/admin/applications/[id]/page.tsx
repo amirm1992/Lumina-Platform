@@ -1,12 +1,13 @@
 import { getApplicationById, getDocuments } from '@/utils/admin/api'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, User, Home, DollarSign, Calendar, Briefcase, PiggyBank, CreditCard, FileText } from 'lucide-react'
+import { ArrowLeft, User, Home, DollarSign, Briefcase, PiggyBank, CreditCard, FileText } from 'lucide-react'
 import { CreditScoreEntry } from '@/components/admin/CreditScoreEntry'
 import { LenderOffersSection } from '@/components/admin/LenderOffersSection'
 import { ApplicationStatusForm } from '@/components/admin/ApplicationStatusForm'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { PreApprovalUpload } from '@/components/admin/PreApprovalUpload'
+import { AdminOfferSlots } from '@/components/admin/AdminOfferSlots'
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
@@ -239,7 +240,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                         />
                     </div>
 
-                    {/* Lender Offers */}
+                    {/* 6-slot view: one card per lender with Add / Edit */}
+                    <AdminOfferSlots
+                        applicationId={id}
+                        offers={application.lender_offers || []}
+                    />
+
+                    {/* Lender Offers table */}
                     <LenderOffersSection
                         applicationId={id}
                         offers={application.lender_offers || []}

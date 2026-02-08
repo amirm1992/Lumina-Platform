@@ -26,6 +26,9 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                             Credit Score
                         </th>
                         <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Offers
+                        </th>
+                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             Status
                         </th>
                         <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -75,6 +78,11 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                                     ) : (
                                         <span className="text-gray-400">Not entered</span>
                                     )}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={`font-medium ${(app.lender_offers?.length ?? 0) >= 6 ? 'text-green-600' : (app.lender_offers?.length ?? 0) > 0 ? 'text-amber-600' : 'text-gray-500'}`}>
+                                        {(app.lender_offers?.length ?? 0)}/6
+                                    </span>
                                 </td>
                                 <td className="px-6 py-4">
                                     <StatusBadge status={app.status} size="sm" />

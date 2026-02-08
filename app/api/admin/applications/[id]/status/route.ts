@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { isUserAdmin, updateApplicationStatus } from '@/utils/admin/api'
+import { unauthorized, notFound, serverError, success } from '@/utils/admin/responses'
 import { sendStatusUpdateEmail, EmailStatus } from '@/utils/email/send-email'
 
 export async function POST(
@@ -8,20 +9,18 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const isAdmin = await isUserAdmin()
-    if (!isAdmin) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    if (!isAdmin) return unauthorized()
 
     const { id } = await params
-    const body = await request.json()
+    const app = await prisma.application.findUnique({ where: { id } })
+    if (!app) return notFound('application')
 
+    const body = await request.json()
     const ok = await updateApplicationStatus(id, {
         status: body.status,
         admin_notes: body.admin_notes
     })
-    if (!ok) {
-        return NextResponse.json({ error: 'Failed to update status' }, { status: 500 })
-    }
+    if (!ok) return serverError('Failed to update status')
 
     if (body.notify_client) {
         const application = await prisma.application.findUnique({
@@ -45,5 +44,5 @@ export async function POST(
         }
     }
 
-    return NextResponse.json({ success: true })
+    return success()
 }
