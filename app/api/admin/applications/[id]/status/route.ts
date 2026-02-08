@@ -1,8 +1,10 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isUserAdmin, updateApplicationStatus } from '@/utils/admin/api'
-import { unauthorized, notFound, serverError, success } from '@/utils/admin/responses'
+import { unauthorized, notFound, badRequest, serverError, success } from '@/utils/admin/responses'
 import { sendStatusUpdateEmail, EmailStatus } from '@/utils/email/send-email'
+
+const VALID_STATUSES = ['pending', 'in_review', 'approved', 'denied', 'cancelled', 'published']
 
 export async function POST(
     request: NextRequest,
@@ -16,6 +18,15 @@ export async function POST(
     if (!app) return notFound('application')
 
     const body = await request.json()
+
+    // Validation
+    if (!body.status || !VALID_STATUSES.includes(body.status)) {
+        return badRequest(`Status must be one of: ${VALID_STATUSES.join(', ')}`)
+    }
+    if (body.admin_notes && typeof body.admin_notes !== 'string') {
+        return badRequest('Admin notes must be a string')
+    }
+
     const ok = await updateApplicationStatus(id, {
         status: body.status,
         admin_notes: body.admin_notes

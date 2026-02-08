@@ -79,7 +79,7 @@ export function AdminOfferSlots({ applicationId, offers }: AdminOfferSlotsProps)
                                         </p>
                                         <p>
                                             <span className="text-gray-500">APR:</span>{' '}
-                                            <strong>{offer.apr ?? '—'}%</strong>
+                                            <strong>{offer.apr != null ? `${offer.apr}%` : '—'}</strong>
                                         </p>
                                         {offer.monthly_payment != null && (
                                             <p>

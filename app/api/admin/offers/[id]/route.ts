@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isUserAdmin, updateLenderOffer, deleteLenderOffer } from '@/utils/admin/api'
-import { unauthorized, notFound, serverError, success } from '@/utils/admin/responses'
+import { unauthorized, notFound, badRequest, serverError, success } from '@/utils/admin/responses'
 
 export async function PUT(
     request: NextRequest,
@@ -15,6 +15,24 @@ export async function PUT(
     if (!existing) return notFound('offer')
 
     const body = await request.json()
+
+    // Validation
+    if (body.lender_name != null && (typeof body.lender_name !== 'string' || !body.lender_name.trim())) {
+        return badRequest('Lender name must be a non-empty string')
+    }
+    if (body.interest_rate != null && (isNaN(Number(body.interest_rate)) || Number(body.interest_rate) <= 0 || Number(body.interest_rate) > 20)) {
+        return badRequest('Interest rate must be a number between 0 and 20')
+    }
+    if (body.apr != null && (isNaN(Number(body.apr)) || Number(body.apr) <= 0 || Number(body.apr) > 25)) {
+        return badRequest('APR must be a number between 0 and 25')
+    }
+    if (body.monthly_payment != null && (isNaN(Number(body.monthly_payment)) || Number(body.monthly_payment) <= 0)) {
+        return badRequest('Monthly payment must be a positive number')
+    }
+    if (body.loan_term != null && ![10, 15, 20, 25, 30].includes(Number(body.loan_term))) {
+        return badRequest('Loan term must be 10, 15, 20, 25, or 30 years')
+    }
+
     const ok = await updateLenderOffer(offerId, {
         lender_name: body.lender_name,
         lender_logo: body.lender_logo,

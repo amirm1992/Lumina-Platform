@@ -8,7 +8,7 @@ const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', c
 export function LiquidAssets() {
     const router = useRouter()
     const { liquidAssets, setLiquidAssets, nextStep, prevStep } = useApplicationStore()
-    const [localAssets, setLocalAssets] = useState(liquidAssets || 50000)
+    const [localAssets, setLocalAssets] = useState(liquidAssets ?? 50000)
 
     const handleContinue = () => { setLiquidAssets(localAssets); nextStep(); router.push('/apply/step/11') }
     const handleBack = () => { prevStep(); router.push('/apply/step/9') }

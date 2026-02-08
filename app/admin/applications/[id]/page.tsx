@@ -103,7 +103,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Property Type</p>
-                                <p className="text-gray-900 capitalize">{application.property_type?.replace('_', ' ').replace('-', ' ') || 'N/A'}</p>
+                                <p className="text-gray-900 capitalize">{application.property_type?.replaceAll('_', ' ').replaceAll('-', ' ') || 'N/A'}</p>
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Property Usage</p>
@@ -170,7 +170,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                         <div className="space-y-3">
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Employment Status</p>
-                                <p className="text-gray-900 font-medium capitalize">{application.employment_status?.replace('-', ' ') || 'N/A'}</p>
+                                <p className="text-gray-900 font-medium capitalize">{application.employment_status?.replaceAll('-', ' ') || 'N/A'}</p>
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Annual Income</p>

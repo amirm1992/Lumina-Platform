@@ -41,7 +41,7 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
                                 className="w-full h-full object-contain p-1"
                             />
                         ) : (
-                            <span className={`text - lg font - bold ${isSelected ? 'text-[#2563EB]' : 'text-gray-500'} `}>
+                            <span className={`text-lg font-bold ${isSelected ? 'text-[#2563EB]' : 'text-gray-500'}`}>
                                 {lender.name[0]}
                             </span>
                         )}

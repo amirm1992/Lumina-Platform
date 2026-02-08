@@ -28,6 +28,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingOffer, setEditingOffer] = useState<LenderOffer | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [saveError, setSaveError] = useState('')
 
     // Open add/edit modal from URL (?add=LenderName or ?edit=offerId)
     useEffect(() => {
@@ -128,6 +129,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
+        setSaveError('')
 
         const payload = {
             lender_name: formData.lender_name,
@@ -157,9 +159,13 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
                 setIsModalOpen(false)
                 resetForm()
                 router.refresh()
+            } else {
+                const data = await res.json().catch(() => ({}))
+                setSaveError(data?.error || `Failed to save offer (${res.status})`)
             }
         } catch (error) {
             console.error('Error saving offer:', error)
+            setSaveError('Network error. Please try again.')
         } finally {
             setIsLoading(false)
         }
@@ -181,14 +187,22 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
         }
     }
 
+    const [isOtherLender, setIsOtherLender] = useState(false)
+
     const handleLenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedName = e.target.value
-        const lender = CONSTANT_LENDERS.find(l => l.name === selectedName)
-        setFormData(prev => ({
-            ...prev,
-            lender_name: selectedName,
-            lender_logo: lender?.logo || prev.lender_logo
-        }))
+        if (selectedName === 'Other') {
+            setIsOtherLender(true)
+            setFormData(prev => ({ ...prev, lender_name: 'Other', lender_logo: '' }))
+        } else {
+            setIsOtherLender(false)
+            const lender = CONSTANT_LENDERS.find(l => l.name === selectedName)
+            setFormData(prev => ({
+                ...prev,
+                lender_name: selectedName,
+                lender_logo: lender?.logo || prev.lender_logo
+            }))
+        }
     }
 
     return (
@@ -287,7 +301,7 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
                                 <div className="relative">
                                     <select
                                         required
-                                        value={formData.lender_name}
+                                        value={isOtherLender ? 'Other' : formData.lender_name}
                                         onChange={handleLenderChange}
                                         className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white appearance-none"
                                     >
@@ -305,14 +319,15 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
                                         </svg>
                                     </div>
                                 </div>
-                                {formData.lender_name === 'Other' && (
+                                {isOtherLender && (
                                     <input
                                         type="text"
                                         required
-                                        value={formData.lender_name === 'Other' ? '' : formData.lender_name}
-                                        onChange={(e) => setFormData({ ...formData, lender_name: e.target.value })}
                                         placeholder="Enter Lender Name"
                                         className="mt-2 w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white"
+                                        onChange={(e) => {
+                                            setFormData(prev => ({ ...prev, lender_name: e.target.value || 'Other' }))
+                                        }}
                                     />
                                 )}
                             </div>
@@ -447,6 +462,8 @@ export function LenderOffersSection({ applicationId, offers }: LenderOffersSecti
                                 />
                                 <span className="text-gray-700">Mark as Recommended ⭐</span>
                             </label>
+
+                            {saveError && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-100">{saveError}</p>}
 
                             <div className="flex justify-end gap-3 pt-4">
                                 <button

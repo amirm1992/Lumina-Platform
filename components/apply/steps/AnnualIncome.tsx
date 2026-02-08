@@ -8,7 +8,7 @@ const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', c
 export function AnnualIncome() {
     const router = useRouter()
     const { annualIncome, setAnnualIncome, nextStep, prevStep } = useApplicationStore()
-    const [localIncome, setLocalIncome] = useState(annualIncome || 100000)
+    const [localIncome, setLocalIncome] = useState(annualIncome ?? 100000)
 
     const handleContinue = () => { setAnnualIncome(localIncome); nextStep(); router.push('/apply/step/10') }
     const handleBack = () => { prevStep(); router.push('/apply/step/8') }

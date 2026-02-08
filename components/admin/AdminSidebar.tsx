@@ -2,12 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ClipboardList, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, LogOut } from 'lucide-react'
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/applications', label: 'Applications', icon: ClipboardList },
-    { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export function AdminSidebar() {

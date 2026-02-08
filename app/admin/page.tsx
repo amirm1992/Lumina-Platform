@@ -6,8 +6,16 @@ import { ClipboardList, Clock, CheckCircle, TrendingUp } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-    const stats = await getAdminDashboardStats()
-    const recentApplications = await getApplications()
+    let stats
+    let recentApplications
+    try {
+        stats = await getAdminDashboardStats()
+        recentApplications = await getApplications()
+    } catch (error) {
+        console.error('Admin dashboard error:', error)
+        stats = { total_applications: 0, pending_count: 0, offers_ready_count: 0, completed_today: 0, in_review_count: 0 }
+        recentApplications = []
+    }
 
     return (
         <div className="space-y-8">
@@ -23,7 +31,7 @@ export default async function AdminDashboard() {
                     title="Total Applications"
                     value={stats.total_applications}
                     icon={ClipboardList}
-                    trend="+12% from last week"
+                    trend=""
                 />
                 <StatsCard
                     title="Pending Review"

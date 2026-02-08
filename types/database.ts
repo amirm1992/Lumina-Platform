@@ -68,8 +68,7 @@ export interface LenderOffer {
 
     // Lender info
     lender_name: string
-    lender_logo?: string | null // Logo URL
-    lender_nmls: string | null
+    lender_logo?: string | null
 
     // Loan terms
     interest_rate: number
@@ -90,7 +89,6 @@ export interface LenderOffer {
     // Admin flags
     is_recommended: boolean
     is_best_match?: boolean
-    admin_notes: string | null
 
     // Import/source (for future Arive PPE)
     source?: string | null
@@ -123,7 +121,6 @@ export interface CreditScoreFormData {
 export interface LenderOfferFormData {
     lender_name: string
     lender_logo?: string
-    lender_nmls?: string
     interest_rate: number
     apr?: number
     monthly_payment?: number
@@ -136,7 +133,6 @@ export interface LenderOfferFormData {
     rate_lock_expires?: string
     is_recommended?: boolean
     is_best_match?: boolean
-    admin_notes?: string
     source?: string
     external_id?: string
 }

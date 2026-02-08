@@ -28,10 +28,14 @@ export function ApplicationStatusForm({
     const [status, setStatus] = useState<ApplicationStatus>(currentStatus)
     const [notes, setNotes] = useState(currentNotes)
     const [notifyClient, setNotifyClient] = useState(false)
+    const [error, setError] = useState('')
+    const [saved, setSaved] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
+        setError('')
+        setSaved(false)
 
         try {
             const res = await fetch(`/api/admin/applications/${applicationId}/status`, {
@@ -45,10 +49,15 @@ export function ApplicationStatusForm({
             })
 
             if (res.ok) {
+                setSaved(true)
                 router.refresh()
+            } else {
+                const data = await res.json().catch(() => ({}))
+                setError(data?.error || `Failed to update status (${res.status})`)
             }
         } catch (error) {
             console.error('Error updating status:', error)
+            setError('Network error. Please try again.')
         } finally {
             setIsLoading(false)
         }
@@ -111,6 +120,9 @@ export function ApplicationStatusForm({
                 </label>
             )}
 
+            {error && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+            {saved && <p className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-100">Status updated successfully.</p>}
+
             <div className="flex items-center gap-4">
                 <button
                     type="submit"
@@ -122,7 +134,7 @@ export function ApplicationStatusForm({
 
                 {status !== currentStatus && (
                     <span className="text-sm text-gray-500">
-                        Changing from {currentStatus.replace('_', ' ')} → {status.replace('_', ' ')}
+                        Changing from {currentStatus.replaceAll('_', ' ')} → {status.replaceAll('_', ' ')}
                     </span>
                 )}
             </div>

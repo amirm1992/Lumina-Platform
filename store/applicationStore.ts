@@ -93,11 +93,19 @@ export const useApplicationStore = create<ApplicationState>()(
             setEmail: (email) => set({ email: email }),
             setPassword: (password) => set({ password: password }),
             setCurrentStep: (step) => set({ currentStep: step }),
-            nextStep: () => set((state) => ({ currentStep: Math.min(state.currentStep + 1, 12) })),
+            nextStep: () => set((state) => ({ currentStep: state.currentStep + 1 })),
             prevStep: () => set((state) => ({ currentStep: Math.max(state.currentStep - 1, 1) })),
             completeApplication: () => set({ isCompleted: true }),
             resetApplication: () => set(initialState),
         }),
-        { name: 'lumina-application' }
+        {
+            name: 'lumina-application',
+            partialize: (state) => {
+                // Never persist sensitive fields to localStorage
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { ssn, password, ...safe } = state
+                return safe
+            },
+        }
     )
 )

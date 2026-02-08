@@ -181,7 +181,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
         , [selectedLenderId, offers])
 
     const ltv = useMemo(() => {
-        if (!userProfile.homeValue) return '0'
+        if (!userProfile.homeValue || userProfile.homeValue <= 0) return '0.0'
         return ((userProfile.estimatedLoanAmount / userProfile.homeValue) * 100).toFixed(1)
     }, [userProfile])
 
@@ -329,7 +329,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                 </div>
                                 <p className="text-sm text-gray-500 mb-5 leading-relaxed">
                                     Based on <strong className="text-black">{selectedLender.name}'s</strong> fees, your total estimated closing costs are{' '}
-                                    <strong className="text-black">${(selectedLender.closingCosts || 12450).toLocaleString()}</strong>.
+                                    <strong className="text-black">${(selectedLender.closingCosts ?? 12450).toLocaleString()}</strong>.
                                     This includes lender fees, appraisal, and title insurance.
                                 </p>
                                 <button className="text-sm text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors uppercase tracking-wide">
@@ -349,7 +349,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">Property Type</span>
-                                        <span className="text-gray-900 font-medium capitalize">{application.property_type?.replace('_', ' ')}</span>
+                                        <span className="text-gray-900 font-medium capitalize">{application.property_type?.replaceAll('_', ' ')}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">ZIP Code</span>

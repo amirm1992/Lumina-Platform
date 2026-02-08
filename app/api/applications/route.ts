@@ -16,13 +16,24 @@ export async function POST(request: NextRequest) {
 
         console.log(`[App Submission] Received application for User ID: ${userId}`)
 
+        // Map categorical credit score to a representative numeric value
+        const creditScoreMap: Record<string, number> = {
+            excellent: 780,
+            good: 710,
+            fair: 640,
+            poor: 560,
+        }
+        const creditScoreNumeric = body.creditScore
+            ? creditScoreMap[body.creditScore] ?? null
+            : null
+
         // Create the application using Prisma
         const application = await prisma.application.create({
             data: {
                 userId: userId,
                 newUserId: userId,
                 productType: body.productType,
-                propertyType: body.propertyType?.replace('-', '_'),
+                propertyType: body.propertyType?.replaceAll('-', '_'),
                 propertyUsage: body.propertyUsage,
                 propertyValue: body.estimatedValue,
                 loanAmount: body.loanAmount,
@@ -30,6 +41,7 @@ export async function POST(request: NextRequest) {
                 employmentStatus: body.employmentStatus,
                 annualIncome: body.annualIncome,
                 liquidAssets: body.liquidAssets,
+                creditScore: creditScoreNumeric,
                 status: 'pending'
             }
         })
@@ -74,22 +86,25 @@ export async function POST(request: NextRequest) {
 
             // 2. Sync Phone Number
             if (phone) {
-                // Formatting checks can happen here if needed, but Clerk API validates E.164 usually
-                // We'll trust the input is relatively clean or let Clerk reject it gently
+                // Convert formatted phone like "(555) 123-4567" to E.164 "+15551234567"
+                const digits = phone.replace(/\D/g, '')
+                const e164Phone = digits.length === 10 ? `+1${digits}` : digits.length === 11 && digits[0] === '1' ? `+${digits}` : null
 
-                // First, list existing phones to avoid duplicates
-                const user = await clerk.users.getUser(userId)
-                const existingPhone = user.phoneNumbers.find(p => p.phoneNumber === phone)
+                if (e164Phone) {
+                    // Check for existing phone to avoid duplicates
+                    const user = await clerk.users.getUser(userId)
+                    const existingPhone = user.phoneNumbers.find(p => p.phoneNumber === e164Phone)
 
-                if (!existingPhone) {
-                    await clerk.phoneNumbers.createPhoneNumber({
-                        userId,
-                        phoneNumber: phone,
-                        verified: true // We assume true since it came from our trusted app flow, or let them verify
-                    })
-                    console.log(`[App Submission] Added phone number to Clerk for ${userId}`)
-                } else {
-                    console.log(`[App Submission] Phone number already exists in Clerk for ${userId}`)
+                    if (!existingPhone) {
+                        await clerk.phoneNumbers.createPhoneNumber({
+                            userId,
+                            phoneNumber: e164Phone,
+                            verified: true
+                        })
+                        console.log(`[App Submission] Added phone number to Clerk for ${userId}`)
+                    } else {
+                        console.log(`[App Submission] Phone number already exists in Clerk for ${userId}`)
+                    }
                 }
             }
 

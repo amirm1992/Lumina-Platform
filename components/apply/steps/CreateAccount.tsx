@@ -39,6 +39,7 @@ export function CreateAccount() {
             employmentStatus: applicationState.employmentStatus,
             annualIncome: applicationState.annualIncome,
             liquidAssets: applicationState.liquidAssets,
+            creditScore: applicationState.creditScore,
         }
 
         let lastError: string | null = null
@@ -94,8 +95,8 @@ export function CreateAccount() {
             setError('Please enter a valid email address')
             return
         }
-        if (localPassword.length < 6) {
-            setError('Password must be at least 6 characters')
+        if (localPassword.length < 8) {
+            setError('Password must be at least 8 characters')
             return
         }
         if (localPassword !== confirmPassword) {

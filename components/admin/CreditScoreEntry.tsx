@@ -28,17 +28,28 @@ export function CreditScoreEntry({ applicationId, initialData }: CreditScoreEntr
     const [source, setSource] = useState<CreditScoreSource>(initialData?.credit_score_source || 'experian')
     const [date, setDate] = useState(initialData?.credit_score_date || new Date().toISOString().split('T')[0])
     const [notes, setNotes] = useState(initialData?.credit_notes || '')
+    const [error, setError] = useState('')
+    const [saved, setSaved] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
+        setError('')
+        setSaved(false)
+
+        const parsed = parseInt(score)
+        if (isNaN(parsed) || parsed < 300 || parsed > 850) {
+            setError('Credit score must be between 300 and 850')
+            setIsLoading(false)
+            return
+        }
 
         try {
             const res = await fetch(`/api/admin/applications/${applicationId}/credit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    credit_score: parseInt(score),
+                    credit_score: parsed,
                     credit_score_source: source,
                     credit_score_date: date,
                     credit_notes: notes
@@ -46,10 +57,15 @@ export function CreditScoreEntry({ applicationId, initialData }: CreditScoreEntr
             })
 
             if (res.ok) {
+                setSaved(true)
                 router.refresh()
+            } else {
+                const data = await res.json().catch(() => ({}))
+                setError(data?.error || `Failed to save credit score (${res.status})`)
             }
-        } catch (error) {
-            console.error('Error saving credit score:', error)
+        } catch (err) {
+            console.error('Error saving credit score:', err)
+            setError('Network error. Please try again.')
         } finally {
             setIsLoading(false)
         }
@@ -125,6 +141,9 @@ export function CreditScoreEntry({ applicationId, initialData }: CreditScoreEntr
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:border-purple-500 focus:bg-white transition-all text-gray-900 resize-none"
                 />
             </div>
+
+            {error && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+            {saved && <p className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-100">Credit score saved.</p>}
 
             <button
                 type="submit"
