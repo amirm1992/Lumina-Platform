@@ -113,6 +113,10 @@ export async function POST(request: NextRequest) {
 
         // Create application and profile in a single transaction
         const application = await prisma.$transaction(async (tx) => {
+            const propertyState = typeof body.propertyState === 'string'
+                ? body.propertyState.trim().toUpperCase().slice(0, 2)
+                : null
+
             const app = await tx.application.create({
                 data: {
                     userId: userId,
@@ -120,6 +124,7 @@ export async function POST(request: NextRequest) {
                     productType: body.productType,
                     propertyType: normalizePropertyType(body.propertyType),
                     propertyUsage: body.propertyUsage,
+                    propertyState: propertyState || undefined,
                     propertyValue: body.estimatedValue,
                     loanAmount: body.loanAmount,
                     zipCode: body.zipCode,
@@ -230,6 +235,7 @@ export async function GET() {
             product_type: app.productType,
             property_type: app.propertyType,
             property_usage: app.propertyUsage,
+            property_state: app.propertyState,
             property_value: app.propertyValue?.toNumber(),
             loan_amount: app.loanAmount?.toNumber(),
             zip_code: app.zipCode,

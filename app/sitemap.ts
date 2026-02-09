@@ -1,8 +1,17 @@
 import type { MetadataRoute } from 'next'
 import { SITE_CONFIG } from '@/lib/constants'
+import { getAllStateSlugs } from '@/lib/state-configs'
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = SITE_CONFIG.url
+
+    // State-specific landing pages
+    const statePages: MetadataRoute.Sitemap = getAllStateSlugs().map((slug) => ({
+        url: `${baseUrl}/mortgage/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.95,
+    }))
 
     // Public, crawlable routes
     return [
@@ -12,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 1.0,
         },
+        ...statePages,
         {
             url: `${baseUrl}/apply`,
             lastModified: new Date(),

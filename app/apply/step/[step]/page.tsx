@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
 import {
     ProductSelection, PropertyType, PropertyUsage, LocationInput, ValueLoanSliders,
@@ -18,8 +18,17 @@ const stepComponents: Record<number, React.ComponentType> = {
 export default function StepPage() {
     const params = useParams()
     const router = useRouter()
-    const { setCurrentStep } = useApplicationStore()
+    const searchParams = useSearchParams()
+    const { setCurrentStep, setPropertyState, propertyState } = useApplicationStore()
     const stepNumber = parseInt(params.step as string, 10)
+
+    // Capture the state param from the URL (e.g. ?state=FL from a state landing page)
+    useEffect(() => {
+        const stateParam = searchParams.get('state')
+        if (stateParam && !propertyState) {
+            setPropertyState(stateParam.toUpperCase())
+        }
+    }, [searchParams, propertyState, setPropertyState])
 
     useEffect(() => {
         if (stepNumber >= 1 && stepNumber <= 12) setCurrentStep(stepNumber)

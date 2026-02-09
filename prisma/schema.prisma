@@ -93,6 +93,7 @@ model Application {
   productType         String?   @map("product_type")
   propertyType        String?   @map("property_type")
   propertyUsage       String?   @map("property_usage")
+  propertyState       String?   @map("property_state")
   propertyValue       Decimal?  @map("property_value")
   loanAmount          Decimal?  @map("loan_amount")
   zipCode             String?   @map("zip_code")

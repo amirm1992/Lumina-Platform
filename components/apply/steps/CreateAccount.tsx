@@ -30,6 +30,7 @@ export function CreateAccount() {
             productType: applicationState.productType,
             propertyType: applicationState.propertyType,
             propertyUsage: applicationState.propertyUsage,
+            propertyState: applicationState.propertyState,
             zipCode: applicationState.zipCode,
             estimatedValue: applicationState.estimatedValue,
             loanAmount: applicationState.loanAmount,

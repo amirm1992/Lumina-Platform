@@ -14,6 +14,7 @@ export interface ApplicationState {
     productType: ProductType
     propertyType: PropertyType
     propertyUsage: PropertyUsage
+    propertyState: string | null
     zipCode: string
     estimatedValue: number
     loanAmount: number
@@ -30,6 +31,7 @@ export interface ApplicationState {
     setProductType: (type: ProductType) => void
     setPropertyType: (type: PropertyType) => void
     setPropertyUsage: (usage: PropertyUsage) => void
+    setPropertyState: (state: string | null) => void
     setZipCode: (zip: string) => void
     setEstimatedValue: (value: number) => void
     setLoanAmount: (amount: number) => void
@@ -52,6 +54,7 @@ const initialState = {
     productType: null as ProductType,
     propertyType: null as PropertyType,
     propertyUsage: null as PropertyUsage,
+    propertyState: null as string | null,
     zipCode: '',
     estimatedValue: 400000,
     loanAmount: 320000,
@@ -74,6 +77,7 @@ export const useApplicationStore = create<ApplicationState>()(
             setProductType: (type) => set({ productType: type }),
             setPropertyType: (type) => set({ propertyType: type }),
             setPropertyUsage: (usage) => set({ propertyUsage: usage }),
+            setPropertyState: (state) => set({ propertyState: state }),
             setZipCode: (zip) => set({ zipCode: zip }),
             setEstimatedValue: (value) => set({ estimatedValue: value }),
             setLoanAmount: (amount) => set({ loanAmount: amount }),

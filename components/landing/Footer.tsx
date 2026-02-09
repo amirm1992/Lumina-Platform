@@ -48,9 +48,9 @@ export function Footer() {
                         <ul className="space-y-3 text-sm text-white/70">
                             <li><Link href="#calculator" className="hover:text-white transition-colors">Loan Calculator</Link></li>
                             <li><Link href="/disclosures" className="hover:text-white transition-colors">Disclosures</Link></li>
+                            <li><Link href="/mortgage/florida" className="hover:text-white transition-colors">Florida Mortgages</Link></li>
                             <li><Link href="#" className="hover:text-white transition-colors">FAQ</Link></li>
                             <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-                            <li><Link href="#" className="hover:text-white transition-colors">Glossary</Link></li>
                         </ul>
                     </div>
 
