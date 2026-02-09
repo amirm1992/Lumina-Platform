@@ -1,29 +1,17 @@
+import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import { DocHubClient } from '@/components/dochub/DocHubClient'
-import type { Document, DocumentCategory } from '@/types/database'
+import { mapDocument } from '@/lib/mappers'
+
+export const metadata: Metadata = {
+    title: 'Document Hub',
+    description: 'Upload and manage your mortgage documents securely. Track document status and approvals.',
+    robots: { index: false, follow: false },
+}
 
 export const dynamic = 'force-dynamic'
-
-function mapDocument(d: any): Document {
-    return {
-        id: d.id,
-        user_id: d.userId,
-        application_id: d.applicationId,
-        category: d.category as DocumentCategory,
-        file_name: d.fileName,
-        storage_key: d.storageKey,
-        file_size: d.fileSize,
-        mime_type: d.mimeType,
-        uploaded_by: d.uploadedBy as 'client' | 'admin',
-        uploaded_by_name: d.uploadedByName,
-        status: d.status as Document['status'],
-        admin_notes: d.adminNotes,
-        created_at: d.createdAt?.toISOString() || new Date().toISOString(),
-        updated_at: d.updatedAt?.toISOString() || new Date().toISOString(),
-    }
-}
 
 export default async function DocHubPage() {
     const { userId } = await auth()

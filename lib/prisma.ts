@@ -40,7 +40,7 @@ function getPool() {
         globalForPrisma.connectionPool = new Pool(poolConfig)
 
         // Handle pool errors
-        globalForPrisma.connectionPool.on('error', (err) => {
+        globalForPrisma.connectionPool.on('error', (err: Error) => {
             console.error('Database pool error:', err.message)
         })
     }

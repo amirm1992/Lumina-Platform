@@ -1,5 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { mapProfile, mapApplication, mapLenderOffer, mapDocument } from '@/lib/mappers'
 import type {
     Application,
     LenderOffer,
@@ -11,76 +12,6 @@ import type {
     ApplicationStatus,
     Document
 } from '@/types/database'
-
-// ============================================
-// HELPERS (Data Mapping)
-// ============================================
-
-function mapProfile(p: any): Profile {
-    return {
-        id: p.id,
-        email: p.email,
-        full_name: p.fullName || null,
-        phone: p.phone || null,
-        is_admin: p.isAdmin || false,
-        created_at: p.createdAt?.toISOString() || new Date().toISOString(),
-        updated_at: p.updatedAt?.toISOString() || new Date().toISOString()
-    }
-}
-
-function mapApplication(a: any): Application {
-    return {
-        id: a.id,
-        user_id: a.userId || '', // Handle null
-        product_type: a.productType as any,
-        property_type: a.propertyType as any,
-        property_usage: a.propertyUsage as any,
-        property_value: a.propertyValue ? Number(a.propertyValue) : null,
-        loan_amount: a.loanAmount ? Number(a.loanAmount) : null,
-        zip_code: a.zipCode,
-        employment_status: a.employmentStatus,
-        annual_income: a.annualIncome ? Number(a.annualIncome) : null,
-        liquid_assets: a.liquidAssets ? Number(a.liquidAssets) : null,
-        credit_score: a.creditScore,
-        credit_score_source: a.creditScoreSource as any,
-        credit_score_date: a.creditScoreDate?.toISOString() || null,
-        credit_notes: a.creditNotes,
-        dti_ratio: a.dtiRatio ? Number(a.dtiRatio) : null,
-        status: a.status as ApplicationStatus,
-        admin_notes: a.adminNotes || null,
-        created_at: a.createdAt?.toISOString() || new Date().toISOString(),
-        updated_at: a.updatedAt?.toISOString() || new Date().toISOString(),
-        offers_published_at: a.offersPublishedAt?.toISOString() || null,
-        // Relations
-        lender_offers: a.lenderOffers?.map(mapLenderOffer) || [],
-        // Profile must be attached manually if not included
-    }
-}
-
-function mapLenderOffer(o: any): LenderOffer {
-    return {
-        id: o.id,
-        application_id: o.applicationId,
-        lender_name: o.lenderName,
-        lender_logo: o.lenderLogo ?? null,
-        interest_rate: o.interestRate ? Number(o.interestRate) : 0,
-        apr: o.apr != null ? Number(o.apr) : null,
-        monthly_payment: o.monthlyPayment != null ? Number(o.monthlyPayment) : null,
-        loan_term: o.loanTerm ?? null,
-        loan_type: (o.loanType || o.productName) ?? null,
-        points: o.points != null ? Number(o.points) : 0,
-        origination_fee: o.originationFee != null ? Number(o.originationFee) : null,
-        closing_costs: o.closingCosts != null ? Number(o.closingCosts) : null,
-        rate_lock_days: o.rateLockDays ?? null,
-        rate_lock_expires: o.rateLockExpires ? new Date(o.rateLockExpires).toISOString().slice(0, 10) : null,
-        is_recommended: o.isRecommended ?? false,
-        is_best_match: o.isBestMatch ?? false,
-        source: o.source ?? null,
-        external_id: o.externalId ?? null,
-        created_at: o.createdAt?.toISOString() ?? new Date().toISOString(),
-        updated_at: o.updatedAt?.toISOString() ?? new Date().toISOString()
-    }
-}
 
 // ============================================
 // AUTH & PERMISSIONS
@@ -272,9 +203,13 @@ export async function updateApplicationStatus(
     data: ApplicationStatusFormData
 ): Promise<boolean> {
     try {
-        const updateData: any = {
+        const updateData: {
+            status: string
+            adminNotes?: string
+            offersPublishedAt?: Date
+        } = {
             status: data.status,
-            adminNotes: data.admin_notes
+            adminNotes: data.admin_notes,
         }
 
         if (data.status === 'offers_ready') {
@@ -283,7 +218,7 @@ export async function updateApplicationStatus(
 
         await prisma.application.update({
             where: { id: applicationId },
-            data: updateData
+            data: updateData,
         })
         await logAdminActivity('changed_status', 'application', applicationId, data)
         return true
@@ -348,7 +283,7 @@ export async function updateLenderOffer(
     data: Partial<LenderOfferFormData>
 ): Promise<boolean> {
     try {
-        const updateData: any = {}
+        const updateData: Record<string, unknown> = {}
         if (data.lender_name !== undefined) updateData.lenderName = data.lender_name
         if (data.interest_rate !== undefined) updateData.interestRate = data.interest_rate
         if (data.apr !== undefined) updateData.apr = data.apr
@@ -371,7 +306,7 @@ export async function updateLenderOffer(
 
         await prisma.lenderOffer.update({
             where: { id: offerId },
-            data: updateData
+            data: updateData,
         })
         await logAdminActivity('updated_offer', 'offer', offerId, data)
         return true
@@ -393,27 +328,8 @@ export async function deleteLenderOffer(offerId: string): Promise<boolean> {
 }
 
 // ============================================
-// DOCUMENTS
+// DOCUMENTS (using centralized mapDocument from lib/mappers)
 // ============================================
-
-function mapDocument(d: any): Document {
-    return {
-        id: d.id,
-        user_id: d.userId,
-        application_id: d.applicationId,
-        category: d.category as any,
-        file_name: d.fileName,
-        storage_key: d.storageKey,
-        file_size: d.fileSize,
-        mime_type: d.mimeType,
-        uploaded_by: d.uploadedBy as any,
-        uploaded_by_name: d.uploadedByName,
-        status: d.status as any,
-        admin_notes: d.adminNotes,
-        created_at: d.createdAt?.toISOString() || new Date().toISOString(),
-        updated_at: d.updatedAt?.toISOString() || new Date().toISOString(),
-    }
-}
 
 export async function getDocumentsForUser(userId: string): Promise<Document[]> {
     const docs = await prisma.document.findMany({
@@ -497,8 +413,8 @@ async function logAdminActivity(
                     action,
                     targetType,
                     targetId,
-                    details: details as any
-                }
+                    details: details ? JSON.parse(JSON.stringify(details)) : null,
+                },
             })
         }
     } catch (e) {
@@ -514,11 +430,11 @@ export async function getRecentActivity(limit: number = 20) {
 
     return logs.map(l => ({
         id: l.id,
-        admin_id: l.adminId, // camel to snake
+        admin_id: l.adminId,
         action: l.action,
-        target_type: l.targetType as any,
+        target_type: l.targetType as 'application' | 'offer' | 'profile' | null,
         target_id: l.targetId,
-        details: l.details ? JSON.parse(JSON.stringify(l.details)) : null,
-        created_at: l.createdAt.toISOString()
+        details: l.details ? JSON.parse(JSON.stringify(l.details)) as Record<string, unknown> : null,
+        created_at: l.createdAt.toISOString(),
     }))
 }

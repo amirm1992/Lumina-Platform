@@ -6,8 +6,8 @@ import { ClipboardList, Clock, CheckCircle, TrendingUp } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-    let stats
-    let recentApplications
+    let stats: Awaited<ReturnType<typeof getAdminDashboardStats>>
+    let recentApplications: Awaited<ReturnType<typeof getApplications>>
     try {
         stats = await getAdminDashboardStats()
         recentApplications = await getApplications()

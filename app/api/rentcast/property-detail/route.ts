@@ -1,87 +1,93 @@
 import { NextResponse } from 'next/server'
 
+const MAX_ADDRESS_LENGTH = 500
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
-    const address = searchParams.get('address')
+    const rawAddress = searchParams.get('address')
 
-    if (!address) {
+    if (!rawAddress) {
         return NextResponse.json({ error: 'Address is required' }, { status: 400 })
+    }
+
+    // Sanitize input: trim, limit length, strip control characters
+    const address = rawAddress.trim().replace(/[\x00-\x1f]/g, '').slice(0, MAX_ADDRESS_LENGTH)
+    if (address.length < 5) {
+        return NextResponse.json({ error: 'Address is too short' }, { status: 400 })
     }
 
     const apiKey = process.env.RAPIDAPI_KEY
     const apiHost = process.env.RAPIDAPI_HOST || 'real-estate101.p.rapidapi.com'
 
     if (!apiKey) {
-        return NextResponse.json({ error: 'RapidAPI key not configured' }, { status: 500 })
+        console.error('RAPIDAPI_KEY is not configured')
+        return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
 
     try {
-        // Format address for Zillow URL: "5500-Grand-Lake-Dr,-San-Antonio,-TX-78244"
-        // 1. Remove commas 
-        // 2. Replace spaces with hyphens
-        // 3. Ensure commas before City and State if possible, or just standard Zillow Search format
-        // Zillow Search URL Pattern: https://www.zillow.com/homes/ADDRESS_rb/
-        // Simple formatter: Replace spaces with hyphens, commas with hyphens or keep commas and encode? 
-        // Best bet: "5500-Grand-Lake-Dr,-San-Antonio,-TX-78244"
-
+        // Format address for Zillow URL pattern
         const formattedAddress = address.replace(/,/g, '').replace(/\s+/g, '-') + '_rb'
-        const zillowUrl = `https://www.zillow.com/homes/${formattedAddress}/`
+        const zillowUrl = `https://www.zillow.com/homes/${encodeURIComponent(formattedAddress)}/`
 
         const apiUrl = `https://${apiHost}/api/search/byurl?url=${encodeURIComponent(zillowUrl)}`
 
         const response = await fetch(apiUrl, {
             headers: {
                 'x-rapidapi-key': apiKey,
-                'x-rapidapi-host': apiHost
+                'x-rapidapi-host': apiHost,
             },
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600 },
         })
 
         if (!response.ok) {
-            throw new Error(`RapidAPI error: ${response.status}`)
+            throw new Error(`RapidAPI returned status ${response.status}`)
         }
 
         const data = await response.json()
 
         if (!data.success && data.error) {
-            console.error('RealEstate101 API Logic Error:', data.error)
-            // If simple URL fails, try strict "City-State" search URL logic or fail gracefully
+            console.error('RealEstate101 API error:', data.error)
             throw new Error(data.error)
         }
 
-        const properties = data.properties || []
+        const properties: Record<string, unknown>[] = data.properties ?? []
 
         if (properties.length === 0) {
             return NextResponse.json({ error: 'Property not found' }, { status: 404 })
         }
 
-        // Take the first result (Best Match)
-        const zillowData = properties[0]
+        const zillowData = properties[0] as Record<string, unknown>
+        const addr = (zillowData.address ?? {}) as Record<string, string>
 
-        // Map Zillow Data to our Property Interface
         const property = {
             id: zillowData.id || zillowData.zpid,
-            addressLine1: zillowData.address?.street || address.split(',')[0],
-            city: zillowData.address?.city,
-            state: zillowData.address?.state,
-            zipCode: zillowData.address?.zipcode,
-            price: zillowData.unformattedPrice || zillowData.price?.replace(/[^0-9]/g, '') || null,
-            status: mapZillowStatus(zillowData.homeStatus, zillowData.marketingStatus),
+            addressLine1: addr.street || address.split(',')[0],
+            city: addr.city,
+            state: addr.state,
+            zipCode: addr.zipcode,
+            price:
+                zillowData.unformattedPrice ||
+                (typeof zillowData.price === 'string'
+                    ? zillowData.price.replace(/[^0-9]/g, '')
+                    : null),
+            status: mapZillowStatus(
+                zillowData.homeStatus as string | undefined,
+                zillowData.marketingStatus as string | undefined
+            ),
             daysOnMarket: zillowData.daysOnZillow || 0,
             bedrooms: zillowData.beds,
             bathrooms: zillowData.baths,
             squareFootage: zillowData.area || zillowData.livingArea,
-            yearBuilt: zillowData.yearBuilt, // Might not be in search result, check details?
-            propertyType: mapHomeType(zillowData.homeType),
+            yearBuilt: zillowData.yearBuilt,
+            propertyType: mapHomeType(zillowData.homeType as string | undefined),
             imageUrl: zillowData.imgSrc,
-            description: zillowData.statusText, // Fallback
-            lastSeenDate: new Date().toISOString()
+            description: zillowData.statusText,
+            lastSeenDate: new Date().toISOString(),
         }
 
         return NextResponse.json(property)
-
     } catch (error) {
-        console.error('RealEstate101 API fetch error:', error)
+        console.error('Property detail fetch error:', error)
         return NextResponse.json(
             { error: 'Failed to fetch property details' },
             { status: 500 }

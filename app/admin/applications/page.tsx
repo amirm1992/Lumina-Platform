@@ -17,7 +17,7 @@ export default async function ApplicationsPage({
 }) {
     const params = await searchParams
     const status = params.status as 'pending' | 'in_review' | 'offers_ready' | 'completed' | undefined
-    let applications
+    let applications: Awaited<ReturnType<typeof getApplications>>
     try {
         applications = await getApplications({
         status,

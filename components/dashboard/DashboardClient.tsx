@@ -1,196 +1,47 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 import { LenderCard } from './LenderCard'
 import { PaymentBreakdown } from './PaymentBreakdown'
 import { MarketTrends } from './MarketTrends'
 import { ScenarioAdjuster } from './ScenarioAdjuster'
 import { EditDetailsModal } from './EditDetailsModal'
-import { RATE_TRENDS } from './constants'
-import { UserProfile, Lender } from './types'
-import { Application, LenderOffer } from '@/types/database'
-import { AuthUser } from '@/types/auth'
-import { CONSTANT_LENDERS, getPlaceholderLenders } from '@/constants/lenders'
+import type { AuthUser } from '@/types/auth'
+import { FINANCIAL_DEFAULTS } from '@/lib/constants'
+import { useDashboardData } from './hooks/useDashboardData'
 
 interface DashboardClientProps {
     user: AuthUser | null
 }
 
-// Convert database offer to Lender type for display
-// Helper to calculate monthly payment
-function calculateMonthlyPayment(principal: number, annualRate: number, years: number): number {
-    const r = annualRate / 100 / 12
-    const n = years * 12
-    if (!principal || !r || !n) return 0
-    return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-}
-
-// Normalize lender name for matching (handles UWM and other aliases)
-function normalizeLenderName(name: string): string {
-    return (name || '').toLowerCase().trim().replace(/\s+/g, ' ')
-}
-
-function dbOfferMatchesConstant(dbName: string, constantName: string): boolean {
-    const d = normalizeLenderName(dbName)
-    const c = normalizeLenderName(constantName)
-    if (d === c) return true
-    if (c === 'uwm' && (d.includes('united wholesale') || d.includes('uwm') || d === 'u.w.m.')) return true
-    return false
-}
-
-// Convert database offer to Lender type for display
-function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
-    const rate = offer.interest_rate ?? 0
-    const term = offer.loan_term ?? 30
-    const calculatedPayment = calculateMonthlyPayment(loanAmount, rate, term)
-    return {
-        id: offer.id,
-        name: offer.lender_name,
-        rate,
-        apr: offer.apr ?? rate,
-        monthlyPayment: calculatedPayment || (offer.monthly_payment ?? 0),
-        loanTerm: term,
-        loanType: (offer.loan_type?.toUpperCase() || 'CONVENTIONAL') as 'CONVENTIONAL' | 'FHA' | 'VA' | 'JUMBO',
-        points: offer.points ?? 0,
-        closingCosts: offer.closing_costs ?? 0,
-        isRecommended: offer.is_recommended,
-        bestMatch: offer.is_best_match ?? false,
-        logo: offer.lender_logo ?? undefined
-    }
-}
-
 export function DashboardClient({ user }: DashboardClientProps) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [application, setApplication] = useState<Application | null>(null)
-    const [offers, setOffers] = useState<Lender[]>(getPlaceholderLenders())
-    const [loading, setLoading] = useState(true)
-    const [fetchError, setFetchError] = useState<string | null>(null)
-    const [applicationStatus, setApplicationStatus] = useState<string>('pending')
 
-    const [userProfile, setUserProfile] = useState<UserProfile>({
-        name: user?.user_metadata?.first_name || user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || "User",
-        creditScore: 0,
-        estimatedLoanAmount: 0,
-        downPayment: 0,
-        homeValue: 0,
-        location: ""
-    })
+    const {
+        application,
+        offers,
+        userProfile,
+        setUserProfile,
+        loading,
+        fetchError,
+        selectedLender,
+        selectedLenderId,
+        setSelectedLenderId,
+        ltv,
+    } = useDashboardData(user)
 
-    // Fetch application and offers from database
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await fetch(`/api/applications?t=${Date.now()}`, { cache: 'no-store' })
-                if (response.ok) {
-                    const data = await response.json()
-                    if (data.applications && data.applications.length > 0) {
-                        // Prefer application that has offers (admin may have added to a specific one)
-                        const apps = data.applications as Application[]
-                        const appWithOffers = apps.find(a => a.lender_offers && a.lender_offers.length > 0)
-                        const app = (appWithOffers ?? apps[0]) as Application
-                        setApplication(app)
-                        setApplicationStatus(app.status)
-
-                        // Update user profile with application data
-                        setUserProfile(prev => ({
-                            ...prev,
-                            creditScore: app.credit_score || 0,
-                            estimatedLoanAmount: app.loan_amount || 0,
-                            homeValue: app.property_value || 0,
-                            downPayment: (app.property_value || 0) - (app.loan_amount || 0),
-                            location: app.zip_code || ""
-                        }))
-
-                        // Convert offers if available
-                        if (app.lender_offers && app.lender_offers.length > 0) {
-                            const dbOffers = app.lender_offers.map(o => offerToLender(o, app.loan_amount || 0))
-
-                            // Merge with Constants
-                            const mergedOffers = CONSTANT_LENDERS.map((constant, index) => {
-                                const match = dbOffers.find(o => dbOfferMatchesConstant(o.name, constant.name))
-
-                                if (match) return match
-
-                                // Return Placeholder
-                                return {
-                                    id: `placeholder-${index}`,
-                                    name: constant.name,
-                                    logo: constant.logo,
-                                    rate: 0,
-                                    apr: 0,
-                                    monthlyPayment: 0,
-                                    loanTerm: 30,
-                                    loanType: 'CONVENTIONAL',
-                                    points: 0,
-                                    closingCosts: 0,
-                                    isRecommended: false,
-                                    isPlaceholder: true
-                                } as Lender
-                            })
-
-                            // Add any other DB offers that aren't in constants
-                            const otherOffers = dbOffers.filter(o =>
-                                !CONSTANT_LENDERS.some(c => dbOfferMatchesConstant(o.name, c.name))
-                            )
-
-                            // Sort: Real offers first (lowest rate), then placeholders
-                            const sortedOffers = [...mergedOffers, ...otherOffers].sort((a, b) => {
-                                if (a.isPlaceholder && !b.isPlaceholder) return 1
-                                if (!a.isPlaceholder && b.isPlaceholder) return -1
-                                return a.rate - b.rate
-                            })
-
-                            setOffers(sortedOffers)
-                        } else {
-                            // No offers yet - show placeholders
-                            setOffers(getPlaceholderLenders())
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching application:', error)
-                setFetchError('Unable to load your application data. Please try refreshing the page.')
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchData()
-    }, [])
-
-    const handleProfileUpdate = (newValues: { homeValue: number; loanAmount: number; downPayment: number }) => {
-        setUserProfile(prev => ({
-            ...prev,
-            homeValue: newValues.homeValue,
-            estimatedLoanAmount: newValues.loanAmount,
-            downPayment: newValues.downPayment
-        }))
-    }
-
-    const [selectedLenderId, setSelectedLenderId] = useState<string>('')
-
-    useEffect(() => {
-        if (offers.length > 0 && !selectedLenderId) {
-            // Select first REAL offer, or first placeholder
-            const firstReal = offers.find(o => !o.isPlaceholder)
-            setSelectedLenderId(firstReal?.id || offers[0].id)
-        }
-    }, [offers, selectedLenderId])
-
-    const selectedLender = useMemo(() =>
-        offers.find(l => l.id === selectedLenderId) || offers[0]
-        , [selectedLenderId, offers])
-
-    const ltv = useMemo(() => {
-        if (!userProfile.homeValue || userProfile.homeValue <= 0) return '0.0'
-        return ((userProfile.estimatedLoanAmount / userProfile.homeValue) * 100).toFixed(1)
-    }, [userProfile])
-
-    // Status banner component - Disabled as per user request
-    const StatusBanner = () => {
-        return null
-    }
+    const handleProfileUpdate = useCallback(
+        (newValues: { homeValue: number; loanAmount: number; downPayment: number }) => {
+            setUserProfile((prev) => ({
+                ...prev,
+                homeValue: newValues.homeValue,
+                estimatedLoanAmount: newValues.loanAmount,
+                downPayment: newValues.downPayment,
+            }))
+        },
+        [setUserProfile]
+    )
 
     if (loading) {
         return (
@@ -217,6 +68,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                     <button
                         onClick={() => window.location.reload()}
                         className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition font-medium"
+                        aria-label="Reload page to try again"
                     >
                         Try again
                     </button>
@@ -230,8 +82,6 @@ export function DashboardClient({ user }: DashboardClientProps) {
             <DashboardSidebar />
 
             <main className="container mx-auto px-6 py-10 pt-20">
-
-                <StatusBanner />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
@@ -332,8 +182,8 @@ export function DashboardClient({ user }: DashboardClientProps) {
                         {selectedLender && (
                             <PaymentBreakdown
                                 monthlyPayment={selectedLender.monthlyPayment}
-                                propertyTax={450}
-                                homeInsurance={120}
+                                propertyTax={FINANCIAL_DEFAULTS.defaultPropertyTax}
+                                homeInsurance={FINANCIAL_DEFAULTS.defaultHomeInsurance}
                             />
                         )}
 
@@ -353,7 +203,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                 </div>
                                 <p className="text-sm text-gray-500 mb-5 leading-relaxed">
                                     Based on <strong className="text-black">{selectedLender.name}'s</strong> fees, your total estimated closing costs are{' '}
-                                    <strong className="text-black">${(selectedLender.closingCosts ?? 12450).toLocaleString()}</strong>.
+                                    <strong className="text-black">${(selectedLender.closingCosts ?? 0).toLocaleString()}</strong>.
                                     This includes lender fees, appraisal, and title insurance.
                                 </p>
                                 <button className="text-sm text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors uppercase tracking-wide">

@@ -1,4 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Terms & Conditions',
+    description:
+        'Terms of service, loan approval terms, and legal disclosures for Lumina mortgage platform. Licensed under C2 Financial Corporation NMLS #135622.',
+    alternates: { canonical: '/terms' },
+}
 
 export default function TermsOfServicePage() {
     return (

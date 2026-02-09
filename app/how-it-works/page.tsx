@@ -1,5 +1,13 @@
+import type { Metadata } from 'next'
 import { Navbar } from '@/components/layout/Navbar'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+    title: 'How It Works - 4 Simple Steps to Your Mortgage',
+    description:
+        'Apply in minutes, get AI-matched rates from top lenders, and close digitally. No lead selling, no broker referrals — just you and your dream home.',
+    alternates: { canonical: '/how-it-works' },
+}
 
 const steps = [
     {

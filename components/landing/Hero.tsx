@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -23,9 +23,10 @@ export function Hero() {
     const [loanAmount, setLoanAmount] = useState(350000)
     const [loanTerm, setLoanTerm] = useState(30)
     const [interestRate, setInterestRate] = useState(6.5)
-    const [chartView, setChartView] = useState<'D' | 'M' | 'W'>('W')
-    const [lottieData, setLottieData] = useState<any>(null)
-    const [lottieDataLoan, setLottieDataLoan] = useState<any>(null)
+    type ChartView = 'D' | 'M' | 'W'
+    const [chartView, setChartView] = useState<ChartView>('W')
+    const [lottieData, setLottieData] = useState<Record<string, unknown> | null>(null)
+    const [lottieDataLoan, setLottieDataLoan] = useState<Record<string, unknown> | null>(null)
 
     useEffect(() => {
         // Fetch Lottie animation data
@@ -44,9 +45,7 @@ export function Hero() {
     useEffect(() => {
         async function fetchRate() {
             try {
-                const response = await fetch('/api/mortgage-rate?history=true', {
-                    next: { revalidate: 3600 }
-                })
+                const response = await fetch('/api/mortgage-rate?history=true')
 
                 if (!response.ok) throw new Error('Failed to fetch')
 
@@ -57,7 +56,6 @@ export function Hero() {
                 }
             } catch (error) {
                 console.warn('Failed to fetch rate:', error)
-                // No mock data fallback. Relies on API/DB returning valid data.
             } finally {
                 setLoading(false)
             }
@@ -65,12 +63,10 @@ export function Hero() {
         fetchRate()
     }, [])
 
-    const getChartData = () => {
+    const chartData = useMemo(() => {
         if (!rateData?.history && !rateData?.rate) return []
 
-        // Logic for different views
         if (chartView === 'D') {
-            // Last 6 Days (Flat line of current rate as placeholder)
             const currentRate = rateData?.rate || 6.5
             const today = new Date()
             return Array.from({ length: 6 }, (_, i) => {
@@ -80,64 +76,53 @@ export function Hero() {
                     date: d.toISOString().split('T')[0],
                     rate: currentRate,
                     label: d.toLocaleDateString('en-US', { weekday: 'short' }),
-                    fullDate: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    fullDate: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
                 }
             })
         }
 
-        let data: any[] = []
+        let data: { date: string; rate: number }[] = []
         if (chartView === 'M') {
-            // Last 6 Months - take last ~26 weeks (6 months), sample every 4th week
-            // Data is chronological (oldest → newest), so slice from END
             if (rateData?.history) {
-                const last26Weeks = rateData.history.slice(-26)  // Most recent 6 months
-                // Sample every 4th entry for monthly view
+                const last26Weeks = rateData.history.slice(-26)
                 data = last26Weeks.filter((_, i) => i % 4 === 0).slice(-6)
             }
         } else {
-            // Weekly (Last 6 weeks) - slice from END to get newest data
             if (rateData?.history) {
-                data = rateData.history.slice(-6)  // Most recent 6 weeks
+                data = rateData.history.slice(-6)
             }
         }
 
-        return data.map(item => ({
+        return data.map((item) => ({
             ...item,
             label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            fullDate: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            fullDate: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         }))
-    }
-    const chartData = getChartData()
+    }, [rateData, chartView])
 
-    // Calculate monthly payment
-    const calculateMonthlyPayment = () => {
-        const principal = loanAmount
+    // Memoize monthly payment calculation
+    const monthlyPayment = useMemo(() => {
         const monthlyRate = interestRate / 100 / 12
         const numberOfPayments = loanTerm * 12
-
-        if (monthlyRate === 0) return principal / numberOfPayments
-
-        const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+        if (monthlyRate === 0) return loanAmount / numberOfPayments
+        return (
+            (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) /
             (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
-        return payment
-    }
+        )
+    }, [loanAmount, interestRate, loanTerm])
 
-    const monthlyPayment = calculateMonthlyPayment()
-    const totalInterest = (monthlyPayment * loanTerm * 12) - loanAmount
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString + 'T00:00:00')
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        })
-    }
+    const totalInterest = useMemo(
+        () => monthlyPayment * loanTerm * 12 - loanAmount,
+        [monthlyPayment, loanTerm, loanAmount]
+    )
 
     return (
         <>
             {/* Hero Section with Dark Navy Blue Background */}
-            <section className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A]">
+            <section
+                aria-label="Hero — mortgage rate comparison"
+                className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A]"
+            >
                 {/* Decorative Elements */}
                 <div className="absolute inset-0 z-0 overflow-hidden">
                     <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#3B82F6]/10 rounded-full blur-[150px]" />
@@ -210,18 +195,23 @@ export function Hero() {
 
                                     {/* Controls (Moved Inside) */}
                                     <div className="absolute top-4 right-4 z-10 flex gap-2">
-                                        {['D', 'M', 'W'].map((view) => (
-                                            <button
-                                                key={view}
-                                                onClick={() => setChartView(view as any)}
-                                                className={`w-8 h-8 rounded-full text-xs font-bold transition-all border ${chartView === view
-                                                    ? 'bg-white text-[#1E3A5F] border-white'
-                                                    : 'bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
-                                                    }`}
-                                            >
-                                                {view}
-                                            </button>
-                                        ))}
+                                        {(['D', 'M', 'W'] as const).map((view) => {
+                                            const labels: Record<string, string> = { D: 'Daily', M: 'Monthly', W: 'Weekly' }
+                                            return (
+                                                <button
+                                                    key={view}
+                                                    onClick={() => setChartView(view)}
+                                                    aria-label={`Show ${labels[view]} rate trend`}
+                                                    aria-pressed={chartView === view}
+                                                    className={`w-8 h-8 rounded-full text-xs font-bold transition-all border ${chartView === view
+                                                        ? 'bg-white text-[#1E3A5F] border-white'
+                                                        : 'bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
+                                                        }`}
+                                                >
+                                                    {view}
+                                                </button>
+                                            )
+                                        })}
                                     </div>
 
                                     <ResponsiveContainer width="100%" height="100%">
@@ -310,6 +300,7 @@ export function Hero() {
                                             value={loanAmount}
                                             onChange={(e) => setLoanAmount(Number(e.target.value))}
                                             className="w-full h-2 bg-[#3B82F6] rounded-lg appearance-none cursor-pointer accent-[#1E3A5F]"
+                                            aria-label={`Loan amount: $${loanAmount.toLocaleString()}`}
                                         />
                                         <div className="flex justify-between text-sm text-gray-500 mt-2">
                                             <span>$50k</span>
@@ -330,6 +321,7 @@ export function Hero() {
                                             value={interestRate}
                                             onChange={(e) => setInterestRate(Number(e.target.value))}
                                             className="w-full h-2 bg-[#3B82F6] rounded-lg appearance-none cursor-pointer accent-[#1E3A5F]"
+                                            aria-label={`Interest rate: ${interestRate.toFixed(2)}%`}
                                         />
                                         <div className="flex justify-between text-sm text-gray-500 mt-2">
                                             <span>3%</span>

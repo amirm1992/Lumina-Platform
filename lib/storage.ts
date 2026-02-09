@@ -1,20 +1,30 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { STORAGE_CONFIG, FINANCIAL_DEFAULTS } from '@/lib/constants'
 
 // DigitalOcean Spaces (S3-compatible) configuration
-const SPACES_REGION = process.env.SPACES_REGION || 'nyc3'
-const SPACES_BUCKET = process.env.SPACES_BUCKET || 'lumina-docs'
-const SPACES_ENDPOINT = process.env.SPACES_ENDPOINT || `https://${SPACES_REGION}.digitaloceanspaces.com`
+const { region: SPACES_REGION, bucket: SPACES_BUCKET, endpoint: SPACES_ENDPOINT } = STORAGE_CONFIG
 
-const s3Client = new S3Client({
-    endpoint: SPACES_ENDPOINT,
-    region: SPACES_REGION,
-    credentials: {
-        accessKeyId: process.env.SPACES_ACCESS_KEY || '',
-        secretAccessKey: process.env.SPACES_SECRET_KEY || '',
-    },
-    forcePathStyle: false,
-})
+function createS3Client(): S3Client {
+    const accessKeyId = process.env.SPACES_ACCESS_KEY
+    const secretAccessKey = process.env.SPACES_SECRET_KEY
+
+    if (!accessKeyId || !secretAccessKey) {
+        console.warn('SPACES_ACCESS_KEY or SPACES_SECRET_KEY is not set — file operations will fail')
+    }
+
+    return new S3Client({
+        endpoint: SPACES_ENDPOINT,
+        region: SPACES_REGION,
+        credentials: {
+            accessKeyId: accessKeyId ?? '',
+            secretAccessKey: secretAccessKey ?? '',
+        },
+        forcePathStyle: false,
+    })
+}
+
+const s3Client = createS3Client()
 
 // Allowed MIME types
 const ALLOWED_MIME_TYPES = [
@@ -25,15 +35,15 @@ const ALLOWED_MIME_TYPES = [
     'image/webp',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]
+] as const
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+const MAX_FILE_SIZE = FINANCIAL_DEFAULTS.maxFileSize
 
 /**
  * Validate a file before upload
  */
 export function validateFile(mimeType: string, fileSize: number): { valid: boolean; error?: string } {
-    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+    if (!(ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)) {
         return { valid: false, error: `File type "${mimeType}" is not allowed. Accepted: PDF, JPG, PNG, WEBP, DOC, DOCX` }
     }
     if (fileSize > MAX_FILE_SIZE) {
@@ -61,7 +71,7 @@ export async function getUploadUrl(storageKey: string, mimeType: string): Promis
         Key: storageKey,
         ContentType: mimeType,
     })
-    return getSignedUrl(s3Client, command, { expiresIn: 900 }) // 15 minutes
+    return getSignedUrl(s3Client, command, { expiresIn: STORAGE_CONFIG.presignedUrlExpiry })
 }
 
 /**
@@ -73,7 +83,7 @@ export async function getDownloadUrl(storageKey: string, fileName: string): Prom
         Key: storageKey,
         ResponseContentDisposition: `inline; filename="${fileName}"`,
     })
-    return getSignedUrl(s3Client, command, { expiresIn: 900 }) // 15 minutes
+    return getSignedUrl(s3Client, command, { expiresIn: STORAGE_CONFIG.presignedUrlExpiry })
 }
 
 /**

@@ -5,13 +5,15 @@ import prisma from '@/lib/prisma'
 // Prevent Next.js from caching this route — admin updates must be reflected immediately
 export const dynamic = 'force-dynamic'
 
-// ── Validation helpers ──
+import { VALIDATION, FINANCIAL_DEFAULTS } from '@/lib/constants'
 
-const VALID_PRODUCT_TYPES = ['purchase', 'refinance', 'heloc']
-const VALID_PROPERTY_TYPES = ['single_family', 'single-family', 'condo', 'townhouse', 'townhome', 'multi_family', 'multi-family', 'other']
-const VALID_PROPERTY_USAGE = ['primary', 'secondary', 'investment']
-const VALID_EMPLOYMENT = ['salaried', 'self-employed', 'retired', 'military']
-const VALID_CREDIT_SCORES = ['excellent', 'good', 'fair', 'poor']
+// ── Validation helpers (using centralized constants) ──
+
+const VALID_PRODUCT_TYPES = VALIDATION.productTypes as readonly string[]
+const VALID_PROPERTY_TYPES = VALIDATION.propertyTypes as readonly string[]
+const VALID_PROPERTY_USAGE = VALIDATION.propertyUsages as readonly string[]
+const VALID_EMPLOYMENT = VALIDATION.employmentStatuses as readonly string[]
+const VALID_CREDIT_SCORES = VALIDATION.creditScores as readonly string[]
 
 function normalizePropertyType(raw: string): string {
     // Accept both hyphen and underscore variants
@@ -99,14 +101,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Map categorical credit score to a representative numeric value
-        const creditScoreMap: Record<string, number> = {
-            excellent: 780,
-            good: 710,
-            fair: 640,
-            poor: 560,
-        }
         const creditScoreNumeric = body.creditScore
-            ? creditScoreMap[body.creditScore] ?? null
+            ? FINANCIAL_DEFAULTS.creditScoreMap[body.creditScore as string] ?? null
             : null
 
         const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : ''

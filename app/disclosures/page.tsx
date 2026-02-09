@@ -1,4 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Licensing & Disclosures',
+    description:
+        'NMLS licensing information, equal housing disclosures, and lending terms for Lumina mortgage services. NMLS #1631748, C2 Financial Corporation NMLS #135622.',
+    alternates: { canonical: '/disclosures' },
+}
 
 export default function DisclosuresPage() {
     return (

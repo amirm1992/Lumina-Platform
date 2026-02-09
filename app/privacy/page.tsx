@@ -1,4 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Privacy Policy',
+    description:
+        'How Lumina collects, uses, and protects your personal information. We never sell your data to third parties.',
+    alternates: { canonical: '/privacy' },
+}
 
 export default function PrivacyPolicyPage() {
     return (

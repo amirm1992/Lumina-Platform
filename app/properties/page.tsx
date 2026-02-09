@@ -1,6 +1,13 @@
+import type { Metadata } from 'next'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { PropertiesClient } from '@/components/properties/PropertiesClient'
+
+export const metadata: Metadata = {
+    title: 'Saved Properties',
+    description: 'Browse and manage your saved properties.',
+    robots: { index: false, follow: false },
+}
 
 export default async function PropertiesPage() {
     const { userId } = await auth()

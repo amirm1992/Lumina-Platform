@@ -4,8 +4,12 @@ const { PrismaClient } = require('@prisma/client')
 const { PrismaPg } = require('@prisma/adapter-pg')
 const { Pool } = require('pg')
 
-// Set SSL rejection to false for DigitalOcean
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+// NOTE: Use the CA certificate for secure TLS in production.
+// Only disable TLS verification for local development when CA cert is unavailable.
+if (process.env.NODE_ENV !== 'production' && !process.env.CA_CERT_PATH) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+    console.warn('⚠️  TLS verification disabled (development only)')
+}
 
 // Manually parse .env and .env.local
 function loadEnv() {
