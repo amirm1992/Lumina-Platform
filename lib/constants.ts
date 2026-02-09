@@ -7,10 +7,10 @@ export const SITE_CONFIG = {
   name: 'Lumina',
   legalName: 'Lumina Financial Technologies',
   tagline: 'AI-Powered Online Mortgage Platform',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://lumina.finance',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://golumina.net',
   description:
     'The future of mortgages. Instant pre-approvals, AI-driven rate comparison, and a 100% digital workflow.',
-  email: 'hello@lumina.finance',
+  email: 'hello@golumina.net',
   phone: '(858) 312-4900',
   phoneRaw: '+18583124900',
 
