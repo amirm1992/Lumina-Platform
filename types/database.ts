@@ -33,6 +33,7 @@ export interface Application {
     product_type: ProductType | null
     property_type: PropertyType | null
     property_usage: PropertyUsage | null
+    property_state: string | null
     property_value: number | null
     loan_amount: number | null
     zip_code: string | null
@@ -160,6 +161,7 @@ export type DocumentCategory =
     | 'employment_letter'
     | 'contract'
     | 'pre_approval'
+    | 'lender_doc'
     | 'insurance'
     | 'other'
 

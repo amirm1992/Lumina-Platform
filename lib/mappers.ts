@@ -57,6 +57,7 @@ interface PrismaApplication {
     productType: string | null
     propertyType: string | null
     propertyUsage: string | null
+    propertyState: string | null
     propertyValue: { toNumber(): number } | number | null
     loanAmount: { toNumber(): number } | number | null
     zipCode: string | null
@@ -160,6 +161,7 @@ export function mapApplication(a: PrismaApplication): Application {
         product_type: a.productType as Application['product_type'],
         property_type: a.propertyType as Application['property_type'],
         property_usage: a.propertyUsage as Application['property_usage'],
+        property_state: a.propertyState ?? null,
         property_value: toNum(a.propertyValue),
         loan_amount: toNum(a.loanAmount),
         zip_code: a.zipCode,
