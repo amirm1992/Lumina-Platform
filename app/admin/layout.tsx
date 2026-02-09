@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
-import { isUserAdmin } from '@/utils/admin/api'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
-import { AdminHeader } from '@/components/admin/AdminHeader'
+import { isUserAdmin, getCurrentUser } from '@/utils/admin/api'
+import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient'
 
 export default async function AdminLayout({
     children,
@@ -15,15 +14,13 @@ export default async function AdminLayout({
         redirect('/admin-login')
     }
 
+    // Get user email for the header
+    const user = await getCurrentUser()
+    const email = user?.emailAddresses[0]?.emailAddress || 'Admin'
+
     return (
-        <div className="min-h-screen bg-gray-50">
-            <AdminHeader />
-            <div className="flex">
-                <AdminSidebar />
-                <main className="flex-1 p-8">
-                    {children}
-                </main>
-            </div>
-        </div>
+        <AdminLayoutClient email={email}>
+            {children}
+        </AdminLayoutClient>
     )
 }

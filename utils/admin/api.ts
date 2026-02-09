@@ -393,24 +393,82 @@ export async function deleteLenderOffer(offerId: string): Promise<boolean> {
 }
 
 // ============================================
-// DOCUMENTS (stub until Document model + storage added)
+// DOCUMENTS
 // ============================================
 
-export async function getDocuments(_applicationId: string): Promise<Document[]> {
-    return []
+function mapDocument(d: any): Document {
+    return {
+        id: d.id,
+        user_id: d.userId,
+        application_id: d.applicationId,
+        category: d.category as any,
+        file_name: d.fileName,
+        storage_key: d.storageKey,
+        file_size: d.fileSize,
+        mime_type: d.mimeType,
+        uploaded_by: d.uploadedBy as any,
+        uploaded_by_name: d.uploadedByName,
+        status: d.status as any,
+        admin_notes: d.adminNotes,
+        created_at: d.createdAt?.toISOString() || new Date().toISOString(),
+        updated_at: d.updatedAt?.toISOString() || new Date().toISOString(),
+    }
 }
 
-export async function uploadDocument(
-    _applicationId: string,
-    _userId: string,
-    _file: File,
-    _category: 'lender_doc' | 'client_upload' | 'disclosure' = 'lender_doc'
-): Promise<Document | null> {
-    return null
+export async function getDocumentsForUser(userId: string): Promise<Document[]> {
+    const docs = await prisma.document.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+    })
+    return docs.map(mapDocument)
 }
 
-export async function deleteDocument(_documentId: string, _filePath: string): Promise<boolean> {
-    return false
+export async function getDocumentsForApplication(applicationId: string): Promise<Document[]> {
+    const docs = await prisma.document.findMany({
+        where: { applicationId },
+        orderBy: { createdAt: 'desc' },
+    })
+    return docs.map(mapDocument)
+}
+
+export async function updateDocumentStatus(
+    documentId: string,
+    status: 'pending_review' | 'approved' | 'rejected',
+    adminNotes?: string
+): Promise<boolean> {
+    try {
+        await prisma.document.update({
+            where: { id: documentId },
+            data: { status, adminNotes },
+        })
+        await logAdminActivity('updated_document_status', 'application', documentId, { status, adminNotes })
+        return true
+    } catch (e) {
+        console.error('Failed to update document status:', e)
+        return false
+    }
+}
+
+export async function deleteDocument(documentId: string): Promise<boolean> {
+    try {
+        const doc = await prisma.document.findUnique({ where: { id: documentId } })
+        if (!doc) return false
+
+        // Delete from storage
+        const { deleteFileFromSpaces } = await import('@/lib/storage')
+        try {
+            await deleteFileFromSpaces(doc.storageKey)
+        } catch (storageErr) {
+            console.error('Storage delete failed (continuing with DB delete):', storageErr)
+        }
+
+        await prisma.document.delete({ where: { id: documentId } })
+        await logAdminActivity('deleted_document', 'application', documentId, { fileName: doc.fileName })
+        return true
+    } catch (e) {
+        console.error('Failed to delete document:', e)
+        return false
+    }
 }
 
 

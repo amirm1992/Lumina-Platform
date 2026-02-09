@@ -1,10 +1,7 @@
+import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
-import { DocHubClient } from '@/components/dochub/DocHubClient'
 import type { Document, DocumentCategory } from '@/types/database'
-
-export const dynamic = 'force-dynamic'
 
 function mapDocument(d: any): Document {
     return {
@@ -25,20 +22,22 @@ function mapDocument(d: any): Document {
     }
 }
 
-export default async function DocHubPage() {
-    const { userId } = await auth()
+// GET /api/documents — get current user's documents
+export async function GET() {
+    try {
+        const { userId } = await auth()
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
 
-    if (!userId) {
-        return redirect('/login')
+        const docs = await prisma.document.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+        })
+
+        return NextResponse.json({ documents: docs.map(mapDocument) })
+    } catch (error) {
+        console.error('GET /api/documents error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
-
-    // Fetch documents scoped to this user only
-    const rawDocs = await prisma.document.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-    })
-
-    const documents = rawDocs.map(mapDocument)
-
-    return <DocHubClient userId={userId} initialDocuments={documents} />
 }

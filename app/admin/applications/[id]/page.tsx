@@ -1,4 +1,4 @@
-import { getApplicationById, getDocuments } from '@/utils/admin/api'
+import { getApplicationById } from '@/utils/admin/api'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, User, Home, DollarSign, Briefcase, PiggyBank, CreditCard, FileText } from 'lucide-react'
@@ -6,8 +6,10 @@ import { CreditScoreEntry } from '@/components/admin/CreditScoreEntry'
 import { LenderOffersSection } from '@/components/admin/LenderOffersSection'
 import { ApplicationStatusForm } from '@/components/admin/ApplicationStatusForm'
 import { StatusBadge } from '@/components/admin/StatusBadge'
-import { PreApprovalUpload } from '@/components/admin/PreApprovalUpload'
+import { DocumentsSection } from '@/components/admin/DocumentsSection'
 import { AdminOfferSlots } from '@/components/admin/AdminOfferSlots'
+import prisma from '@/lib/prisma'
+import type { Document, DocumentCategory } from '@/types/database'
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
@@ -24,8 +26,30 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         notFound()
     }
 
-    // Fetch associated documents
-    const documents = await getDocuments(id)
+    // Fetch associated documents for this user directly from Prisma
+    const rawDocs = application.user_id
+        ? await prisma.document.findMany({
+            where: { userId: application.user_id },
+            orderBy: { createdAt: 'desc' },
+        })
+        : []
+
+    const documents: Document[] = rawDocs.map((d: any) => ({
+        id: d.id,
+        user_id: d.userId,
+        application_id: d.applicationId,
+        category: d.category as DocumentCategory,
+        file_name: d.fileName,
+        storage_key: d.storageKey,
+        file_size: d.fileSize,
+        mime_type: d.mimeType,
+        uploaded_by: d.uploadedBy as 'client' | 'admin',
+        uploaded_by_name: d.uploadedByName,
+        status: d.status as Document['status'],
+        admin_notes: d.adminNotes,
+        created_at: d.createdAt?.toISOString() || new Date().toISOString(),
+        updated_at: d.updatedAt?.toISOString() || new Date().toISOString(),
+    }))
 
     const profile = application.profile as { email?: string; full_name?: string; phone?: string } | undefined
 
@@ -210,16 +234,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
                 {/* Right Column - Admin Actions */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Pre-Approval / Documents */}
+                    {/* Documents Section */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                             <FileText className="w-5 h-5 text-[#2563EB]" />
-                            Documents & Pre-Approval
+                            Client Documents
                         </h2>
-                        <PreApprovalUpload
+                        <DocumentsSection
                             applicationId={id}
                             userId={application.user_id}
-                            documents={documents}
+                            initialDocuments={documents}
                         />
                     </div>
 

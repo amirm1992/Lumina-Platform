@@ -151,18 +151,56 @@ export interface AdminDashboardStats {
     completed_today: number
 }
 
+// Document categories for DocHub
+export type DocumentCategory =
+    | 'government_id'
+    | 'proof_of_income'
+    | 'tax_returns'
+    | 'bank_statements'
+    | 'employment_letter'
+    | 'contract'
+    | 'pre_approval'
+    | 'insurance'
+    | 'other'
+
+export type DocumentStatus = 'pending_review' | 'approved' | 'rejected'
+
+export type DocumentUploader = 'client' | 'admin'
+
 // Documents
 export interface Document {
     id: string
-    application_id: string
     user_id: string
+    application_id: string | null
+    category: DocumentCategory
     file_name: string
-    file_path: string
+    storage_key: string
     file_size: number | null
-    file_type: string | null
-    category: 'lender_doc' | 'client_upload' | 'disclosure'
-    status: 'pending' | 'verified'
-    uploaded_by: string
+    mime_type: string | null
+    uploaded_by: DocumentUploader
+    uploaded_by_name: string | null
+    status: DocumentStatus
+    admin_notes: string | null
     created_at: string
     updated_at: string
 }
+
+// Predefined document slot definitions
+export interface DocumentSlotDef {
+    category: DocumentCategory
+    label: string
+    description: string
+    required: boolean
+}
+
+export const DOCUMENT_SLOTS: DocumentSlotDef[] = [
+    { category: 'government_id', label: 'Government ID', description: "Driver's license or passport", required: true },
+    { category: 'proof_of_income', label: 'Proof of Income', description: 'Recent pay stubs (last 2 months)', required: true },
+    { category: 'tax_returns', label: 'Tax Returns', description: 'Last 2 years of tax returns', required: true },
+    { category: 'bank_statements', label: 'Bank Statements', description: 'Last 2 months of bank statements', required: true },
+    { category: 'employment_letter', label: 'Employment Verification', description: 'Letter from employer', required: false },
+    { category: 'contract', label: 'Purchase Contract', description: 'Signed purchase agreement', required: false },
+    { category: 'pre_approval', label: 'Pre-Approval Letter', description: 'Pre-approval from lender', required: false },
+    { category: 'insurance', label: "Homeowner's Insurance", description: 'Proof of insurance', required: false },
+    { category: 'other', label: 'Other Documents', description: 'Any additional supporting documents', required: false },
+]

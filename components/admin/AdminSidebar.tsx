@@ -2,18 +2,39 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ClipboardList, LogOut } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, LogOut, X } from 'lucide-react'
+import { useEffect } from 'react'
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/applications', label: 'Applications', icon: ClipboardList },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+    mobileOpen: boolean
+    onMobileClose: () => void
+}
+
+export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
     const pathname = usePathname()
 
-    return (
-        <aside className="w-64 min-h-[calc(100vh-64px)] bg-white border-r border-gray-200 p-4 flex flex-col">
+    // Close mobile sidebar on route change
+    useEffect(() => {
+        onMobileClose()
+    }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Prevent body scroll when mobile sidebar is open
+    useEffect(() => {
+        if (mobileOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => { document.body.style.overflow = '' }
+    }, [mobileOpen])
+
+    const sidebarContent = (
+        <>
             <nav className="space-y-2 flex-1">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href ||
@@ -44,6 +65,46 @@ export function AdminSidebar() {
                     Exit Admin
                 </Link>
             </div>
-        </aside>
+        </>
+    )
+
+    return (
+        <>
+            {/* Desktop sidebar — hidden on mobile */}
+            <aside className="hidden lg:flex w-64 min-h-[calc(100vh-64px)] bg-white border-r border-gray-200 p-4 flex-col">
+                {sidebarContent}
+            </aside>
+
+            {/* Mobile sidebar overlay */}
+            {mobileOpen && (
+                <div className="fixed inset-0 z-50 lg:hidden">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+                        onClick={onMobileClose}
+                    />
+
+                    {/* Drawer */}
+                    <div className="absolute top-0 left-0 w-64 h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-left duration-200">
+                        {/* Header */}
+                        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
+                            <span className="font-bold text-gray-900">Navigation</span>
+                            <button
+                                onClick={onMobileClose}
+                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                                aria-label="Close sidebar"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Nav content */}
+                        <div className="flex-1 flex flex-col p-4">
+                            {sidebarContent}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
