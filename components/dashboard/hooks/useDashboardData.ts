@@ -125,11 +125,17 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
             try {
                 const response = await fetch(`/api/applications?t=${Date.now()}`, {
                     cache: 'no-store',
+                    credentials: 'same-origin',
                 })
-                if (!response.ok) throw new Error('Failed to fetch applications')
-
-                const data = await response.json()
+                const data = await response.json().catch(() => ({}))
                 if (cancelled) return
+
+                if (!response.ok) {
+                    const message = data?.error || (response.status === 401
+                        ? 'Your session may have expired. Please log in again.'
+                        : `Request failed (${response.status}). Please try again.`)
+                    throw new Error(message)
+                }
 
                 if (data.applications?.length > 0) {
                     const apps = data.applications as Application[]
@@ -160,9 +166,8 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
             } catch (error) {
                 console.error('Error fetching application:', error)
                 if (!cancelled) {
-                    setFetchError(
-                        'Unable to load your application data. Please try refreshing the page.'
-                    )
+                    const message = error instanceof Error ? error.message : 'Unable to load your application data. Please try refreshing the page.'
+                    setFetchError(message)
                 }
             } finally {
                 if (!cancelled) setLoading(false)

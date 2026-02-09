@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
+import Link from 'next/link'
 import DashboardSidebar from './DashboardSidebar'
 import { LenderCard } from './LenderCard'
 import { PaymentBreakdown } from './PaymentBreakdown'
@@ -65,13 +66,23 @@ export function DashboardClient({ user }: DashboardClientProps) {
                     </div>
                     <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to load dashboard</h2>
                     <p className="text-gray-500 mb-6 text-sm">{fetchError}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition font-medium"
-                        aria-label="Reload page to try again"
-                    >
-                        Try again
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition font-medium"
+                            aria-label="Reload page to try again"
+                        >
+                            Try again
+                        </button>
+                        {fetchError.toLowerCase().includes('session') || fetchError.toLowerCase().includes('log in') ? (
+                            <Link
+                                href="/login?redirect=/dashboard"
+                                className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                            >
+                                Log in again
+                            </Link>
+                        ) : null}
+                    </div>
                 </div>
             </div>
         )
