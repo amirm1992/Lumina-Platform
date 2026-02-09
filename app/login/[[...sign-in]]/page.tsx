@@ -94,7 +94,7 @@ export default function LoginPage() {
                             }}
                             routing="path"
                             path="/login"
-                            signUpUrl="/signup" // Redirects to /apply anyway, but good to have
+                            signUpUrl="/apply"
                             afterSignInUrl={redirectTo}
                         />
                     </div>
