@@ -20,6 +20,17 @@ function normalizePropertyType(raw: string): string {
     return raw.replaceAll('-', '_').replace('townhome', 'townhouse')
 }
 
+/** Safely coerce Prisma Decimal or number to number for JSON (avoids 500 if driver returns number or different shape). */
+function toNumber(val: unknown): number | null {
+    if (val == null) return null
+    if (typeof val === 'number' && !Number.isNaN(val)) return val
+    if (typeof (val as { toNumber?: () => number }).toNumber === 'function') {
+        return (val as { toNumber: () => number }).toNumber()
+    }
+    const n = Number(val)
+    return Number.isNaN(n) ? null : n
+}
+
 function validateApplicationBody(body: Record<string, unknown>): string | null {
     // Product type
     if (!body.productType || !VALID_PRODUCT_TYPES.includes(body.productType as string)) {
@@ -228,20 +239,20 @@ export async function GET() {
             }
         })
 
-        // Transform to match existing API response format
+        // Transform to match existing API response format (safe for any Prisma Decimal shape)
         const formattedApplications = applications.map(app => ({
             id: app.id,
             user_id: app.userId,
             product_type: app.productType,
             property_type: app.propertyType,
             property_usage: app.propertyUsage,
-            property_state: app.propertyState,
-            property_value: app.propertyValue?.toNumber(),
-            loan_amount: app.loanAmount?.toNumber(),
+            property_state: (app as { propertyState?: string | null }).propertyState ?? null,
+            property_value: toNumber(app.propertyValue),
+            loan_amount: toNumber(app.loanAmount),
             zip_code: app.zipCode,
             employment_status: app.employmentStatus,
-            annual_income: app.annualIncome?.toNumber(),
-            liquid_assets: app.liquidAssets?.toNumber(),
+            annual_income: toNumber(app.annualIncome),
+            liquid_assets: toNumber(app.liquidAssets),
             credit_score: app.creditScore,
             status: app.status,
             admin_notes: app.adminNotes,
@@ -255,15 +266,17 @@ export async function GET() {
                 lender_logo: offer.lenderLogo,
                 product_name: offer.productName,
                 loan_type: offer.loanType,
-                interest_rate: offer.interestRate?.toNumber(),
-                apr: offer.apr?.toNumber(),
-                monthly_payment: offer.monthlyPayment?.toNumber(),
-                closing_costs: offer.closingCosts?.toNumber(),
-                points: offer.points?.toNumber(),
-                origination_fee: offer.originationFee?.toNumber(),
+                interest_rate: toNumber(offer.interestRate),
+                apr: toNumber(offer.apr),
+                monthly_payment: toNumber(offer.monthlyPayment),
+                closing_costs: toNumber(offer.closingCosts),
+                points: toNumber(offer.points),
+                origination_fee: toNumber(offer.originationFee),
                 loan_term: offer.loanTerm,
                 rate_lock_days: offer.rateLockDays,
-                rate_lock_expires: offer.rateLockExpires?.toISOString?.()?.slice(0, 10) ?? null,
+                rate_lock_expires: offer.rateLockExpires instanceof Date
+                    ? offer.rateLockExpires.toISOString().slice(0, 10)
+                    : offer.rateLockExpires ?? null,
                 is_recommended: offer.isRecommended,
                 is_best_match: offer.isBestMatch,
                 is_visible: offer.isVisible,
@@ -280,7 +293,8 @@ export async function GET() {
         )
 
     } catch (error) {
-        console.error('Error:', error)
+        const message = error instanceof Error ? error.message : String(error)
+        console.error('[GET /api/applications]', message, error)
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
