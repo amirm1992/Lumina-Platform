@@ -6,7 +6,7 @@ import { Footer } from '@/components/landing/Footer'
 import { SITE_CONFIG } from '@/lib/constants'
 
 export const metadata: Metadata = {
-    title: `${SITE_CONFIG.name} - Compare Mortgage Rates from Top Lenders`,
+    title: `${SITE_CONFIG.name} - AI-Powered Online Mortgage Platform`,
     description:
         'Compare mortgage rates from 50+ lenders instantly. Get pre-approved in minutes with AI-driven rate matching. Conventional, FHA, VA, and jumbo loans available.',
     alternates: {

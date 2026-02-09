@@ -6,7 +6,7 @@
 export const SITE_CONFIG = {
   name: 'Lumina',
   legalName: 'Lumina Financial Technologies',
-  tagline: 'AI-Powered Mortgage Platform',
+  tagline: 'AI-Powered Online Mortgage Platform',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://lumina.finance',
   description:
     'The future of mortgages. Instant pre-approvals, AI-driven rate comparison, and a 100% digital workflow.',
