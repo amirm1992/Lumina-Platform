@@ -75,16 +75,12 @@ export default function LoginPage() {
                                     card: "!bg-transparent !shadow-none !border-none !p-8 w-full",
                                     headerTitle: "hidden",
                                     headerSubtitle: "hidden",
-                                    // Make inputs pop slightly
                                     formFieldInput: "!bg-white/5 !border-white/10 focus:!border-blue-500/50 !text-white placeholder:!text-white/30 !transition-all",
                                     formFieldLabel: "!text-white/70",
-                                    // Social buttons
                                     socialButtonsBlockButton: "!bg-white/5 hover:!bg-white/10 !border-white/10 !transition-colors",
                                     socialButtonsBlockButtonText: "!text-white/90 !font-medium",
-                                    // Divider
                                     dividerLine: "!bg-white/10",
                                     dividerText: "!text-white/40",
-                                    // Footer
                                     footer: "!bg-transparent !border-none",
                                     footerAction: "!bg-transparent",
                                     footerActionLink: "!text-blue-400 hover:!text-blue-300 !font-medium",
@@ -95,7 +91,7 @@ export default function LoginPage() {
                             routing="path"
                             path="/login"
                             signUpUrl="/apply"
-                            afterSignInUrl={redirectTo}
+                            fallbackRedirectUrl={redirectTo}
                         />
                     </div>
                 </div>
