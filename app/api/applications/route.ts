@@ -246,7 +246,7 @@ export async function GET() {
             product_type: app.productType,
             property_type: app.propertyType,
             property_usage: app.propertyUsage,
-            property_state: (app as { propertyState?: string | null }).propertyState ?? null,
+            property_state: app.propertyState ?? null,
             property_value: toNumber(app.propertyValue),
             loan_amount: toNumber(app.loanAmount),
             zip_code: app.zipCode,
@@ -294,9 +294,10 @@ export async function GET() {
 
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
+        const stack = error instanceof Error ? error.stack?.slice(0, 500) : undefined
         console.error('[GET /api/applications]', message, error)
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: message, _debug_stack: stack },
             { status: 500 }
         )
     }
