@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import type { Application, LenderOffer } from '@/types/database'
 import type { UserProfile, Lender } from '../types'
 import type { AuthUser } from '@/types/auth'
-import { CONSTANT_LENDERS, getPlaceholderLenders } from '@/constants/lenders'
+import { CONSTANT_LENDERS, getPlaceholderLenders, getLenderLogo } from '@/constants/lenders'
 
 // ============================================
 // Helpers (pure functions, no side effects)
@@ -33,6 +33,8 @@ function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
     const rate = offer.interest_rate ?? 0
     const term = offer.loan_term ?? 30
     const calculatedPayment = calculateMonthlyPayment(loanAmount, rate, term)
+    // Use DB logo first, fall back to constant lender logo
+    const logo = offer.lender_logo || getLenderLogo(offer.lender_name) || undefined
     return {
         id: offer.id,
         name: offer.lender_name,
@@ -45,7 +47,7 @@ function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
         closingCosts: offer.closing_costs ?? 0,
         isRecommended: offer.is_recommended,
         bestMatch: offer.is_best_match ?? false,
-        logo: offer.lender_logo ?? undefined,
+        logo,
     }
 }
 
@@ -69,11 +71,8 @@ function mergeOffersWithConstants(dbOffers: Lender[]): Lender[] {
         } as Lender
     })
 
-    const otherOffers = dbOffers.filter(
-        (o) => !CONSTANT_LENDERS.some((c) => dbOfferMatchesConstant(o.name, c.name))
-    )
-
-    return [...mergedOffers, ...otherOffers].sort((a, b) => {
+    // Only show lenders that are in CONSTANT_LENDERS — hide legacy/removed lenders
+    return mergedOffers.sort((a, b) => {
         if (a.isPlaceholder && !b.isPlaceholder) return 1
         if (!a.isPlaceholder && b.isPlaceholder) return -1
         return a.rate - b.rate
