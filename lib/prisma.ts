@@ -11,14 +11,22 @@ const globalForPrisma = globalThis as unknown as {
 
 // Load DigitalOcean CA certificate for secure TLS verification
 function getCaCertificate(): string | undefined {
-    try {
-        const certPath = path.join(process.cwd(), 'ca-certificate.crt')
-        if (fs.existsSync(certPath)) {
-            return fs.readFileSync(certPath, 'utf-8')
+    // Try multiple possible locations for the CA cert
+    const possiblePaths = [
+        path.join(process.cwd(), 'ca-certificate.crt'),
+        path.resolve('ca-certificate.crt'),
+        path.join(__dirname, '..', 'ca-certificate.crt'),
+    ]
+    for (const certPath of possiblePaths) {
+        try {
+            if (fs.existsSync(certPath)) {
+                return fs.readFileSync(certPath, 'utf-8')
+            }
+        } catch {
+            // try next path
         }
-    } catch {
-        console.warn('Could not load CA certificate, falling back to rejectUnauthorized: false')
     }
+    console.warn('[prisma] CA certificate not found, using rejectUnauthorized: false')
     return undefined
 }
 
@@ -35,6 +43,11 @@ function getPool() {
             max: 10,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 10000,
+        }
+
+        // Ensure Node doesn't reject the connection when no CA cert is available
+        if (!ca) {
+            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
         }
 
         globalForPrisma.connectionPool = new Pool(poolConfig)

@@ -240,52 +240,65 @@ export async function GET() {
         })
 
         // Transform to match existing API response format (safe for any Prisma Decimal shape)
-        const formattedApplications = applications.map(app => ({
-            id: app.id,
-            user_id: app.userId,
-            product_type: app.productType,
-            property_type: app.propertyType,
-            property_usage: app.propertyUsage,
-            property_state: app.propertyState ?? null,
-            property_value: toNumber(app.propertyValue),
-            loan_amount: toNumber(app.loanAmount),
-            zip_code: app.zipCode,
-            employment_status: app.employmentStatus,
-            annual_income: toNumber(app.annualIncome),
-            liquid_assets: toNumber(app.liquidAssets),
-            credit_score: app.creditScore,
-            status: app.status,
-            admin_notes: app.adminNotes,
-            created_at: app.createdAt,
-            updated_at: app.updatedAt,
-            offers_published_at: app.offersPublishedAt,
-            lender_offers: app.lenderOffers.map(offer => ({
-                id: offer.id,
-                application_id: offer.applicationId,
-                lender_name: offer.lenderName,
-                lender_logo: offer.lenderLogo,
-                product_name: offer.productName,
-                loan_type: offer.loanType,
-                interest_rate: toNumber(offer.interestRate),
-                apr: toNumber(offer.apr),
-                monthly_payment: toNumber(offer.monthlyPayment),
-                closing_costs: toNumber(offer.closingCosts),
-                points: toNumber(offer.points),
-                origination_fee: toNumber(offer.originationFee),
-                loan_term: offer.loanTerm,
-                rate_lock_days: offer.rateLockDays,
-                rate_lock_expires: offer.rateLockExpires instanceof Date
-                    ? offer.rateLockExpires.toISOString().slice(0, 10)
-                    : offer.rateLockExpires ?? null,
-                is_recommended: offer.isRecommended,
-                is_best_match: offer.isBestMatch,
-                is_visible: offer.isVisible,
-                source: offer.source,
-                external_id: offer.externalId,
-                created_at: offer.createdAt,
-                updated_at: offer.updatedAt
-            }))
-        }))
+        let formattedApplications;
+        try {
+            formattedApplications = applications.map(app => {
+                try {
+                    return {
+                        id: app.id,
+                        user_id: app.userId,
+                        product_type: app.productType,
+                        property_type: app.propertyType,
+                        property_usage: app.propertyUsage,
+                        property_state: app.propertyState ?? null,
+                        property_value: toNumber(app.propertyValue),
+                        loan_amount: toNumber(app.loanAmount),
+                        zip_code: app.zipCode,
+                        employment_status: app.employmentStatus,
+                        annual_income: toNumber(app.annualIncome),
+                        liquid_assets: toNumber(app.liquidAssets),
+                        credit_score: app.creditScore,
+                        status: app.status,
+                        admin_notes: app.adminNotes,
+                        created_at: app.createdAt,
+                        updated_at: app.updatedAt,
+                        offers_published_at: app.offersPublishedAt,
+                        lender_offers: app.lenderOffers.map(offer => ({
+                            id: offer.id,
+                            application_id: offer.applicationId,
+                            lender_name: offer.lenderName,
+                            lender_logo: offer.lenderLogo,
+                            product_name: offer.productName,
+                            loan_type: offer.loanType,
+                            interest_rate: toNumber(offer.interestRate),
+                            apr: toNumber(offer.apr),
+                            monthly_payment: toNumber(offer.monthlyPayment),
+                            closing_costs: toNumber(offer.closingCosts),
+                            points: toNumber(offer.points),
+                            origination_fee: toNumber(offer.originationFee),
+                            loan_term: offer.loanTerm,
+                            rate_lock_days: offer.rateLockDays,
+                            rate_lock_expires: offer.rateLockExpires instanceof Date
+                                ? offer.rateLockExpires.toISOString().slice(0, 10)
+                                : offer.rateLockExpires ?? null,
+                            is_recommended: offer.isRecommended,
+                            is_best_match: offer.isBestMatch,
+                            is_visible: offer.isVisible,
+                            source: offer.source,
+                            external_id: offer.externalId,
+                            created_at: offer.createdAt,
+                            updated_at: offer.updatedAt
+                        }))
+                    }
+                } catch (mapErr) {
+                    console.error('Error mapping application:', app.id, mapErr);
+                    throw mapErr;
+                }
+            })
+        } catch (totalMapErr) {
+            console.error('Total mapping error:', totalMapErr);
+            throw totalMapErr;
+        }
 
         return NextResponse.json(
             { applications: formattedApplications },
@@ -294,10 +307,9 @@ export async function GET() {
 
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
-        const stack = error instanceof Error ? error.stack?.slice(0, 500) : undefined
         console.error('[GET /api/applications]', message, error)
         return NextResponse.json(
-            { error: message, _debug_stack: stack },
+            { error: 'Internal server error' },
             { status: 500 }
         )
     }
