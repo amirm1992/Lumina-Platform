@@ -29,12 +29,12 @@ export const CONSTANT_LENDERS: LenderMeta[] = [
     },
     {
         name: 'Pennymac',
-        logo: '',
+        logo: '/logos/pennymac.png',
         description: 'Leading national mortgage lender'
     },
     {
         name: 'New American Funding',
-        logo: '',
+        logo: '/logos/new-american-funding.png',
         description: 'Independent mortgage lender'
     }
 ];
