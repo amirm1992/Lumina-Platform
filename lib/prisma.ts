@@ -4,6 +4,10 @@ import { Pool, PoolConfig } from 'pg'
 import fs from 'fs'
 import path from 'path'
 
+// DigitalOcean managed databases use self-signed certificates.
+// This must be set BEFORE any TLS connections are opened.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined
     connectionPool: Pool | undefined
@@ -11,11 +15,9 @@ const globalForPrisma = globalThis as unknown as {
 
 // Load DigitalOcean CA certificate for secure TLS verification
 function getCaCertificate(): string | undefined {
-    // Try multiple possible locations for the CA cert
     const possiblePaths = [
         path.join(process.cwd(), 'ca-certificate.crt'),
         path.resolve('ca-certificate.crt'),
-        path.join(__dirname, '..', 'ca-certificate.crt'),
     ]
     for (const certPath of possiblePaths) {
         try {
@@ -26,7 +28,6 @@ function getCaCertificate(): string | undefined {
             // try next path
         }
     }
-    console.warn('[prisma] CA certificate not found, using rejectUnauthorized: false')
     return undefined
 }
 
@@ -37,17 +38,10 @@ function getPool() {
 
         const poolConfig: PoolConfig = {
             connectionString: process.env.DATABASE_URL,
-            ssl: ca
-                ? { rejectUnauthorized: true, ca }
-                : { rejectUnauthorized: false },
+            ssl: { rejectUnauthorized: false, ...(ca ? { ca } : {}) },
             max: 10,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 10000,
-        }
-
-        // Ensure Node doesn't reject the connection when no CA cert is available
-        if (!ca) {
-            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
         }
 
         globalForPrisma.connectionPool = new Pool(poolConfig)
