@@ -23,9 +23,9 @@ export const CONSTANT_LENDERS: LenderMeta[] = [
         description: 'FHA & VA Specialist'
     },
     {
-        name: 'Better',
-        logo: '/logos/logo-2.jpg',
-        description: 'Digital-first lender'
+        name: 'Kind Lending',
+        logo: '/logos/kind-lending.png',
+        description: 'People-first mortgage lender'
     },
     {
         name: 'Pennymac',
