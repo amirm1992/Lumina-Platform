@@ -41,6 +41,10 @@ export function CreateAccount() {
             annualIncome: applicationState.annualIncome,
             liquidAssets: applicationState.liquidAssets,
             creditScore: applicationState.creditScore,
+            ssn: applicationState.ssn || undefined,
+            consentSoftPull: applicationState.consentSoftPull || false,
+            consentSignedAt: applicationState.consentSignedAt || undefined,
+            consentSignedName: applicationState.consentSignedName || undefined,
         }
 
         let lastError: string | null = null

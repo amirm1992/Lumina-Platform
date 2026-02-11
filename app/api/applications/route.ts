@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 import { VALIDATION, FINANCIAL_DEFAULTS } from '@/lib/constants'
+import { encrypt } from '@/lib/encryption'
 
 // ── Validation helpers (using centralized constants) ──
 
@@ -116,6 +117,22 @@ export async function POST(request: NextRequest) {
             ? FINANCIAL_DEFAULTS.creditScoreMap[body.creditScore as string] ?? null
             : null
 
+        // Encrypt SSN if provided (9 digits)
+        const rawSsn = typeof body.ssn === 'string' ? body.ssn.replace(/\D/g, '') : ''
+        const ssnEncrypted = rawSsn.length === 9 ? encrypt(rawSsn) : null
+        const consentSoftPull = ssnEncrypted ? Boolean(body.consentSoftPull) : false
+        const consentSignedAt = consentSoftPull && body.consentSignedAt
+            ? new Date(body.consentSignedAt)
+            : null
+        const consentSignedName = consentSoftPull && typeof body.consentSignedName === 'string'
+            ? body.consentSignedName.trim()
+            : null
+        // Capture client IP for consent record
+        const forwarded = request.headers.get('x-forwarded-for')
+        const consentIpAddress = consentSoftPull
+            ? (forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown')
+            : null
+
         const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : ''
         const lastName = typeof body.lastName === 'string' ? body.lastName.trim() : ''
         const fullName = `${firstName} ${lastName}`.trim()
@@ -143,6 +160,11 @@ export async function POST(request: NextRequest) {
                     annualIncome: body.annualIncome,
                     liquidAssets: body.liquidAssets,
                     creditScore: creditScoreNumeric,
+                    ssnEncrypted: ssnEncrypted || undefined,
+                    consentSoftPull,
+                    consentSignedAt: consentSignedAt || undefined,
+                    consentSignedName: consentSignedName || undefined,
+                    consentIpAddress: consentIpAddress || undefined,
                     status: 'pending'
                 }
             })

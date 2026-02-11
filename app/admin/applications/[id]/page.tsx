@@ -8,6 +8,9 @@ import { ApplicationStatusForm } from '@/components/admin/ApplicationStatusForm'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { DocumentsSection } from '@/components/admin/DocumentsSection'
 import { AdminOfferSlots } from '@/components/admin/AdminOfferSlots'
+import { DeleteApplicationButton } from '@/components/admin/DeleteApplicationButton'
+import { SSNDisplay } from '@/components/admin/SSNDisplay'
+import { ConsentRecord } from '@/components/admin/ConsentRecord'
 import prisma from '@/lib/prisma'
 import type { Document, DocumentCategory } from '@/types/database'
 
@@ -51,6 +54,23 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         updated_at: d.updatedAt?.toISOString() || new Date().toISOString(),
     }))
 
+    // Fetch SSN + consent metadata (not the actual SSN — that's fetched on-demand via API)
+    const ssnFlags = await prisma.application.findUnique({
+        where: { id },
+        select: {
+            ssnEncrypted: true,
+            consentSoftPull: true,
+            consentSignedAt: true,
+            consentSignedName: true,
+            consentIpAddress: true,
+        },
+    })
+    const hasSSN = !!ssnFlags?.ssnEncrypted
+    const hasConsent = ssnFlags?.consentSoftPull ?? false
+    const consentSignedAt = ssnFlags?.consentSignedAt?.toISOString() ?? null
+    const consentSignedName = ssnFlags?.consentSignedName ?? null
+    const consentIpAddress = ssnFlags?.consentIpAddress ?? null
+
     const profile = application.profile as { email?: string; full_name?: string; phone?: string } | undefined
 
     // Calculate derived values
@@ -87,6 +107,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                         </p>
                     </div>
                 </div>
+                <DeleteApplicationButton
+                    applicationId={id}
+                    applicationLabel={`#${id.slice(0, 8)} — ${profile?.full_name || profile?.email || 'Unknown'}`}
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -110,6 +134,24 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Phone</p>
                                 <p className="text-gray-900">{profile?.phone || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">SSN (Soft Pull)</p>
+                                <SSNDisplay
+                                    applicationId={id}
+                                    hasSSN={hasSSN}
+                                    hasConsent={hasConsent}
+                                />
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Credit Authorization</p>
+                                <ConsentRecord
+                                    hasConsent={hasConsent}
+                                    signedAt={consentSignedAt}
+                                    signedName={consentSignedName}
+                                    ipAddress={consentIpAddress}
+                                    borrowerName={profile?.full_name || 'N/A'}
+                                />
                             </div>
                         </div>
                     </div>

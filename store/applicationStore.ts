@@ -25,6 +25,10 @@ export interface ApplicationState {
     employmentStatus: EmploymentStatus
     annualIncome: number
     liquidAssets: number
+    ssn: string
+    consentSoftPull: boolean
+    consentSignedAt: string
+    consentSignedName: string
     email: string
     currentStep: number
     isCompleted: boolean
@@ -42,6 +46,10 @@ export interface ApplicationState {
     setEmploymentStatus: (status: EmploymentStatus) => void
     setAnnualIncome: (income: number) => void
     setLiquidAssets: (assets: number) => void
+    setSsn: (ssn: string) => void
+    setConsentSoftPull: (consent: boolean) => void
+    setConsentSignedAt: (timestamp: string) => void
+    setConsentSignedName: (name: string) => void
     setEmail: (email: string) => void
     setCurrentStep: (step: number) => void
     nextStep: () => void
@@ -65,6 +73,10 @@ const initialState = {
     employmentStatus: null as EmploymentStatus,
     annualIncome: 0,
     liquidAssets: 0,
+    ssn: '',
+    consentSoftPull: false,
+    consentSignedAt: '',
+    consentSignedName: '',
     email: '',
     currentStep: 1,
     isCompleted: false,
@@ -88,6 +100,10 @@ export const useApplicationStore = create<ApplicationState>()(
             setEmploymentStatus: (status) => set({ employmentStatus: status }),
             setAnnualIncome: (income) => set({ annualIncome: income }),
             setLiquidAssets: (assets) => set({ liquidAssets: assets }),
+            setSsn: (ssn) => set({ ssn }),
+            setConsentSoftPull: (consent) => set({ consentSoftPull: consent }),
+            setConsentSignedAt: (timestamp) => set({ consentSignedAt: timestamp }),
+            setConsentSignedName: (name) => set({ consentSignedName: name }),
             setEmail: (email) => set({ email: email }),
             setCurrentStep: (step) => set({ currentStep: step }),
             nextStep: () => set((state) => ({ currentStep: state.currentStep + 1 })),

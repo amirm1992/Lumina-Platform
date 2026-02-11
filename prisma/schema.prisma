@@ -88,6 +88,11 @@ model Application {
   creditScoreSource String?       @map("credit_score_source")
   creditScoreDate   DateTime?     @map("credit_score_date") @db.Date
   creditNotes       String?       @map("credit_notes")
+  ssnEncrypted      String?       @map("ssn_encrypted")
+  consentSoftPull   Boolean       @default(false) @map("consent_soft_pull")
+  consentSignedAt   DateTime?     @map("consent_signed_at")
+  consentSignedName String?       @map("consent_signed_name")
+  consentIpAddress  String?       @map("consent_ip_address")
   dtiRatio          Decimal?      @map("dti_ratio")
   status            String        @default("pending")
   adminNotes        String?       @map("admin_notes")

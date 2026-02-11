@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Application } from '@/types/database'
 import { StatusBadge } from './StatusBadge'
 import { Eye } from 'lucide-react'
+import { DeleteApplicationButton } from './DeleteApplicationButton'
 
 interface ApplicationsTableProps {
     applications: Application[]
@@ -93,13 +94,20 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                                     </p>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <Link
-                                        href={`/admin/applications/${app.id}`}
-                                        className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 font-medium text-sm"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        View
-                                    </Link>
+                                    <div className="inline-flex items-center gap-3">
+                                        <Link
+                                            href={`/admin/applications/${app.id}`}
+                                            className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 font-medium text-sm"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View
+                                        </Link>
+                                        <DeleteApplicationButton
+                                            applicationId={app.id}
+                                            applicationLabel={`#${app.id.slice(0, 8)} — ${profile?.full_name || profile?.email || 'Unknown'}`}
+                                            variant="icon"
+                                        />
+                                    </div>
                                 </td>
                             </tr>
                         )
