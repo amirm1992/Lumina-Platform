@@ -46,6 +46,14 @@ export interface Application {
     credit_score_source: CreditScoreSource | null
     credit_score_date: string | null
     credit_notes: string | null
+
+    // SSN & credit consent
+    ssn_encrypted: string | null
+    consent_soft_pull: boolean
+    consent_signed_at: string | null
+    consent_signed_name: string | null
+    consent_ip_address: string | null
+
     dti_ratio: number | null
 
     // Status & workflow

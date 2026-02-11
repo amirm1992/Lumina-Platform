@@ -68,6 +68,11 @@ interface PrismaApplication {
     creditScoreSource: string | null
     creditScoreDate: Date | null
     creditNotes: string | null
+    ssnEncrypted: string | null
+    consentSoftPull: boolean
+    consentSignedAt: Date | null
+    consentSignedName: string | null
+    consentIpAddress: string | null
     dtiRatio: { toNumber(): number } | number | null
     status: string
     adminNotes: string | null
@@ -172,6 +177,11 @@ export function mapApplication(a: PrismaApplication): Application {
         credit_score_source: a.creditScoreSource as Application['credit_score_source'],
         credit_score_date: toDateString(a.creditScoreDate),
         credit_notes: a.creditNotes,
+        ssn_encrypted: a.ssnEncrypted ?? null,
+        consent_soft_pull: a.consentSoftPull,
+        consent_signed_at: a.consentSignedAt?.toISOString() ?? null,
+        consent_signed_name: a.consentSignedName ?? null,
+        consent_ip_address: a.consentIpAddress ?? null,
         dti_ratio: toNum(a.dtiRatio),
         status: a.status as ApplicationStatus,
         admin_notes: a.adminNotes ?? null,
