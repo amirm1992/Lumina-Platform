@@ -3,6 +3,7 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import prisma from '@/lib/prisma'
 import { validateFile, buildStorageKey, getUploadUrl, uploadFileToSpaces } from '@/lib/storage'
 import type { DocumentCategory } from '@/types/database'
+import { sendAdminDocumentUploadedEmail } from '@/utils/email/send-email'
 
 // POST /api/documents/upload
 // Two modes:
@@ -58,6 +59,19 @@ export async function POST(req: NextRequest) {
                 },
             })
 
+            // Notify admin of new upload (non-blocking)
+            try {
+                await sendAdminDocumentUploadedEmail({
+                    uploaderName: uploaderName,
+                    uploaderEmail: user?.emailAddresses[0]?.emailAddress,
+                    documentName: file.name,
+                    category,
+                    applicationId: applicationId,
+                })
+            } catch (emailErr) {
+                console.error('Admin doc upload email warning:', emailErr)
+            }
+
             return NextResponse.json({
                 document: {
                     id: doc.id,
@@ -107,6 +121,19 @@ export async function POST(req: NextRequest) {
                 status: 'pending_review',
             },
         })
+
+        // Notify admin of new upload (non-blocking)
+        try {
+            await sendAdminDocumentUploadedEmail({
+                uploaderName: uploaderName,
+                uploaderEmail: user?.emailAddresses[0]?.emailAddress,
+                documentName: fileName,
+                category,
+                applicationId: applicationId,
+            })
+        } catch (emailErr) {
+            console.error('Admin doc upload email warning:', emailErr)
+        }
 
         return NextResponse.json({
             uploadUrl,

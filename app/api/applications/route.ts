@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import prisma from '@/lib/prisma'
+import { sendApplicationReceivedEmail, sendAdminNewApplicationEmail } from '@/utils/email/send-email'
 
 // Prevent Next.js from caching this route — admin updates must be reflected immediately
 export const dynamic = 'force-dynamic'
@@ -217,6 +218,30 @@ export async function POST(request: NextRequest) {
             }
         } catch (clerkError) {
             console.error('Clerk sync warning:', clerkError)
+            // Don't fail the request — application is already saved
+        }
+
+        // Send notification emails (non-blocking — application already saved)
+        try {
+            // Client confirmation
+            if (email) {
+                await sendApplicationReceivedEmail({
+                    to: email,
+                    name: fullName || 'Valued Client',
+                    applicationId: application.id,
+                })
+            }
+
+            // Admin alert
+            await sendAdminNewApplicationEmail({
+                applicantName: fullName || 'Unknown',
+                applicantEmail: email || 'N/A',
+                applicationId: application.id,
+                productType: body.productType,
+                loanAmount: body.loanAmount,
+            })
+        } catch (emailErr) {
+            console.error('Email notification warning:', emailErr)
             // Don't fail the request — application is already saved
         }
 

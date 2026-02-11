@@ -1,29 +1,27 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, Send } from 'lucide-react'
+import { X, Send, Loader2 } from 'lucide-react'
 
 interface ComposeModalProps {
     isOpen: boolean
     onClose: () => void
-    onSend: (to: string, subject: string, body: string) => void
+    onSend: (subject: string, message: string) => Promise<void>
+    sending?: boolean
 }
 
-export function ComposeModal({ isOpen, onClose, onSend }: ComposeModalProps) {
-    const [to, setTo] = useState('support@lumina.com')
+export function ComposeModal({ isOpen, onClose, onSend, sending }: ComposeModalProps) {
     const [subject, setSubject] = useState('')
     const [body, setBody] = useState('')
 
     if (!isOpen) return null
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        onSend(to, subject, body)
-        // Reset
-        setTo('support@lumina.com')
+        if (!subject.trim() || !body.trim()) return
+        await onSend(subject.trim(), body.trim())
         setSubject('')
         setBody('')
-        onClose()
     }
 
     return (
@@ -51,11 +49,10 @@ export function ComposeModal({ isOpen, onClose, onSend }: ComposeModalProps) {
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">To</label>
                             <input
-                                type="email"
-                                value={to}
-                                onChange={(e) => setTo(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-black focus:outline-none focus:border-purple-500 transition-colors"
-                                placeholder="Recipient"
+                                type="text"
+                                value="Lumina Support (support@golumina.net)"
+                                disabled
+                                className="w-full bg-gray-100 border border-gray-200 rounded-lg px-4 py-2 text-gray-500 cursor-not-allowed"
                             />
                         </div>
                         <div>
@@ -65,7 +62,7 @@ export function ComposeModal({ isOpen, onClose, onSend }: ComposeModalProps) {
                                 value={subject}
                                 onChange={(e) => setSubject(e.target.value)}
                                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-black focus:outline-none focus:border-purple-500 transition-colors"
-                                placeholder="Subject"
+                                placeholder="What's this about?"
                                 autoFocus
                             />
                         </div>
@@ -83,11 +80,20 @@ export function ComposeModal({ isOpen, onClose, onSend }: ComposeModalProps) {
                     <div className="flex justify-end pt-6 mt-2">
                         <button
                             type="submit"
-                            disabled={!subject || !body}
+                            disabled={!subject.trim() || !body.trim() || sending}
                             className="px-6 py-2.5 bg-black hover:bg-gray-800 text-white font-bold rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-black/10"
                         >
-                            <Send className="w-4 h-4" />
-                            Send Message
+                            {sending ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4" />
+                                    Send Message
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

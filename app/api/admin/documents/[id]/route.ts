@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isUserAdmin } from '@/utils/admin/api'
 import prisma from '@/lib/prisma'
 import { getDownloadUrl, deleteFileFromSpaces } from '@/lib/storage'
+import { sendDocumentRejectedEmail } from '@/utils/email/send-email'
 
 // GET /api/admin/documents/[id] — get signed download URL (admin can download any doc)
 export async function GET(
@@ -42,9 +43,9 @@ export async function PATCH(
 
         const { id } = params
         const body = await req.json()
-        const { status, adminNotes } = body as { status?: string; adminNotes?: string }
+        const { status, adminNotes, notify_client } = body as { status?: string; adminNotes?: string; notify_client?: boolean }
 
-        const updateData: any = {}
+        const updateData: Record<string, unknown> = {}
         if (status) updateData.status = status
         if (adminNotes !== undefined) updateData.adminNotes = adminNotes
 
@@ -52,6 +53,27 @@ export async function PATCH(
             where: { id },
             data: updateData,
         })
+
+        // Send rejection email if status changed to "rejected" and admin opted to notify
+        if (status === 'rejected' && notify_client) {
+            try {
+                const profile = await prisma.profile.findUnique({
+                    where: { id: doc.userId },
+                    select: { email: true, fullName: true },
+                })
+                if (profile?.email) {
+                    await sendDocumentRejectedEmail({
+                        to: profile.email,
+                        name: profile.fullName || 'Valued Client',
+                        documentName: doc.fileName,
+                        category: doc.category,
+                        reason: adminNotes || undefined,
+                    })
+                }
+            } catch (emailErr) {
+                console.error('Doc rejection email warning:', emailErr)
+            }
+        }
 
         return NextResponse.json({
             document: {

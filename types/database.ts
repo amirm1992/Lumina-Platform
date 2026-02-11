@@ -195,6 +195,24 @@ export interface Document {
     updated_at: string
 }
 
+// Document request status
+export type DocumentRequestStatus = 'requested' | 'fulfilled' | 'cancelled'
+
+// Document request (underwriting requests additional docs)
+export interface DocumentRequest {
+    id: string
+    application_id: string
+    title: string
+    category: string | null
+    instructions: string | null
+    status: DocumentRequestStatus
+    created_by: string
+    fulfilled_at: string | null
+    cancelled_at: string | null
+    created_at: string
+    updated_at: string
+}
+
 // Predefined document slot definitions
 export interface DocumentSlotDef {
     category: DocumentCategory
