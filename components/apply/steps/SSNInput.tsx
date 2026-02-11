@@ -82,7 +82,7 @@ export function SSNInput() {
         router.push('/apply/step/10')
     }
 
-    const maskValue = (val: string) => showSSN ? val : val.replace(/./g, '•')
+    const displayValue = (val: string) => showSSN ? val : '•'.repeat(val.length)
 
     return (
         <div className="space-y-6">
@@ -109,39 +109,94 @@ export function SSNInput() {
                 <label className="block text-sm text-gray-500 mb-3">Social Security Number</label>
                 <div className="flex items-center gap-2">
                     <input
-                        type={showSSN ? 'text' : 'password'}
+                        type="text"
                         inputMode="numeric"
                         autoComplete="off"
-                        value={showSSN ? part1 : maskValue(part1)}
-                        onChange={(e) => handlePart1(e.target.value)}
+                        value={displayValue(part1)}
+                        onChange={(e) => {
+                            // When masked, the user's new keystroke appends to bullets.
+                            // Extract only the raw digit(s) the user just typed and
+                            // append to the real value stored in state.
+                            const raw = e.target.value
+                            if (showSSN) {
+                                handlePart1(raw)
+                            } else {
+                                const newChars = raw.replace(/•/g, '').replace(/\D/g, '')
+                                handlePart1((part1 + newChars).slice(0, 3))
+                            }
+                        }}
+                        onKeyDown={(e) => {
+                            if (!showSSN && e.key === 'Backspace') {
+                                e.preventDefault()
+                                setPart1(part1.slice(0, -1))
+                            }
+                        }}
                         placeholder="•••"
-                        maxLength={3}
+                        maxLength={showSSN ? 3 : undefined}
                         className="w-24 p-4 rounded-xl bg-white border border-gray-200 text-black text-center text-xl tracking-[0.3em] placeholder:text-gray-300 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                     <span className="text-gray-300 text-2xl font-light">—</span>
                     <input
                         ref={ref2}
-                        type={showSSN ? 'text' : 'password'}
+                        type="text"
                         inputMode="numeric"
                         autoComplete="off"
-                        value={showSSN ? part2 : maskValue(part2)}
-                        onChange={(e) => handlePart2(e.target.value)}
-                        onKeyDown={handleBackspace2}
+                        value={displayValue(part2)}
+                        onChange={(e) => {
+                            const raw = e.target.value
+                            if (showSSN) {
+                                handlePart2(raw)
+                            } else {
+                                const newChars = raw.replace(/•/g, '').replace(/\D/g, '')
+                                handlePart2((part2 + newChars).slice(0, 2))
+                            }
+                        }}
+                        onKeyDown={(e) => {
+                            if (!showSSN && e.key === 'Backspace') {
+                                e.preventDefault()
+                                if (part2 === '') {
+                                    setPart1(part1.slice(0, -1))
+                                } else {
+                                    setPart2(part2.slice(0, -1))
+                                }
+                            } else {
+                                handleBackspace2(e)
+                            }
+                        }}
                         placeholder="••"
-                        maxLength={2}
+                        maxLength={showSSN ? 2 : undefined}
                         className="w-20 p-4 rounded-xl bg-white border border-gray-200 text-black text-center text-xl tracking-[0.3em] placeholder:text-gray-300 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                     <span className="text-gray-300 text-2xl font-light">—</span>
                     <input
                         ref={ref3}
-                        type={showSSN ? 'text' : 'password'}
+                        type="text"
                         inputMode="numeric"
                         autoComplete="off"
-                        value={showSSN ? part3 : maskValue(part3)}
-                        onChange={(e) => handlePart3(e.target.value)}
-                        onKeyDown={handleBackspace3}
+                        value={displayValue(part3)}
+                        onChange={(e) => {
+                            const raw = e.target.value
+                            if (showSSN) {
+                                handlePart3(raw)
+                            } else {
+                                const newChars = raw.replace(/•/g, '').replace(/\D/g, '')
+                                handlePart3((part3 + newChars).slice(0, 4))
+                            }
+                        }}
+                        onKeyDown={(e) => {
+                            if (!showSSN && e.key === 'Backspace') {
+                                e.preventDefault()
+                                if (part3 === '') {
+                                    ref2.current?.focus()
+                                } else {
+                                    setPart3(part3.slice(0, -1))
+                                }
+                            } else {
+                                handleBackspace3(e)
+                            }
+                        }}
                         placeholder="••••"
-                        maxLength={4}
+                        maxLength={showSSN ? 4 : undefined}
                         className="w-28 p-4 rounded-xl bg-white border border-gray-200 text-black text-center text-xl tracking-[0.3em] placeholder:text-gray-300 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all shadow-sm"
                     />
                     <button

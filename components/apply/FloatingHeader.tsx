@@ -5,8 +5,8 @@ import Image from 'next/image'
 
 export function FloatingHeader() {
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 flex items-start justify-between px-6 py-6 bg-transparent pointer-events-none">
-            <div className="pointer-events-auto">
+        <header className="fixed top-0 left-0 right-0 z-50 flex items-start justify-between px-4 sm:px-6 py-3 sm:py-6 bg-transparent pointer-events-none">
+            <div className="pointer-events-auto hidden sm:block">
                 <Link href="/" className="block group">
                     <div className="relative w-20 h-20 -mt-2 transition-transform group-hover:scale-105">
                         <Image
@@ -19,7 +19,7 @@ export function FloatingHeader() {
                 </Link>
             </div>
 
-            <div className="pointer-events-auto mt-4">
+            <div className="pointer-events-auto mt-1 sm:mt-4">
                 <Link
                     href="/"
                     className="text-sm text-gray-600 hover:text-black flex items-center gap-2 transition-colors bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-gray-200 hover:bg-white shadow-sm"
