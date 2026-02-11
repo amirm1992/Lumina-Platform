@@ -2,14 +2,16 @@
 
 import React from 'react'
 import { Property } from './types'
-import { X, MapPin, Bed, Bath, Square, Calendar, Hash, DollarSign } from 'lucide-react'
+import { X, MapPin, Bed, Bath, Square, Calendar, Hash, DollarSign, Star, Loader2 } from 'lucide-react'
 
 interface PropertyDetailsModalProps {
     property: Property | null
     onClose: () => void
+    onChoose: (propertyId: string) => void
+    isChoosing?: boolean
 }
 
-export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModalProps) {
+export function PropertyDetailsModal({ property, onClose, onChoose, isChoosing }: PropertyDetailsModalProps) {
     if (!property) return null
 
     return (
@@ -19,7 +21,16 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-4xl max-h-[90vh] bg-white border border-gray-100 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            <div className={`relative w-full max-w-4xl max-h-[90vh] bg-white border-2 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200
+                ${property.isChosen ? 'border-amber-400' : 'border-gray-100'}`}>
+
+                {/* Chosen Banner */}
+                {property.isChosen && (
+                    <div className="bg-amber-400 text-black text-center py-2 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shrink-0">
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                        This is your chosen property — its data is linked to your application
+                    </div>
+                )}
 
                 {/* Header Image */}
                 <div className="relative h-64 md:h-80 shrink-0">
@@ -39,19 +50,23 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
                         <X className="w-6 h-6" />
                     </button>
 
-                    <div className="absolute bottom-6 left-6 md:left-10">
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider backdrop-blur-md
-                                ${(property.status === 'For Sale' && property.price) ? 'bg-green-500/80 text-white' :
+                    {/* Status badge */}
+                    <div className="absolute top-6 left-6">
+                        <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider backdrop-blur-md
+                            ${(property.status === 'For Sale' && property.price) ? 'bg-green-500/80 text-white' :
+                                property.status === 'Pending' ? 'bg-amber-500/80 text-white' :
                                     'bg-gray-700/80 text-white'}
-                            `}>
-                                {!property.price ? 'Off Market' : property.status}
-                            </span>
-                        </div>
+                        `}>
+                            {!property.price ? 'Off Market' : property.status}
+                        </span>
+                    </div>
+
+                    <div className="absolute bottom-6 left-6 md:left-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-white mb-1 shadow-black/50 drop-shadow-lg">{property.addressLine1}</h2>
                         <p className="text-lg text-gray-200 flex items-center gap-2 drop-shadow-md">
                             <MapPin className="w-4 h-4 text-white" />
                             {property.city}, {property.state} {property.zipCode}
+                            {property.county && <span className="text-gray-300">· {property.county}</span>}
                         </p>
                     </div>
                 </div>
@@ -63,7 +78,9 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
                             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">List Price</p>
                             <div className="flex items-center gap-2">
                                 <DollarSign className="w-6 h-6 text-green-500" />
-                                <span className="text-3xl font-bold text-black">${(property.price || 0).toLocaleString()}</span>
+                                <span className="text-3xl font-bold text-black">
+                                    {property.price ? `$${Number(property.price).toLocaleString()}` : 'N/A'}
+                                </span>
                             </div>
                         </div>
                         <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
@@ -78,7 +95,10 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
                             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Size</p>
                             <div className="flex items-center gap-2">
                                 <Square className="w-5 h-5 text-purple-500" />
-                                <span className="text-2xl font-bold text-black">{(property.squareFootage || 0).toLocaleString()} <span className="text-sm font-normal text-gray-500">sqft</span></span>
+                                <span className="text-2xl font-bold text-black">
+                                    {property.squareFootage ? `${Number(property.squareFootage).toLocaleString()}` : '-'}
+                                    <span className="text-sm font-normal text-gray-500"> sqft</span>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -96,16 +116,16 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
                                 </div>
                                 <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
                                     <span className="block text-gray-500 text-xs mb-1">Property Type</span>
-                                    <span className="block text-black font-semibold">{property.propertyType || 'Single Family'}</span>
+                                    <span className="block text-black font-semibold">{property.propertyType || 'N/A'}</span>
                                 </div>
                                 <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
                                     <span className="block text-gray-500 text-xs mb-1">Days on Market</span>
-                                    <span className="block text-black font-semibold">{property.daysOnMarket || 0} Days</span>
+                                    <span className="block text-black font-semibold">{property.daysOnMarket ?? 0} Days</span>
                                 </div>
                                 <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
-                                    <span className="block text-gray-500 text-xs mb-1">Last Updated</span>
+                                    <span className="block text-gray-500 text-xs mb-1">Added</span>
                                     <span className="block text-black font-semibold">
-                                        {property.lastSeenDate ? new Date(property.lastSeenDate).toLocaleDateString() : 'Recent'}
+                                        {new Date(property.createdAt).toLocaleDateString()}
                                     </span>
                                 </div>
                             </div>
@@ -127,11 +147,36 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
 
                 {/* Footer Action */}
                 <div className="p-6 border-t border-gray-100 bg-gray-50 shrink-0 flex gap-4">
-                    <button className="flex-1 py-4 bg-black hover:bg-gray-800 text-white rounded-xl font-bold uppercase tracking-wider transition-all shadow-lg shadow-black/10">
-                        Start Application
-                    </button>
-                    <button className="flex-1 py-4 bg-white hover:bg-gray-50 text-black rounded-xl font-bold uppercase tracking-wider transition-all border border-gray-200">
-                        Run Analysis
+                    {property.isChosen ? (
+                        <button
+                            onClick={() => onChoose(property.id)}
+                            disabled={isChoosing}
+                            className="flex-1 py-4 bg-amber-400 hover:bg-amber-300 text-black rounded-xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                        >
+                            {isChoosing ? (
+                                <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
+                            ) : (
+                                <><Star className="w-5 h-5 fill-current" /> Remove as Chosen</>
+                            )}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => onChoose(property.id)}
+                            disabled={isChoosing}
+                            className="flex-1 py-4 bg-black hover:bg-gray-800 text-white rounded-xl font-bold uppercase tracking-wider transition-all shadow-lg shadow-black/10 flex items-center justify-center gap-2"
+                        >
+                            {isChoosing ? (
+                                <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
+                            ) : (
+                                <><Star className="w-5 h-5" /> Choose This Property</>
+                            )}
+                        </button>
+                    )}
+                    <button
+                        onClick={onClose}
+                        className="px-8 py-4 bg-white hover:bg-gray-50 text-black rounded-xl font-bold uppercase tracking-wider transition-all border border-gray-200"
+                    >
+                        Close
                     </button>
                 </div>
             </div>

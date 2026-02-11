@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Orbitron } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Toaster } from 'sonner'
 import { ComplianceFooter } from '@/components/layout/ComplianceFooter'
 import { SITE_CONFIG } from '@/lib/constants'
 
@@ -97,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <main className="flex-1">
                         {children}
                     </main>
+                    <Toaster position="bottom-right" richColors closeButton />
                     <ComplianceFooter />
                 </body>
             </html>

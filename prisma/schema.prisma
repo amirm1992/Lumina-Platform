@@ -101,7 +101,11 @@ model Application {
   offersPublishedAt DateTime?     @map("offers_published_at")
   newUserId         String?       @map("new_user_id")
   propertyState     String?       @map("property_state") @db.VarChar(2)
+  propertyAddress   String?       @map("property_address")
+  propertyCity      String?       @map("property_city")
+  propertyCounty    String?       @map("property_county")
   lenderOffers      LenderOffer[]
+  properties        Property[]
 
   @@index([status], map: "idx_applications_status")
   @@index([userId], map: "idx_applications_user_id")
@@ -137,6 +141,38 @@ model LenderOffer {
 
   @@index([applicationId], map: "idx_lender_offers_application_id")
   @@map("lender_offers")
+}
+
+model Property {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String      @map("user_id")
+  applicationId String?     @map("application_id") @db.Uuid
+  addressLine1  String      @map("address_line1")
+  city          String
+  state         String      @db.VarChar(2)
+  zipCode       String      @map("zip_code")
+  county        String?
+  price         Decimal?
+  bedrooms      Int?
+  bathrooms     Decimal?
+  squareFootage Int?        @map("square_footage")
+  yearBuilt     Int?        @map("year_built")
+  propertyType  String?     @map("property_type")
+  lotSize       Decimal?    @map("lot_size")
+  status        String?     @default("For Sale")
+  imageUrl      String?     @map("image_url")
+  description   String?
+  daysOnMarket  Int?        @map("days_on_market")
+  isChosen      Boolean     @default(false) @map("is_chosen")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "idx_properties_user_id")
+  @@index([applicationId], map: "idx_properties_application_id")
+  @@index([userId, isChosen], map: "idx_properties_user_chosen")
+  @@map("properties")
 }
 
 model AdminActivityLog {

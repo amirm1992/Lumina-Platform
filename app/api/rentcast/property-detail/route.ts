@@ -16,78 +16,62 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Address is too short' }, { status: 400 })
     }
 
-    const apiKey = process.env.RAPIDAPI_KEY
-    const apiHost = process.env.RAPIDAPI_HOST || 'real-estate101.p.rapidapi.com'
-
+    const apiKey = process.env.RENTCAST_API_KEY
     if (!apiKey) {
-        console.error('RAPIDAPI_KEY is not configured')
+        console.error('RENTCAST_API_KEY is not configured')
         return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
 
+    const headers = {
+        'Accept': 'application/json',
+        'X-Api-Key': apiKey,
+    }
+
     try {
-        // Format address for Zillow URL pattern
-        const formattedAddress = address.replace(/,/g, '').replace(/\s+/g, '-') + '_rb'
-        const zillowUrl = `https://www.zillow.com/homes/${encodeURIComponent(formattedAddress)}/`
+        // Fetch property records and sale listings in parallel
+        const [propertyRes, listingRes] = await Promise.allSettled([
+            fetch(`https://api.rentcast.io/v1/properties?address=${encodeURIComponent(address)}`, {
+                headers,
+                next: { revalidate: 3600 },
+            }),
+            fetch(`https://api.rentcast.io/v1/listings/sale?address=${encodeURIComponent(address)}`, {
+                headers,
+                next: { revalidate: 3600 },
+            }),
+        ])
 
-        const apiUrl = `https://${apiHost}/api/search/byurl?url=${encodeURIComponent(zillowUrl)}`
-
-        const response = await fetch(apiUrl, {
-            headers: {
-                'x-rapidapi-key': apiKey,
-                'x-rapidapi-host': apiHost,
-            },
-            next: { revalidate: 3600 },
-        })
-
-        if (!response.ok) {
-            throw new Error(`RapidAPI returned status ${response.status}`)
+        // Parse property record data
+        let propertyData: Record<string, unknown> | null = null
+        if (propertyRes.status === 'fulfilled' && propertyRes.value.ok) {
+            const data = await propertyRes.value.json()
+            // API returns an array of property records
+            const records = Array.isArray(data) ? data : []
+            if (records.length > 0) {
+                propertyData = records[0]
+            }
         }
 
-        const data = await response.json()
-
-        if (!data.success && data.error) {
-            console.error('RealEstate101 API error:', data.error)
-            throw new Error(data.error)
+        // Parse listing data
+        let listingData: Record<string, unknown> | null = null
+        if (listingRes.status === 'fulfilled' && listingRes.value.ok) {
+            const data = await listingRes.value.json()
+            const listings = Array.isArray(data) ? data : []
+            if (listings.length > 0) {
+                listingData = listings[0]
+            }
         }
 
-        const properties: Record<string, unknown>[] = data.properties ?? []
-
-        if (properties.length === 0) {
+        // We need at least one data source
+        if (!propertyData && !listingData) {
             return NextResponse.json({ error: 'Property not found' }, { status: 404 })
         }
 
-        const zillowData = properties[0] as Record<string, unknown>
-        const addr = (zillowData.address ?? {}) as Record<string, string>
-
-        const property = {
-            id: zillowData.id || zillowData.zpid,
-            addressLine1: addr.street || address.split(',')[0],
-            city: addr.city,
-            state: addr.state,
-            zipCode: addr.zipcode,
-            price:
-                zillowData.unformattedPrice ||
-                (typeof zillowData.price === 'string'
-                    ? zillowData.price.replace(/[^0-9]/g, '')
-                    : null),
-            status: mapZillowStatus(
-                zillowData.homeStatus as string | undefined,
-                zillowData.marketingStatus as string | undefined
-            ),
-            daysOnMarket: zillowData.daysOnZillow || 0,
-            bedrooms: zillowData.beds,
-            bathrooms: zillowData.baths,
-            squareFootage: zillowData.area || zillowData.livingArea,
-            yearBuilt: zillowData.yearBuilt,
-            propertyType: mapHomeType(zillowData.homeType as string | undefined),
-            imageUrl: zillowData.imgSrc,
-            description: zillowData.statusText,
-            lastSeenDate: new Date().toISOString(),
-        }
+        // Merge data — listing data takes priority for price/status/photos
+        const property = buildPropertyResponse(address, propertyData, listingData)
 
         return NextResponse.json(property)
     } catch (error) {
-        console.error('Property detail fetch error:', error)
+        console.error('RentCast property detail error:', error)
         return NextResponse.json(
             { error: 'Failed to fetch property details' },
             { status: 500 }
@@ -95,18 +79,73 @@ export async function GET(request: Request) {
     }
 }
 
-function mapZillowStatus(homeStatus: string | undefined, marketingStatus: string | undefined): string {
-    const status = (homeStatus || marketingStatus || '').toUpperCase()
-    if (status.includes('FOR_SALE') || status.includes('FOR SALE')) return 'For Sale'
-    if (status.includes('PENDING') || status.includes('UNDER CONTRACT')) return 'Pending'
-    if (status.includes('SOLD')) return 'Sold'
+function buildPropertyResponse(
+    originalAddress: string,
+    propertyData: Record<string, unknown> | null,
+    listingData: Record<string, unknown> | null,
+) {
+    // Property record fields
+    const pAddr = (propertyData?.addressLine1 as string) || ''
+    const pCity = (propertyData?.city as string) || ''
+    const pState = (propertyData?.state as string) || ''
+    const pZip = (propertyData?.zipCode as string) || ''
+    const pCounty = (propertyData?.county as string) || ''
+
+    // Listing fields
+    const lAddr = (listingData?.addressLine1 as string) || ''
+    const lCity = (listingData?.city as string) || ''
+    const lState = (listingData?.state as string) || ''
+    const lZip = (listingData?.zipCode as string) || ''
+
+    // Photos from listing
+    const photos = (listingData?.photos as string[]) || []
+
+    // Price: prefer listing price, fall back to property estimated value
+    const listingPrice = listingData?.price as number | undefined
+    const estimatedValue = (propertyData?.propertyTaxes as Record<string, unknown>)?.assessedValue as number | undefined
+    const price = listingPrice || estimatedValue || null
+
+    // Status from listing
+    const listingStatus = (listingData?.status as string) || ''
+
+    return {
+        addressLine1: lAddr || pAddr || originalAddress.split(',')[0]?.trim(),
+        city: lCity || pCity,
+        state: lState || pState,
+        zipCode: lZip || pZip,
+        county: pCounty || null,
+        price,
+        status: mapStatus(listingStatus),
+        daysOnMarket: (listingData?.daysOnMarket as number) || 0,
+        bedrooms: (propertyData?.bedrooms as number) || (listingData?.bedrooms as number) || null,
+        bathrooms: (propertyData?.bathrooms as number) || (listingData?.bathrooms as number) || null,
+        squareFootage: (propertyData?.squareFootage as number) || (listingData?.squareFootage as number) || null,
+        yearBuilt: (propertyData?.yearBuilt as number) || null,
+        propertyType: mapPropertyType(
+            (propertyData?.propertyType as string) || (listingData?.propertyType as string)
+        ),
+        lotSize: (propertyData?.lotSize as number) || null,
+        imageUrl: photos.length > 0 ? photos[0] : null,
+        description: (listingData?.description as string) || null,
+    }
+}
+
+function mapStatus(status: string): string {
+    if (!status) return 'Off Market'
+    const s = status.toUpperCase()
+    if (s.includes('ACTIVE') || s.includes('FOR_SALE') || s.includes('FOR SALE')) return 'For Sale'
+    if (s.includes('PENDING') || s.includes('UNDER CONTRACT') || s.includes('CONTINGENT')) return 'Pending'
+    if (s.includes('SOLD') || s.includes('CLOSED')) return 'Sold'
     return 'Off Market'
 }
 
-function mapHomeType(type: string | undefined): string {
+function mapPropertyType(type: string | undefined): string {
     if (!type) return 'Single Family'
-    if (type.includes('MULTI')) return 'Multi-Family'
-    if (type.includes('CONDO')) return 'Condo'
-    if (type.includes('TOWNHOUSE')) return 'Townhouse'
+    const t = type.toUpperCase()
+    if (t.includes('MULTI') || t.includes('DUPLEX') || t.includes('TRIPLEX') || t.includes('QUAD')) return 'Multi-Family'
+    if (t.includes('CONDO')) return 'Condo'
+    if (t.includes('TOWNHOUSE') || t.includes('TOWN')) return 'Townhouse'
+    if (t.includes('APARTMENT')) return 'Apartment'
+    if (t.includes('MOBILE') || t.includes('MANUFACTURED')) return 'Mobile Home'
     return 'Single Family'
 }
