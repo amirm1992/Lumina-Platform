@@ -2,6 +2,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore, PropertyType as PT } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const options: { value: PT; label: string }[] = [
     { value: 'single-family', label: 'Single Family Home' },
@@ -14,7 +15,7 @@ export function PropertyType() {
     const router = useRouter()
     const { propertyType, setPropertyType, nextStep, prevStep } = useApplicationStore()
 
-    const handleSelect = (value: PT) => { setPropertyType(value); nextStep(); router.push('/apply/step/3') }
+    const handleSelect = (value: PT) => { setPropertyType(value); trackStepComplete(2); nextStep(); router.push('/apply/step/3') }
     const handleBack = () => { prevStep(); router.push('/apply/step/1') }
 
     return (

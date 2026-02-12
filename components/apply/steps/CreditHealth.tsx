@@ -2,6 +2,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore, CreditScore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const options: { value: CreditScore; label: string; range: string; color: string }[] = [
     { value: 'excellent', label: 'Excellent', range: '740+', color: 'bg-green-50 border-green-500 text-green-700 shadow-sm' },
@@ -14,7 +15,7 @@ export function CreditHealth() {
     const router = useRouter()
     const { creditScore, setCreditScore, nextStep, prevStep } = useApplicationStore()
 
-    const handleSelect = (value: CreditScore) => { setCreditScore(value); nextStep(); router.push('/apply/step/8') }
+    const handleSelect = (value: CreditScore) => { setCreditScore(value); trackStepComplete(7); nextStep(); router.push('/apply/step/8') }
     const handleBack = () => { prevStep(); router.push('/apply/step/6') }
 
     return (

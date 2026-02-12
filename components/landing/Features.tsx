@@ -113,6 +113,28 @@ export function Features() {
                 </div>
             </section>
 
+            {/* Florida CTA Banner */}
+            <section className="py-16 bg-gradient-to-r from-[#EFF6FF] to-[#DBEAFE]">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div>
+                            <div className="text-[#2563EB] font-medium text-sm mb-2">Now Serving Florida</div>
+                            <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A5F] mb-3">
+                                Looking for the best mortgage rates in Florida?
+                            </h2>
+                            <p className="text-gray-600 max-w-xl">
+                                Compare rates from 50+ lenders across Miami, Tampa, Orlando, Jacksonville, and all of Florida. Get pre-approved in minutes.
+                            </p>
+                        </div>
+                        <Link href="/mortgage/florida" className="flex-shrink-0">
+                            <button className="px-8 py-4 rounded-full text-base font-semibold bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all shadow-lg shadow-[#2563EB]/25 whitespace-nowrap">
+                                See Florida Rates
+                            </button>
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="py-20 bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A] relative overflow-hidden">
                 {/* Decorative */}

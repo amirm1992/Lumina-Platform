@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 function formatPhone(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 10)
@@ -32,6 +33,7 @@ export function PersonalIdentity() {
         setFirstName(localFirst.trim())
         setLastName(localLast.trim())
         setPhone(localPhone)
+        trackStepComplete(6)
         nextStep()
         router.push('/apply/step/7')
     }

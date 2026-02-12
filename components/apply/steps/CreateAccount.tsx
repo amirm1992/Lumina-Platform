@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSignUp, useUser, useClerk } from '@clerk/nextjs'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete, trackApplicationSubmitted } from '@/lib/analytics'
 
 export function CreateAccount() {
     const router = useRouter()
@@ -76,6 +77,8 @@ export function CreateAccount() {
     const finalizeSuccess = () => {
         setEmail(localEmail)
         completeApplication()
+        trackStepComplete(12)
+        trackApplicationSubmitted('new_account')
         setSuccess(true)
         setLoading(false)
         router.push('/dashboard')
@@ -215,6 +218,8 @@ export function CreateAccount() {
 
             setEmail(userEmail)
             completeApplication()
+            trackStepComplete(12)
+            trackApplicationSubmitted('existing_account')
             setSuccess(true)
             setLoading(false)
             router.push('/dashboard')

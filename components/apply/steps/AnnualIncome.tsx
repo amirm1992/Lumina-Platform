@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v)
 
@@ -10,7 +11,7 @@ export function AnnualIncome() {
     const { annualIncome, setAnnualIncome, nextStep, prevStep } = useApplicationStore()
     const [localIncome, setLocalIncome] = useState(annualIncome ?? 100000)
 
-    const handleContinue = () => { setAnnualIncome(localIncome); nextStep(); router.push('/apply/step/10') }
+    const handleContinue = () => { setAnnualIncome(localIncome); trackStepComplete(9); nextStep(); router.push('/apply/step/10') }
     const handleBack = () => { prevStep(); router.push('/apply/step/8') }
 
     return (

@@ -5,12 +5,12 @@ import { getAllStateSlugs } from '@/lib/state-configs'
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = SITE_CONFIG.url
 
-    // State-specific landing pages
+    // State-specific landing pages — primary SEO targets
     const statePages: MetadataRoute.Sitemap = getAllStateSlugs().map((slug) => ({
         url: `${baseUrl}/mortgage/${slug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
-        priority: 0.95,
+        priority: 1.0,
     }))
 
     // Public, crawlable routes

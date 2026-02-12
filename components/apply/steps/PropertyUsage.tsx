@@ -2,6 +2,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore, PropertyUsage as PU } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const options: { value: PU; label: string; desc: string }[] = [
     { value: 'primary', label: 'Primary Residence', desc: 'Main home' },
@@ -13,7 +14,7 @@ export function PropertyUsage() {
     const router = useRouter()
     const { propertyUsage, setPropertyUsage, nextStep, prevStep } = useApplicationStore()
 
-    const handleSelect = (value: PU) => { setPropertyUsage(value); nextStep(); router.push('/apply/step/4') }
+    const handleSelect = (value: PU) => { setPropertyUsage(value); trackStepComplete(3); nextStep(); router.push('/apply/step/4') }
     const handleBack = () => { prevStep(); router.push('/apply/step/2') }
 
     return (

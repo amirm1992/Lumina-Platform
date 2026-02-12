@@ -2,6 +2,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore, EmploymentStatus as ES } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const options: { value: ES; label: string }[] = [
     { value: 'salaried', label: 'Salaried / W-2 Employee' },
@@ -14,7 +15,7 @@ export function EmploymentStatus() {
     const router = useRouter()
     const { employmentStatus, setEmploymentStatus, nextStep, prevStep } = useApplicationStore()
 
-    const handleSelect = (value: ES) => { setEmploymentStatus(value); nextStep(); router.push('/apply/step/9') }
+    const handleSelect = (value: ES) => { setEmploymentStatus(value); trackStepComplete(8); nextStep(); router.push('/apply/step/9') }
     const handleBack = () => { prevStep(); router.push('/apply/step/7') }
 
     return (

@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v)
 
@@ -10,7 +11,7 @@ export function LiquidAssets() {
     const { liquidAssets, setLiquidAssets, nextStep, prevStep } = useApplicationStore()
     const [localAssets, setLocalAssets] = useState(liquidAssets ?? 50000)
 
-    const handleContinue = () => { setLiquidAssets(localAssets); nextStep(); router.push('/apply/step/11') }
+    const handleContinue = () => { setLiquidAssets(localAssets); trackStepComplete(10); nextStep(); router.push('/apply/step/11') }
     const handleBack = () => { prevStep(); router.push('/apply/step/9') }
 
     return (

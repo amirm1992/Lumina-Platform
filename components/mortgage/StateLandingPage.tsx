@@ -158,7 +158,7 @@ export function StateLandingPage({ config }: Props) {
                     <div className="text-center mb-16">
                         <div className="text-[#2563EB] font-medium mb-4">Simple Process</div>
                         <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A5F] mb-4">
-                            How It Works
+                            How to Get the Best {config.name} Mortgage Rate
                         </h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
                             From application to closing — entirely online, in four simple steps.
@@ -188,7 +188,7 @@ export function StateLandingPage({ config }: Props) {
                             Why {config.name} Homebuyers Choose Lumina
                         </h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
-                            Traditional mortgages are slow, opaque, and frustrating. We built something better.
+                            Traditional {config.name.toLowerCase()} mortgage lenders are slow, opaque, and frustrating. We built a faster, smarter way to compare {config.name.toLowerCase()} home loan rates.
                         </p>
                     </div>
 
@@ -271,8 +271,7 @@ export function StateLandingPage({ config }: Props) {
                             Ready to find your best {config.name} mortgage rate?
                         </h2>
                         <p className="text-white/70 text-lg mb-10 max-w-2xl mx-auto">
-                            Get pre-approved in minutes. Compare rates from 50+ lenders.
-                            Close faster with our fully digital process.
+                            Get pre-approved for a {config.name.toLowerCase()} home loan in minutes. Compare mortgage rates from 50+ lenders and close faster with our fully digital process.
                         </p>
                         <Link
                             href={applyUrl}

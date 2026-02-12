@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepView } from '@/lib/analytics'
 import {
     ProductSelection, PropertyType, PropertyUsage, LocationInput, ValueLoanSliders,
     PersonalIdentity, CreditHealth, EmploymentStatus, AnnualIncome, LiquidAssets,
@@ -34,6 +35,13 @@ export default function StepPage() {
         if (stepNumber >= 1 && stepNumber <= 12) setCurrentStep(stepNumber)
         else router.replace('/apply/step/1')
     }, [stepNumber, setCurrentStep, router])
+
+    // ── Analytics: track funnel step view ──
+    useEffect(() => {
+        if (stepNumber >= 1 && stepNumber <= 12) {
+            trackStepView(stepNumber)
+        }
+    }, [stepNumber])
 
     const StepComponent = stepComponents[stepNumber]
     if (!StepComponent) return null

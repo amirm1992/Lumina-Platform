@@ -51,21 +51,21 @@ export const STATE_CONFIGS: Record<string, StateConfig> = {
         code: 'FL',
         name: 'Florida',
 
-        headline: 'Smart Mortgage Options for Florida Homebuyers — 100% Online',
+        headline: 'Florida Mortgage Rates — Compare 50+ Lenders & Save',
         subheadline:
-            'Compare rates from top lenders in seconds. AI-powered rate matching, soft credit pull, and a fully digital closing process — built for Florida homebuyers.',
-        ctaText: 'Start My Florida Application',
+            'Find the best Florida mortgage rates in minutes. AI-powered rate matching across 50+ lenders, soft credit pull that won\'t affect your score, and a fully digital closing process — built for Florida homebuyers.',
+        ctaText: 'Get My Florida Rate',
 
         licensingText: `Licensed to originate mortgages in the State of Florida`,
         complianceDisclaimer: `${SITE_CONFIG.name} is a brand of ${SITE_CONFIG.nmls.brokerName} | NMLS #${SITE_CONFIG.nmls.broker}. Licensed by the Florida Office of Financial Regulation. Equal Housing Lender. NMLS Consumer Access: ${SITE_CONFIG.nmls.consumerAccessUrl}`,
 
         marketInsight:
-            "Florida's housing market continues to attract buyers nationwide with competitive rates and growing demand across Miami, Tampa, Orlando, and Jacksonville. Securing the right mortgage has never been more important — Lumina helps Florida homebuyers compare offers from 50+ lenders to find their best rate, all online.",
+            "Florida mortgage rates remain competitive as the state's housing market attracts buyers nationwide — from Miami and Fort Lauderdale to Tampa, Orlando, and Jacksonville. Whether you're a first-time homebuyer in Florida or refinancing an existing home loan, securing the best rate matters. Lumina compares Florida mortgage rates from 50+ lenders so you can find the lowest rate for your situation, entirely online.",
 
         meta: {
-            title: `Florida Mortgage Rates — Compare 50+ Lenders | ${SITE_CONFIG.name}`,
+            title: `Best Florida Mortgage Rates 2026 — Compare 50+ Lenders Online | ${SITE_CONFIG.name}`,
             description:
-                'Compare mortgage rates from top Florida lenders. Get pre-approved in minutes with AI-driven rate matching. Purchase, refinance, and HELOC — 100% online.',
+                'Compare the best Florida mortgage rates from 50+ lenders. Get pre-approved in minutes — FHA, VA, conventional, jumbo, and HELOC. Soft credit pull, 100% online. No obligation.',
         },
 
         schema: {

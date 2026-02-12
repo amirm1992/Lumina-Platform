@@ -2,6 +2,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore, ProductType } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const options: { value: ProductType; label: string; desc: string }[] = [
     { value: 'purchase', label: 'Purchase', desc: 'Buy a new home' },
@@ -15,6 +16,7 @@ export function ProductSelection() {
 
     const handleSelect = (value: ProductType) => {
         setProductType(value)
+        trackStepComplete(1)
         nextStep()
         router.push('/apply/step/2')
     }

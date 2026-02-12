@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 export function SSNInput() {
     const router = useRouter()
@@ -73,6 +74,7 @@ export function SSNInput() {
         setConsentSoftPull(true)
         setConsentSignedAt(new Date().toISOString())
         setConsentSignedName(borrowerName)
+        trackStepComplete(11)
         nextStep()
         router.push('/apply/step/12')
     }

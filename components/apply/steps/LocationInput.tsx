@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 export function LocationInput() {
     const router = useRouter()
@@ -12,7 +13,7 @@ export function LocationInput() {
     const handleContinue = (e?: React.FormEvent) => {
         if (e) e.preventDefault()
         if (!/^\d{5}$/.test(localZip)) { setError('Enter a valid 5-digit ZIP'); return }
-        setZipCode(localZip); nextStep(); router.push('/apply/step/5')
+        setZipCode(localZip); trackStepComplete(4); nextStep(); router.push('/apply/step/5')
     }
     const handleBack = () => { prevStep(); router.push('/apply/step/3') }
 

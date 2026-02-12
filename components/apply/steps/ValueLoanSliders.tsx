@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApplicationStore } from '@/store/applicationStore'
+import { trackStepComplete } from '@/lib/analytics'
 
 const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v)
 
@@ -11,7 +12,7 @@ export function ValueLoanSliders() {
 
     const ltv = estimatedValue > 0 ? (loanAmount / estimatedValue) * 100 : 0
 
-    const handleNext = () => { nextStep(); router.push('/apply/step/6') }
+    const handleNext = () => { trackStepComplete(5); nextStep(); router.push('/apply/step/6') }
     const handleBack = () => { prevStep(); router.push('/apply/step/4') }
 
     return (
