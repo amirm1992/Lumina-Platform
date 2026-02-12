@@ -9,9 +9,10 @@ interface LenderCardProps {
     lender: Lender
     isSelected: boolean
     onSelect: () => void
+    onPreApprove?: () => void
 }
 
-export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
+export function LenderCard({ lender, isSelected, onSelect, onPreApprove }: LenderCardProps) {
     const isPlaceholder = lender.isPlaceholder === true
     return (
         <div
@@ -108,6 +109,12 @@ export function LenderCard({ lender, isSelected, onSelect }: LenderCardProps) {
             <button
                 type="button"
                 disabled={isPlaceholder}
+                onClick={(e) => {
+                    if (isSelected && onPreApprove) {
+                        e.stopPropagation()
+                        onPreApprove()
+                    }
+                }}
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all
                     ${isPlaceholder
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'

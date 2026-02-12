@@ -11,6 +11,26 @@ export type PropertyUsage = 'primary' | 'secondary' | 'investment'
 
 export type LoanType = 'conventional' | 'fha' | 'va' | 'jumbo' | 'usda'
 
+export type MortgageType = 'conventional' | 'fha' | 'va' | 'jumbo'
+
+export type AmortizationType = 'fixed' | 'arm'
+
+export type MaritalStatus = 'married' | 'unmarried' | 'separated'
+
+export type HousingStatus = 'own' | 'rent' | 'rent_free'
+
+export type ZapierPushStatus = 'pending' | 'sent' | 'confirmed' | 'failed'
+
+export type DisclosureType =
+    | 'disclosure_le'
+    | 'disclosure_til'
+    | 'disclosure_intent_to_proceed'
+    | 'disclosure_credit_auth'
+    | 'disclosure_econsent'
+    | 'disclosure_state'
+
+export type DisclosureSignatureStatus = 'pending_signature' | 'signed' | 'expired'
+
 export type CreditScoreSource = 'self_reported' | 'soft_pull' | 'hard_pull' | 'estimated'
 
 // Profile (extends auth.users)
@@ -56,6 +76,53 @@ export interface Application {
 
     dti_ratio: number | null
 
+    // ── 1003 Borrower Details (Pre-Approval Modal) ──
+    date_of_birth: string | null
+    marital_status: MaritalStatus | null
+    first_time_home_buyer: boolean | null
+    preferred_language: string | null
+
+    // ── Current Mailing Address ──
+    mailing_address: string | null
+    mailing_unit: string | null
+    mailing_city: string | null
+    mailing_state: string | null
+    mailing_zip_code: string | null
+    address_duration_months: number | null
+    housing_status: HousingStatus | null
+
+    // ── Employment Details ──
+    employer_name: string | null
+    employer_position: string | null
+    employer_phone: string | null
+    employment_start_date: string | null
+    self_employed: boolean | null
+
+    // ── Loan Preferences ──
+    down_payment: number | null
+    mortgage_type: MortgageType | null
+    loan_term: number | null
+    amortization_type: AmortizationType | null
+    number_of_units: number | null
+
+    // ── Co-Borrower ──
+    has_co_borrower: boolean | null
+    co_borrower_first_name: string | null
+    co_borrower_last_name: string | null
+    co_borrower_email: string | null
+    co_borrower_phone: string | null
+    co_borrower_dob: string | null
+
+    // ── Arive / Zapier Integration ──
+    arive_loan_id: string | null
+    arive_deep_link: string | null
+    zapier_push_status: ZapierPushStatus | null
+    zapier_pushed_at: string | null
+
+    // ── Pre-Approval ──
+    pre_approval_submitted_at: string | null
+    pre_approval_complete: boolean
+
     // Status & workflow
     status: ApplicationStatus
     admin_notes: string | null
@@ -68,6 +135,7 @@ export interface Application {
     // Joined data (optional)
     profile?: Profile
     lender_offers?: LenderOffer[]
+    disclosure_signatures?: DisclosureSignature[]
 }
 
 // Lender Offer
@@ -171,6 +239,12 @@ export type DocumentCategory =
     | 'pre_approval'
     | 'lender_doc'
     | 'insurance'
+    | 'disclosure_le'
+    | 'disclosure_til'
+    | 'disclosure_intent_to_proceed'
+    | 'disclosure_credit_auth'
+    | 'disclosure_econsent'
+    | 'disclosure_state'
     | 'other'
 
 export type DocumentStatus = 'pending_review' | 'approved' | 'rejected'
@@ -232,3 +306,65 @@ export const DOCUMENT_SLOTS: DocumentSlotDef[] = [
     { category: 'insurance', label: "Homeowner's Insurance", description: 'Proof of insurance', required: false },
     { category: 'other', label: 'Other Documents', description: 'Any additional supporting documents', required: false },
 ]
+
+// Disclosure document slots
+export const DISCLOSURE_SLOTS: DocumentSlotDef[] = [
+    { category: 'disclosure_le', label: 'Loan Estimate (LE)', description: 'Initial Loan Estimate disclosure', required: true },
+    { category: 'disclosure_til', label: 'Truth in Lending', description: 'Truth in Lending Act disclosure', required: true },
+    { category: 'disclosure_intent_to_proceed', label: 'Intent to Proceed', description: 'Acknowledge intent to proceed with the loan', required: true },
+    { category: 'disclosure_credit_auth', label: 'Credit Authorization', description: 'Authorization to pull credit report', required: true },
+    { category: 'disclosure_econsent', label: 'E-Sign Consent', description: 'Consent to use electronic signatures', required: true },
+    { category: 'disclosure_state', label: 'State Disclosures', description: 'State-specific required disclosures', required: false },
+]
+
+// Disclosure Signature
+export interface DisclosureSignature {
+    id: string
+    application_id: string
+    disclosure_type: DisclosureType
+    document_id: string | null
+    signed_name: string | null
+    signed_at: string | null
+    signed_ip: string | null
+    status: DisclosureSignatureStatus
+    created_at: string
+    updated_at: string
+}
+
+// Pre-Approval Modal form data
+export interface PreApprovalFormData {
+    // Step 1: Borrower Info
+    date_of_birth: string
+    marital_status: MaritalStatus
+    first_time_home_buyer: boolean
+    preferred_language: string
+
+    // Step 2: Current Residence
+    mailing_address: string
+    mailing_unit?: string
+    mailing_city: string
+    mailing_state: string
+    mailing_zip_code: string
+    address_duration_months: number
+    housing_status: HousingStatus
+
+    // Step 3: Employment Details
+    employer_name: string
+    employer_position: string
+    employer_phone: string
+    employment_start_date: string
+    self_employed: boolean
+
+    // Step 4: Loan Preferences + Co-Borrower
+    down_payment: number
+    mortgage_type: MortgageType
+    loan_term: number
+    amortization_type: AmortizationType
+    number_of_units: number
+    has_co_borrower: boolean
+    co_borrower_first_name?: string
+    co_borrower_last_name?: string
+    co_borrower_email?: string
+    co_borrower_phone?: string
+    co_borrower_dob?: string
+}

@@ -8,6 +8,7 @@ import { PaymentBreakdown } from './PaymentBreakdown'
 import { MarketTrends } from './MarketTrends'
 import { ScenarioAdjuster } from './ScenarioAdjuster'
 import { EditDetailsModal } from './EditDetailsModal'
+import { PreApprovalModal } from './PreApprovalModal'
 import type { AuthUser } from '@/types/auth'
 import { FINANCIAL_DEFAULTS } from '@/lib/constants'
 import { useDashboardData } from './hooks/useDashboardData'
@@ -18,6 +19,7 @@ interface DashboardClientProps {
 
 export function DashboardClient({ user }: DashboardClientProps) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [isPreApprovalOpen, setIsPreApprovalOpen] = useState(false)
 
     const {
         application,
@@ -161,6 +163,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                                 lender={lender}
                                                 isSelected={selectedLenderId === lender.id}
                                                 onSelect={() => setSelectedLenderId(lender.id)}
+                                                onPreApprove={() => setIsPreApprovalOpen(true)}
                                             />
                                         ))}
                                     </div>
@@ -264,6 +267,18 @@ export function DashboardClient({ user }: DashboardClientProps) {
                 }}
                 onSave={handleProfileUpdate}
             />
+
+            {/* Pre-Approval Modal */}
+            {application && (
+                <PreApprovalModal
+                    isOpen={isPreApprovalOpen}
+                    onClose={() => setIsPreApprovalOpen(false)}
+                    applicationId={application.id}
+                    lenderName={selectedLender?.name || 'Lender'}
+                    defaultDownPayment={userProfile.downPayment}
+                    employmentStatus={application.employment_status}
+                />
+            )}
 
             {/* Extended Compliance Footer */}
             <footer className="mt-16 border-t border-gray-200 bg-white">

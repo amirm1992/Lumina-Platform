@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
-import { FileText, ShieldCheck, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import React, { useState, useCallback, useEffect } from 'react'
+import { FileText, ShieldCheck, CheckCircle2, Clock, AlertCircle, PenTool, Lock } from 'lucide-react'
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
 import { DocumentSlot } from './DocumentSlot'
-import { DOCUMENT_SLOTS } from '@/types/database'
-import type { Document } from '@/types/database'
+import { DisclosureSignModal } from './DisclosureSignModal'
+import { DOCUMENT_SLOTS, DISCLOSURE_SLOTS } from '@/types/database'
+import type { Document, DisclosureSignature } from '@/types/database'
 
 interface DocHubClientProps {
     userId: string
@@ -15,6 +16,40 @@ interface DocHubClientProps {
 export function DocHubClient({ userId, initialDocuments }: DocHubClientProps) {
     const [documents, setDocuments] = useState<Document[]>(initialDocuments)
     const [error, setError] = useState<string | null>(null)
+
+    // Disclosure state
+    const [disclosures, setDisclosures] = useState<DisclosureSignature[]>([])
+    const [disclosuresLoading, setDisclosuresLoading] = useState(true)
+    const [preApprovalComplete, setPreApprovalComplete] = useState(false)
+    const [signingDisclosure, setSigningDisclosure] = useState<DisclosureSignature | null>(null)
+
+    // Fetch disclosures on mount
+    useEffect(() => {
+        async function fetchDisclosures() {
+            try {
+                const res = await fetch('/api/disclosures')
+                if (res.ok) {
+                    const data = await res.json()
+                    setDisclosures(data.disclosures || [])
+                    setPreApprovalComplete(data.preApprovalComplete || false)
+                }
+            } catch (err) {
+                console.error('Failed to fetch disclosures:', err)
+            } finally {
+                setDisclosuresLoading(false)
+            }
+        }
+        fetchDisclosures()
+    }, [])
+
+    const handleDisclosureSigned = useCallback((updated: DisclosureSignature) => {
+        setDisclosures(prev => prev.map(d => d.id === updated.id ? updated : d))
+    }, [])
+
+    // Disclosure stats
+    const totalDisclosures = disclosures.length
+    const signedDisclosures = disclosures.filter(d => d.status === 'signed').length
+    const pendingDisclosures = disclosures.filter(d => d.status === 'pending_signature').length
 
     // Get the latest document for each category (most recent wins)
     const getDocForCategory = useCallback((category: string): Document | null => {
@@ -137,6 +172,95 @@ export function DocHubClient({ userId, initialDocuments }: DocHubClientProps) {
                     All documents are encrypted and stored securely. Only you and your loan advisor can access them.
                 </div>
 
+                {/* ── Disclosures Section ── */}
+                {preApprovalComplete && (
+                    <div className="mb-10">
+                        <div className="flex items-center justify-between mb-1">
+                            <h2 className="text-lg font-bold text-gray-900">Disclosures</h2>
+                            {totalDisclosures > 0 && (
+                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                                    signedDisclosures === totalDisclosures
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-amber-100 text-amber-700'
+                                }`}>
+                                    {signedDisclosures}/{totalDisclosures} Signed
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">
+                            Review and electronically sign each required disclosure to proceed with your loan.
+                        </p>
+
+                        {disclosuresLoading ? (
+                            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+                                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                                <p className="text-sm text-gray-500">Loading disclosures...</p>
+                            </div>
+                        ) : disclosures.length === 0 ? (
+                            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+                                <Lock className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                                <p className="text-sm text-gray-500">Disclosures will appear here after your pre-approval is processed.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {disclosures.map(disclosure => {
+                                    const slotDef = DISCLOSURE_SLOTS.find(s => s.category === disclosure.disclosure_type)
+                                    const isSigned = disclosure.status === 'signed'
+                                    return (
+                                        <button
+                                            key={disclosure.id}
+                                            onClick={() => setSigningDisclosure(disclosure)}
+                                            className={`text-left p-5 rounded-xl border transition-all ${
+                                                isSigned
+                                                    ? 'bg-green-50/50 border-green-200 hover:border-green-300'
+                                                    : 'bg-white border-amber-200 hover:border-amber-300 hover:shadow-md'
+                                            }`}
+                                        >
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    {isSigned ? (
+                                                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                                    ) : (
+                                                        <PenTool className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                                                    )}
+                                                    <h3 className="font-semibold text-gray-900 text-sm">
+                                                        {slotDef?.label || disclosure.disclosure_type}
+                                                    </h3>
+                                                </div>
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                                                    isSigned
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : 'bg-amber-100 text-amber-700'
+                                                }`}>
+                                                    {isSigned ? 'Signed' : 'Requires Signature'}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 ml-7">
+                                                {slotDef?.description || 'Review and sign this disclosure'}
+                                            </p>
+                                            {isSigned && disclosure.signed_at && (
+                                                <p className="text-[10px] text-gray-400 ml-7 mt-1">
+                                                    Signed {new Date(disclosure.signed_at).toLocaleDateString()} by {disclosure.signed_name}
+                                                </p>
+                                            )}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        )}
+
+                        {pendingDisclosures > 0 && (
+                            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
+                                <PenTool className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                                <p className="text-sm text-amber-800">
+                                    <strong>{pendingDisclosures} disclosure{pendingDisclosures > 1 ? 's' : ''}</strong> still require{pendingDisclosures === 1 ? 's' : ''} your signature.
+                                    Click on each to review and sign.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Document Slots - Required */}
                 <div className="mb-10">
                     <h2 className="text-lg font-bold text-gray-900 mb-1">Required Documents</h2>
@@ -170,6 +294,18 @@ export function DocHubClient({ userId, initialDocuments }: DocHubClientProps) {
                         ))}
                     </div>
                 </div>
+
+                {/* Disclosure Sign Modal */}
+                {signingDisclosure && (
+                    <DisclosureSignModal
+                        isOpen={!!signingDisclosure}
+                        onClose={() => setSigningDisclosure(null)}
+                        disclosure={signingDisclosure}
+                        label={DISCLOSURE_SLOTS.find(s => s.category === signingDisclosure.disclosure_type)?.label || 'Disclosure'}
+                        description={DISCLOSURE_SLOTS.find(s => s.category === signingDisclosure.disclosure_type)?.description || ''}
+                        onSigned={handleDisclosureSigned}
+                    />
+                )}
             </main>
         </div>
     )

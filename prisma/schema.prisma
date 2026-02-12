@@ -104,8 +104,58 @@ model Application {
   propertyAddress   String?       @map("property_address")
   propertyCity      String?       @map("property_city")
   propertyCounty    String?       @map("property_county")
-  lenderOffers      LenderOffer[]
-  properties        Property[]
+
+  // ── 1003 Borrower Details (Pre-Approval Modal) ──
+  dateOfBirth           DateTime? @map("date_of_birth") @db.Date
+  maritalStatus         String?   @map("marital_status")
+  firstTimeHomeBuyer    Boolean?  @map("first_time_home_buyer")
+  preferredLanguage     String?   @map("preferred_language")
+
+  // ── Current Mailing Address ──
+  mailingAddress        String?   @map("mailing_address")
+  mailingUnit           String?   @map("mailing_unit")
+  mailingCity           String?   @map("mailing_city")
+  mailingState          String?   @map("mailing_state") @db.VarChar(2)
+  mailingZipCode        String?   @map("mailing_zip_code")
+  addressDurationMonths Int?      @map("address_duration_months")
+  housingStatus         String?   @map("housing_status")
+
+  // ── Employment Details ──
+  employerName          String?   @map("employer_name")
+  employerPosition      String?   @map("employer_position")
+  employerPhone         String?   @map("employer_phone")
+  employmentStartDate   DateTime? @map("employment_start_date") @db.Date
+  selfEmployed          Boolean?  @map("self_employed")
+
+  // ── Loan Preferences ──
+  downPayment           Decimal?  @map("down_payment")
+  mortgageType          String?   @map("mortgage_type")
+  loanTerm              Int?      @map("loan_term")
+  amortizationType      String?   @map("amortization_type")
+  numberOfUnits         Int?      @map("number_of_units")
+
+  // ── Co-Borrower ──
+  hasCoBorrower         Boolean?  @map("has_co_borrower")
+  coBorrowerFirstName   String?   @map("co_borrower_first_name")
+  coBorrowerLastName    String?   @map("co_borrower_last_name")
+  coBorrowerEmail       String?   @map("co_borrower_email")
+  coBorrowerPhone       String?   @map("co_borrower_phone")
+  coBorrowerDob         DateTime? @map("co_borrower_dob") @db.Date
+
+  // ── Arive / Zapier Integration ──
+  ariveLoanId           String?   @map("arive_loan_id")
+  ariveDeepLink         String?   @map("arive_deep_link")
+  zapierPushStatus      String?   @map("zapier_push_status")
+  zapierPushedAt        DateTime? @map("zapier_pushed_at")
+
+  // ── Pre-Approval Status ──
+  preApprovalSubmittedAt DateTime? @map("pre_approval_submitted_at")
+  preApprovalComplete    Boolean   @default(false) @map("pre_approval_complete")
+
+  // ── Relations ──
+  lenderOffers           LenderOffer[]
+  properties             Property[]
+  disclosureSignatures   DisclosureSignature[]
 
   @@index([status], map: "idx_applications_status")
   @@index([userId], map: "idx_applications_user_id")
@@ -266,4 +316,23 @@ model MessageReply {
   @@index([threadId], map: "idx_message_replies_thread_id")
   @@index([senderId], map: "idx_message_replies_sender_id")
   @@map("message_replies")
+}
+
+model DisclosureSignature {
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId    String      @map("application_id") @db.Uuid
+  disclosureType   String      @map("disclosure_type")
+  documentId       String?     @map("document_id") @db.Uuid
+  signedName       String?     @map("signed_name")
+  signedAt         DateTime?   @map("signed_at")
+  signedIp         String?     @map("signed_ip")
+  status           String      @default("pending_signature")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  application      Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId], map: "idx_disclosure_signatures_application_id")
+  @@index([disclosureType], map: "idx_disclosure_signatures_type")
+  @@map("disclosure_signatures")
 }
