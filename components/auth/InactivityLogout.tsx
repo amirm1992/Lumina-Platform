@@ -11,7 +11,7 @@ const INACTIVITY_TIMEOUT_MS = 3 * 60 * 1000 // 3 minutes
  * Signs the user out after 3 minutes of inactivity.
  * Only active when the user is signed in.
  */
-export function InactivityLogout() {
+export function InactivityLogout(): null {
     const { signOut } = useClerk()
     const { isSignedIn, isLoaded } = useUser()
     const router = useRouter()
