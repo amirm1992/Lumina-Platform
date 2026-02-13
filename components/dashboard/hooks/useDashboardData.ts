@@ -86,6 +86,7 @@ function mergeOffersWithConstants(dbOffers: Lender[]): Lender[] {
 interface UseDashboardDataReturn {
     application: Application | null
     offers: Lender[]
+    hasRealOffers: boolean
     userProfile: UserProfile
     setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>
     loading: boolean
@@ -192,6 +193,11 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
         [selectedLenderId, offers]
     )
 
+    const hasRealOffers = useMemo(
+        () => offers.some((o) => !o.isPlaceholder),
+        [offers]
+    )
+
     const ltv = useMemo(() => {
         if (!userProfile.homeValue || userProfile.homeValue <= 0) return '0.0'
         return ((userProfile.estimatedLoanAmount / userProfile.homeValue) * 100).toFixed(1)
@@ -200,6 +206,7 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
     return {
         application,
         offers,
+        hasRealOffers,
         userProfile,
         setUserProfile,
         loading,

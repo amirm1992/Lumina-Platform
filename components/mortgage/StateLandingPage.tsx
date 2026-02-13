@@ -133,7 +133,7 @@ export function StateLandingPage({ config }: Props) {
                             </Link>
                         </div>
 
-                        {/* Trust badges */}
+                        {/* Trust checkmarks */}
                         <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-white/50 text-sm">
                             <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
@@ -146,6 +146,38 @@ export function StateLandingPage({ config }: Props) {
                             <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                                 <span>NMLS #{SITE_CONFIG.nmls.individual}</span>
+                            </div>
+                        </div>
+
+                        {/* GSE Trust Badges */}
+                        <div className="flex items-center justify-center gap-6 sm:gap-8 mt-8 opacity-70">
+                            {/* Fannie Mae */}
+                            <div className="flex items-center gap-2 text-white/80" title="Fannie Mae">
+                                <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 4.5H21m-3.75 4.5H21" />
+                                </svg>
+                                <span className="text-xs sm:text-sm font-medium tracking-wide">Fannie Mae</span>
+                            </div>
+
+                            <div className="w-px h-5 bg-white/20" />
+
+                            {/* Equal Housing Opportunity */}
+                            <div className="flex items-center gap-2 text-white/80" title="Equal Housing Opportunity">
+                                <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 3L2 12h3v9h14v-9h3L12 3zm0 2.84L18 11v8H6v-8l6-5.16z" />
+                                    <rect x="9" y="13" width="6" height="4" rx="0.5" />
+                                </svg>
+                                <span className="text-xs sm:text-sm font-medium tracking-wide hidden sm:inline">Equal Housing</span>
+                            </div>
+
+                            <div className="w-px h-5 bg-white/20" />
+
+                            {/* Freddie Mac */}
+                            <div className="flex items-center gap-2 text-white/80" title="Freddie Mac">
+                                <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+                                </svg>
+                                <span className="text-xs sm:text-sm font-medium tracking-wide">Freddie Mac</span>
                             </div>
                         </div>
                     </div>
@@ -306,6 +338,31 @@ export function StateLandingPage({ config }: Props) {
                             <Link href="/privacy" className="hover:text-white/60 transition-colors">Privacy Policy</Link>
                             <Link href="/terms" className="hover:text-white/60 transition-colors">Terms of Service</Link>
                         </div>
+                        {/* GSE Trust Badge Banner */}
+                        <div className="flex items-center justify-center gap-8 sm:gap-10 py-5 px-4 mx-auto max-w-xl rounded-2xl bg-[#1B5E3A]/30 border border-[#2D7A4F]/20 mt-2">
+                            <div className="flex items-center gap-2 text-white/70" title="Fannie Mae">
+                                <svg className="w-5 h-5 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 4.5H21m-3.75 4.5H21" />
+                                </svg>
+                                <span className="text-xs font-medium tracking-wide hidden sm:inline">Fannie Mae</span>
+                            </div>
+                            <div className="w-px h-6 bg-white/15" />
+                            <div className="flex items-center gap-2 text-white/70" title="Equal Housing Opportunity">
+                                <svg className="w-5 h-5 text-white/50" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 3L2 12h3v9h14v-9h3L12 3zm0 2.84L18 11v8H6v-8l6-5.16z" />
+                                    <rect x="9" y="13" width="6" height="4" rx="0.5" />
+                                </svg>
+                                <span className="text-xs font-medium tracking-wide hidden sm:inline">Equal Housing</span>
+                            </div>
+                            <div className="w-px h-6 bg-white/15" />
+                            <div className="flex items-center gap-2 text-white/70" title="Freddie Mac">
+                                <svg className="w-5 h-5 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+                                </svg>
+                                <span className="text-xs font-medium tracking-wide hidden sm:inline">Freddie Mac</span>
+                            </div>
+                        </div>
+
                         <p className="text-white/20 text-xs">
                             &copy; {new Date().getFullYear()} {SITE_CONFIG.legalName}. All rights reserved. Equal Housing Lender.
                         </p>

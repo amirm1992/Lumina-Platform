@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react'
 import Link from 'next/link'
 import DashboardSidebar from './DashboardSidebar'
 import { LenderCard } from './LenderCard'
+import { LenderNegotiationList } from './LenderNegotiationList'
 import { PaymentBreakdown } from './PaymentBreakdown'
 import { MarketTrends } from './MarketTrends'
 import { ScenarioAdjuster } from './ScenarioAdjuster'
@@ -24,6 +25,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
     const {
         application,
         offers,
+        hasRealOffers,
         userProfile,
         setUserProfile,
         loading,
@@ -90,6 +92,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
         )
     }
 
+    // Only show real (non-placeholder) offers in the cards
+    const realOffers = offers.filter(o => !o.isPlaceholder)
+
     return (
         <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
             <DashboardSidebar />
@@ -108,7 +113,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                     Welcome back, {userProfile.name}
                                 </h1>
                                 <p className="text-gray-500">
-                                    {offers.some(o => !o.isPlaceholder)
+                                    {hasRealOffers
                                         ? 'Based on your verified credit, here are your personalized offers.'
                                         : 'We are crunching the numbers with our top lenders for you.'}
                                 </p>
@@ -140,60 +145,38 @@ export function DashboardClient({ user }: DashboardClientProps) {
                             onEdit={() => setIsEditModalOpen(true)}
                         />
 
-                        {/* Rate Grid */}
-                        <div>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-black">
-                                    {offers.length > 0 ? 'Available Lender Offers' : 'Lender Offers'}
-                                </h2>
-                                {offers.length > 0 && (
+                        {/* Offer Cards (when offers exist) OR Lender Negotiation List (when waiting) */}
+                        {hasRealOffers ? (
+                            <div>
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-black">Available Lender Offers</h2>
                                     <div className="flex gap-2 text-xs">
                                         <span className="text-gray-500">Sort by:</span>
                                         <button className="text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors">Lowest Rate</button>
                                     </div>
-                                )}
-                            </div>
-
-                            {offers.length > 0 ? (
-                                <>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {offers.map(lender => (
-                                            <LenderCard
-                                                key={lender.id}
-                                                lender={lender}
-                                                isSelected={selectedLenderId === lender.id}
-                                                onSelect={() => setSelectedLenderId(lender.id)}
-                                                onPreApprove={() => setIsPreApprovalOpen(true)}
-                                            />
-                                        ))}
-                                    </div>
-                                    {offers.some(o => o.isPlaceholder) && (
-                                        <p className="mt-4 text-center text-sm text-gray-500">
-                                            We’re comparing offers from 6 lenders. You’ll see your personalized rates here as they’re ready.
-                                        </p>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                        </svg>
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Offers Yet</h3>
-                                    <p className="text-gray-500 text-sm max-w-sm mx-auto">
-                                        We're working on getting you the best rates from our lender network. This usually takes 24-48 hours.
-                                    </p>
                                 </div>
-                            )}
-                        </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {realOffers.map(lender => (
+                                        <LenderCard
+                                            key={lender.id}
+                                            lender={lender}
+                                            isSelected={selectedLenderId === lender.id}
+                                            onSelect={() => setSelectedLenderId(lender.id)}
+                                            onPreApprove={() => setIsPreApprovalOpen(true)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <LenderNegotiationList />
+                        )}
                     </div>
 
                     {/* Right Column: Analytics & Visualization */}
                     <div className="lg:col-span-4 space-y-8">
 
                         {/* Monthly Payment Breakdown */}
-                        {selectedLender && (
+                        {selectedLender && hasRealOffers && (
                             <PaymentBreakdown
                                 monthlyPayment={selectedLender.monthlyPayment}
                                 propertyTax={FINANCIAL_DEFAULTS.defaultPropertyTax}
@@ -205,7 +188,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                         <MarketTrends />
 
                         {/* Closing Info */}
-                        {selectedLender && (
+                        {selectedLender && hasRealOffers && (
                             <div className="p-6 rounded-2xl bg-white/70 backdrop-blur-md border border-white/50 shadow-lg transition-all hover:shadow-xl">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="p-2 bg-black/90 rounded-lg shadow-lg shadow-black/10">
@@ -216,7 +199,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                     <h4 className="font-bold text-black">Closing Cost Insight</h4>
                                 </div>
                                 <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-                                    Based on <strong className="text-black">{selectedLender.name}'s</strong> fees, your total estimated closing costs are{' '}
+                                    Based on <strong className="text-black">{selectedLender.name}&apos;s</strong> fees, your total estimated closing costs are{' '}
                                     <strong className="text-black">${(selectedLender.closingCosts ?? 0).toLocaleString()}</strong>.
                                     This includes lender fees, appraisal, and title insurance.
                                 </p>
