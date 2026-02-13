@@ -137,7 +137,15 @@ export async function POST(request: NextRequest) {
 
         // Encrypt SSN if provided (9 digits)
         const rawSsn = typeof body.ssn === 'string' ? body.ssn.replace(/\D/g, '') : ''
-        const ssnEncrypted = rawSsn.length === 9 ? encrypt(rawSsn) : null
+        let ssnEncrypted: string | null = null
+        if (rawSsn.length === 9) {
+            try {
+                ssnEncrypted = encrypt(rawSsn)
+            } catch (encryptErr) {
+                console.error('SSN encryption failed (missing key?) — storing without SSN:', encryptErr)
+                // Don't block the application — just skip SSN storage
+            }
+        }
         const consentSoftPull = ssnEncrypted ? Boolean(body.consentSoftPull) : false
         const consentSignedAt = consentSoftPull && body.consentSignedAt
             ? new Date(body.consentSignedAt)
