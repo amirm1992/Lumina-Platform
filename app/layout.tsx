@@ -5,6 +5,7 @@ import { Orbitron } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import { ComplianceFooter } from '@/components/layout/ComplianceFooter'
+import { InactivityLogout } from '@/components/auth/InactivityLogout'
 import { SITE_CONFIG } from '@/lib/constants'
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
@@ -128,6 +129,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             />
                         </noscript>
                     )}
+                    <InactivityLogout />
                     <main className="flex-1">
                         {children}
                     </main>

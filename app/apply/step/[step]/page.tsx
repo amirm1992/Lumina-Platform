@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useClerk, useUser } from '@clerk/nextjs'
 import { useApplicationStore } from '@/store/applicationStore'
 import { trackStepView } from '@/lib/analytics'
 import {
@@ -20,8 +21,23 @@ export default function StepPage() {
     const params = useParams()
     const router = useRouter()
     const searchParams = useSearchParams()
-    const { setCurrentStep, setPropertyState, propertyState } = useApplicationStore()
+    const { signOut } = useClerk()
+    const { isSignedIn, isLoaded: isUserLoaded } = useUser()
+    const { setCurrentStep, setPropertyState, propertyState, resetApplication } = useApplicationStore()
     const stepNumber = parseInt(params.step as string, 10)
+    const hasReset = useRef(false)
+
+    // When landing on step 1: sign out any existing session and reset application data
+    // This ensures every new application starts completely fresh
+    useEffect(() => {
+        if (stepNumber === 1 && !hasReset.current && isUserLoaded) {
+            hasReset.current = true
+            resetApplication()
+            if (isSignedIn) {
+                signOut()
+            }
+        }
+    }, [stepNumber, resetApplication, isUserLoaded, isSignedIn, signOut])
 
     // Capture the state param from the URL (e.g. ?state=FL from a state landing page)
     useEffect(() => {
