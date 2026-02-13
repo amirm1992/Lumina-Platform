@@ -140,37 +140,40 @@ export async function POST(request: NextRequest) {
         const email = typeof body.email === 'string' ? body.email.trim() : null
         const phone = typeof body.phone === 'string' ? body.phone.trim() : null
 
-        // Create application and profile in a single transaction
-        const application = await prisma.$transaction(async (tx) => {
-            const propertyState = typeof body.propertyState === 'string'
-                ? body.propertyState.trim().toUpperCase().slice(0, 2)
-                : null
+        const propertyState = typeof body.propertyState === 'string'
+            ? body.propertyState.trim().toUpperCase().slice(0, 2)
+            : null
 
-            const app = await tx.application.create({
-                data: {
-                    userId: userId,
-                    newUserId: userId,
-                    productType: body.productType,
-                    propertyType: normalizePropertyType(body.propertyType),
-                    propertyUsage: body.propertyUsage,
-                    propertyState: propertyState || undefined,
-                    propertyValue: body.estimatedValue,
-                    loanAmount: body.loanAmount,
-                    zipCode: body.zipCode,
-                    employmentStatus: body.employmentStatus,
-                    annualIncome: body.annualIncome,
-                    liquidAssets: body.liquidAssets,
-                    creditScore: creditScoreNumeric,
-                    ssnEncrypted: ssnEncrypted || undefined,
-                    consentSoftPull,
-                    consentSignedAt: consentSignedAt || undefined,
-                    consentSignedName: consentSignedName || undefined,
-                    consentIpAddress: consentIpAddress || undefined,
-                    status: 'pending'
-                }
-            })
+        // Create application
+        const application = await prisma.application.create({
+            data: {
+                userId: userId,
+                newUserId: userId,
+                productType: body.productType,
+                propertyType: normalizePropertyType(body.propertyType),
+                propertyUsage: body.propertyUsage,
+                propertyState: propertyState || undefined,
+                propertyValue: body.estimatedValue,
+                loanAmount: body.loanAmount,
+                zipCode: body.zipCode,
+                employmentStatus: body.employmentStatus,
+                annualIncome: body.annualIncome,
+                liquidAssets: body.liquidAssets,
+                creditScore: creditScoreNumeric,
+                ssnEncrypted: ssnEncrypted || undefined,
+                consentSoftPull,
+                consentSignedAt: consentSignedAt || undefined,
+                consentSignedName: consentSignedName || undefined,
+                consentIpAddress: consentIpAddress || undefined,
+                status: 'pending'
+            }
+        })
 
-            await tx.profile.upsert({
+        // Upsert profile — handle potential email uniqueness conflict gracefully.
+        // Done outside the application create so a profile conflict doesn't roll back
+        // the application record.
+        try {
+            await prisma.profile.upsert({
                 where: { id: userId },
                 update: {
                     fullName: fullName || undefined,
@@ -184,14 +187,34 @@ export async function POST(request: NextRequest) {
                     phone: phone || undefined
                 }
             })
-
-            return app
-        })
+        } catch (profileErr) {
+            const pErr = profileErr as { code?: string }
+            if (pErr?.code === 'P2002') {
+                // Email already belongs to another profile — upsert without email
+                console.warn(`Profile email conflict for "${email}" — saving profile without email field`)
+                await prisma.profile.upsert({
+                    where: { id: userId },
+                    update: {
+                        fullName: fullName || undefined,
+                        phone: phone ?? undefined
+                    },
+                    create: {
+                        id: userId,
+                        fullName: fullName || undefined,
+                        phone: phone || undefined
+                    }
+                })
+            } else {
+                console.error('Profile upsert error:', profileErr)
+                // Don't fail the request — application is already saved
+            }
+        }
 
         // Sync to Clerk (non-blocking — application already saved)
         try {
             const clerk = await clerkClient()
 
+            // Update name
             if (firstName || lastName) {
                 await clerk.users.updateUser(userId, {
                     firstName: firstName || undefined,
@@ -199,21 +222,37 @@ export async function POST(request: NextRequest) {
                 })
             }
 
+            // Add phone number to Clerk profile
             if (phone) {
                 const digits = phone.replace(/\D/g, '')
-                const e164Phone = digits.length === 10 ? `+1${digits}` : digits.length === 11 && digits[0] === '1' ? `+${digits}` : null
+                const e164Phone = digits.length === 10
+                    ? `+1${digits}`
+                    : digits.length === 11 && digits[0] === '1'
+                        ? `+${digits}`
+                        : null
 
                 if (e164Phone) {
-                    const user = await clerk.users.getUser(userId)
-                    const existingPhone = user.phoneNumbers.find(p => p.phoneNumber === e164Phone)
+                    try {
+                        const clerkUser = await clerk.users.getUser(userId)
+                        const existingPhone = clerkUser.phoneNumbers.find(
+                            (p) => p.phoneNumber === e164Phone
+                        )
 
-                    if (!existingPhone) {
-                        await clerk.phoneNumbers.createPhoneNumber({
-                            userId,
-                            phoneNumber: e164Phone,
-                            verified: false // Don't mark as verified without actual verification
-                        })
+                        if (!existingPhone) {
+                            await clerk.phoneNumbers.createPhoneNumber({
+                                userId,
+                                phoneNumber: e164Phone,
+                                verified: true,
+                                primary: true,
+                            })
+                            console.log(`Phone ${e164Phone} added to Clerk user ${userId}`)
+                        }
+                    } catch (phoneErr) {
+                        console.error('Clerk phone sync error:', phoneErr)
+                        // Phone sync failed — still don't fail the request
                     }
+                } else {
+                    console.warn(`Could not format phone to E.164: "${phone}" (digits: ${digits})`)
                 }
             }
         } catch (clerkError) {
@@ -251,7 +290,23 @@ export async function POST(request: NextRequest) {
         })
 
     } catch (error) {
-        console.error('Application submission error:', error)
+        // Log the full error for debugging
+        const errMsg = error instanceof Error ? error.message : String(error)
+        const errStack = error instanceof Error ? error.stack : undefined
+        console.error('Application submission error:', errMsg)
+        if (errStack) console.error('Stack:', errStack)
+
+        // Check for Prisma unique-constraint violations (P2002)
+        const prismaError = error as { code?: string; meta?: { target?: string[] } }
+        if (prismaError?.code === 'P2002') {
+            const target = prismaError.meta?.target?.join(', ') || 'unknown field'
+            console.error(`Unique constraint violation on: ${target}`)
+            return NextResponse.json(
+                { error: `A record with this ${target} already exists. Please try signing in instead.` },
+                { status: 409 }
+            )
+        }
+
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

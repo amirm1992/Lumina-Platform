@@ -49,7 +49,9 @@ export function CreateAccount() {
         }
 
         let lastError: string | null = null
-        for (let attempt = 0; attempt < 3; attempt++) {
+        // Retry up to 5 times with increasing delays to handle session propagation
+        const delays = [600, 1000, 1500, 2000, 3000]
+        for (let attempt = 0; attempt < delays.length; attempt++) {
             try {
                 const response = await fetch('/api/applications', {
                     method: 'POST',
@@ -61,13 +63,19 @@ export function CreateAccount() {
                 }
                 const data = await response.json().catch(() => ({}))
                 lastError = data?.error || `Request failed (${response.status})`
-                if (response.status === 401 && attempt < 2) {
-                    await new Promise((r) => setTimeout(r, 500))
+                // Retry on 401 (session not yet propagated) — wait with increasing delay
+                if (response.status === 401 && attempt < delays.length - 1) {
+                    await new Promise((r) => setTimeout(r, delays[attempt]))
                     continue
                 }
                 break
             } catch (err) {
                 lastError = err instanceof Error ? err.message : 'Network error'
+                // Also retry on network errors (session middleware may not be ready)
+                if (attempt < delays.length - 1) {
+                    await new Promise((r) => setTimeout(r, delays[attempt]))
+                    continue
+                }
             }
         }
         return lastError
@@ -81,7 +89,6 @@ export function CreateAccount() {
         trackApplicationSubmitted('new_account')
         setSuccess(true)
         setLoading(false)
-        router.push('/dashboard')
     }
 
     const handleSubmit = async (e?: React.FormEvent) => {
@@ -128,8 +135,8 @@ export function CreateAccount() {
                 // Activate the session immediately
                 await setActive({ session: result.createdSessionId })
 
-                // Brief delay so the session cookie is available
-                await new Promise((r) => setTimeout(r, 400))
+                // Wait for the session cookie to propagate before making API calls
+                await new Promise((r) => setTimeout(r, 1000))
 
                 // Save application to DB
                 const saveError = await saveApplication(localEmail)
@@ -184,8 +191,8 @@ export function CreateAccount() {
             // Set the session as active
             await setActive({ session: completeSignUp.createdSessionId })
 
-            // Brief delay so the session cookie is available
-            await new Promise((r) => setTimeout(r, 400))
+            // Wait for the session cookie to propagate before making API calls
+            await new Promise((r) => setTimeout(r, 1000))
 
             // Save application to DB
             const saveError = await saveApplication(localEmail)
@@ -213,16 +220,20 @@ export function CreateAccount() {
             const userEmail = user.primaryEmailAddress?.emailAddress || email
             const saveError = await saveApplication(userEmail)
             if (saveError) {
+                // If the error is about a duplicate/conflict, provide a clearer message
+                if (saveError.includes('already exists') || saveError.includes('409')) {
+                    throw new Error('An application may already exist for this account. Please check your dashboard.')
+                }
                 throw new Error(saveError)
             }
 
+            setLocalEmail(userEmail)
             setEmail(userEmail)
             completeApplication()
             trackStepComplete(12)
             trackApplicationSubmitted('existing_account')
             setSuccess(true)
             setLoading(false)
-            router.push('/dashboard')
 
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Failed to submit application.'
@@ -263,6 +274,16 @@ export function CreateAccount() {
                         {loading ? 'Submitting Application...' : 'Yes, Submit Application'}
                     </button>
 
+                    {error && (
+                        <button
+                            type="button"
+                            onClick={() => router.push('/dashboard')}
+                            className="w-full px-8 py-4 rounded-full bg-[#1D4ED8] text-white font-semibold hover:bg-[#1e40af] transition-all"
+                        >
+                            Go to Dashboard
+                        </button>
+                    )}
+
                     <button
                         type="button"
                         onClick={() => signOut(() => window.location.reload())}
@@ -279,21 +300,44 @@ export function CreateAccount() {
     if (success || isCompleted) {
         return (
             <div className="space-y-8 text-center py-8">
+                {/* Animated checkmark icon */}
                 <div className="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-green-600">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
+
                 <div>
-                    <h1 className="text-3xl font-bold text-black mb-3">Congratulations! 🎉</h1>
-                    <p className="text-xl text-gray-600">Your application has been submitted successfully.</p>
+                    <h1 className="text-3xl font-bold text-black mb-3">Congratulations!</h1>
+                    <p className="text-xl text-gray-600 mb-2">Your application has been submitted successfully.</p>
+                    <p className="text-gray-500">Your personalized savings are being calculated. We&apos;ll have your rates ready shortly.</p>
                 </div>
-                <button
-                    onClick={() => router.push('/dashboard')}
-                    className="px-8 py-3 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-all shadow-md"
-                >
-                    View Your Dashboard →
-                </button>
+
+                {/* Email confirmation notice */}
+                <div className="p-5 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE]">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-[#1D4ED8]">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        <span className="font-semibold text-[#1D4ED8]">Check your inbox</span>
+                    </div>
+                    <p className="text-sm text-[#1D4ED8]/80">
+                        We&apos;ve sent a confirmation email to <span className="font-semibold">{localEmail || email}</span>.
+                        Please verify your email to access your dashboard and view your rates.
+                    </p>
+                </div>
+
+                <div className="flex flex-col gap-3 pt-2">
+                    <button
+                        onClick={() => router.push('/dashboard')}
+                        className="w-full px-8 py-4 rounded-full bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-md"
+                    >
+                        Go to My Dashboard
+                    </button>
+                    <p className="text-xs text-gray-400">
+                        Didn&apos;t receive the email? Check your spam folder or contact us at support@golumina.net
+                    </p>
+                </div>
             </div>
         )
     }
@@ -341,7 +385,7 @@ export function CreateAccount() {
                         disabled={loading || verificationCode.length !== 6}
                         className="px-8 py-4 rounded-full bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all"
                     >
-                        {loading ? 'Verifying...' : 'Verify & Continue'}
+                        {loading ? 'Verifying & Submitting...' : 'Verify & Submit Application'}
                     </button>
                 </div>
             </div>
