@@ -97,6 +97,22 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { userId } = await auth()
 
+        console.log('[POST /api/applications] userId:', userId)
+        console.log('[POST /api/applications] body keys:', Object.keys(body))
+        console.log('[POST /api/applications] body snapshot:', JSON.stringify({
+            email: body.email,
+            productType: body.productType,
+            propertyType: body.propertyType,
+            propertyUsage: body.propertyUsage,
+            zipCode: body.zipCode,
+            estimatedValue: body.estimatedValue,
+            loanAmount: body.loanAmount,
+            employmentStatus: body.employmentStatus,
+            creditScore: body.creditScore,
+            annualIncome: body.annualIncome,
+            liquidAssets: body.liquidAssets,
+        }))
+
         if (!userId) {
             return NextResponse.json(
                 { error: 'User not authenticated' },
@@ -107,6 +123,7 @@ export async function POST(request: NextRequest) {
         // Validate input
         const validationError = validateApplicationBody(body)
         if (validationError) {
+            console.error('[POST /api/applications] validation failed:', validationError)
             return NextResponse.json(
                 { error: validationError },
                 { status: 400 }
@@ -145,6 +162,7 @@ export async function POST(request: NextRequest) {
             : null
 
         // Create application
+        console.log('[POST /api/applications] creating application for user:', userId)
         const application = await prisma.application.create({
             data: {
                 userId: userId,
@@ -293,13 +311,14 @@ export async function POST(request: NextRequest) {
         // Log the full error for debugging
         const errMsg = error instanceof Error ? error.message : String(error)
         const errStack = error instanceof Error ? error.stack : undefined
+        const errCode = (error as { code?: string })?.code
         console.error('Application submission error:', errMsg)
+        console.error('Error code:', errCode)
         if (errStack) console.error('Stack:', errStack)
 
         // Check for Prisma unique-constraint violations (P2002)
-        const prismaError = error as { code?: string; meta?: { target?: string[] } }
-        if (prismaError?.code === 'P2002') {
-            const target = prismaError.meta?.target?.join(', ') || 'unknown field'
+        if (errCode === 'P2002') {
+            const target = (error as { meta?: { target?: string[] } }).meta?.target?.join(', ') || 'unknown field'
             console.error(`Unique constraint violation on: ${target}`)
             return NextResponse.json(
                 { error: `A record with this ${target} already exists. Please try signing in instead.` },
@@ -307,8 +326,9 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Return the actual error message so the client can display useful info
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: errMsg || 'Internal server error' },
             { status: 500 }
         )
     }

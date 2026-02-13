@@ -48,21 +48,27 @@ export function CreateAccount() {
             consentSignedName: applicationState.consentSignedName || undefined,
         }
 
+        // Debug: log what we're sending so we can trace issues
+        console.log('[saveApplication] payload:', JSON.stringify(payload, null, 2))
+
         let lastError: string | null = null
         // Retry up to 5 times with increasing delays to handle session propagation
         const delays = [600, 1000, 1500, 2000, 3000]
         for (let attempt = 0; attempt < delays.length; attempt++) {
             try {
+                console.log(`[saveApplication] attempt ${attempt + 1}/${delays.length}`)
                 const response = await fetch('/api/applications', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                 })
                 if (response.ok) {
+                    console.log('[saveApplication] success')
                     return null // success
                 }
                 const data = await response.json().catch(() => ({}))
                 lastError = data?.error || `Request failed (${response.status})`
+                console.error(`[saveApplication] attempt ${attempt + 1} failed: ${response.status}`, data)
                 // Retry on 401 (session not yet propagated) — wait with increasing delay
                 if (response.status === 401 && attempt < delays.length - 1) {
                     await new Promise((r) => setTimeout(r, delays[attempt]))
@@ -71,6 +77,7 @@ export function CreateAccount() {
                 break
             } catch (err) {
                 lastError = err instanceof Error ? err.message : 'Network error'
+                console.error(`[saveApplication] attempt ${attempt + 1} network error:`, err)
                 // Also retry on network errors (session middleware may not be ready)
                 if (attempt < delays.length - 1) {
                     await new Promise((r) => setTimeout(r, delays[attempt]))
