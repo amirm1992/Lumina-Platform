@@ -72,9 +72,9 @@ export function TrustSidebar() {
                 {/* GSE Badges */}
                 <div className="mt-4 pt-4 border-t border-green-200">
                     <div className="flex items-center justify-between px-1">
-                        <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={1280} height={1280} className="h-7 w-auto opacity-40" />
+                        <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={1169} height={212} className="h-5 w-auto opacity-40" />
                         <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-7 w-auto opacity-40" />
-                        <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={592} height={300} className="h-7 w-auto opacity-40" />
+                        <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={342} height={220} className="h-5 w-auto opacity-40" />
                     </div>
                 </div>
             </div>
