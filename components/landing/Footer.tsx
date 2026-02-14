@@ -131,11 +131,11 @@ export function Footer() {
                     {/* Trust Badge Banner */}
                     <div className="mt-8 pt-8 border-t border-white/10">
                         <div className="flex items-center justify-center gap-8 sm:gap-12 py-6 px-4 mx-auto max-w-2xl rounded-2xl bg-[#1B5E3A]/40 border border-[#2D7A4F]/30">
-                            <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={225} height={225} className="h-9 sm:h-11 w-auto invert opacity-80" />
-                            <div className="w-px h-8 bg-white/20" />
-                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={840} height={859} className="h-9 sm:h-11 w-auto invert opacity-80" />
-                            <div className="w-px h-8 bg-white/20" />
-                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={840} height={859} className="h-9 sm:h-11 w-auto invert opacity-80" />
+                            <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={1280} height={1280} className="h-10 sm:h-14 w-auto invert opacity-90" />
+                            <div className="w-px h-10 bg-white/20" />
+                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-14 w-auto invert opacity-90" />
+                            <div className="w-px h-10 bg-white/20" />
+                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={592} height={300} className="h-10 sm:h-14 w-auto invert opacity-90" />
                         </div>
                     </div>
 
