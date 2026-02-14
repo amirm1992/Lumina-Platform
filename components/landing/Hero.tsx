@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -175,35 +176,12 @@ export function Hero() {
                         </div>
 
                         {/* Trust Badges */}
-                        <div className="flex items-center justify-center gap-6 sm:gap-8 mb-16 opacity-70">
-                            {/* Fannie Mae */}
-                            <div className="flex items-center gap-2 text-white/80" title="Fannie Mae">
-                                <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 4.5H21m-3.75 4.5H21" />
-                                </svg>
-                                <span className="text-xs sm:text-sm font-medium tracking-wide">Fannie Mae</span>
-                            </div>
-
-                            <div className="w-px h-5 bg-white/20" />
-
-                            {/* Equal Housing Opportunity */}
-                            <div className="flex items-center gap-2 text-white/80" title="Equal Housing Opportunity">
-                                <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 3L2 12h3v9h14v-9h3L12 3zm0 2.84L18 11v8H6v-8l6-5.16z" />
-                                    <rect x="9" y="13" width="6" height="4" rx="0.5" />
-                                </svg>
-                                <span className="text-xs sm:text-sm font-medium tracking-wide hidden sm:inline">Equal Housing</span>
-                            </div>
-
-                            <div className="w-px h-5 bg-white/20" />
-
-                            {/* Freddie Mac */}
-                            <div className="flex items-center gap-2 text-white/80" title="Freddie Mac">
-                                <svg className="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
-                                </svg>
-                                <span className="text-xs sm:text-sm font-medium tracking-wide">Freddie Mac</span>
-                            </div>
+                        <div className="flex items-center justify-center gap-6 sm:gap-10 mb-16">
+                            <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={120} height={40} className="h-8 sm:h-10 w-auto brightness-0 invert opacity-70" />
+                            <div className="w-px h-8 bg-white/20" />
+                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={100} height={40} className="h-8 sm:h-10 w-auto brightness-0 invert opacity-70" />
+                            <div className="w-px h-8 bg-white/20" />
+                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={120} height={40} className="h-8 sm:h-10 w-auto brightness-0 invert opacity-70" />
                         </div>
 
                         {/* Live Rate Dashboard */}
