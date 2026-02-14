@@ -135,7 +135,7 @@ export function Footer() {
                             <div className="w-px h-10 bg-white/20" />
                             <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-14 w-auto invert opacity-90" />
                             <div className="w-px h-10 bg-white/20" />
-                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={342} height={220} className="h-10 sm:h-14 w-auto invert opacity-90" />
+                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={152} height={54} className="h-12 sm:h-16 w-auto invert opacity-90" />
                         </div>
                     </div>
 

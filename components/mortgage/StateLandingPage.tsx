@@ -155,7 +155,7 @@ export function StateLandingPage({ config }: Props) {
                             <div className="w-px h-10 bg-white/20" />
                             <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-14 w-auto invert opacity-90" />
                             <div className="w-px h-10 bg-white/20" />
-                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={342} height={220} className="h-10 sm:h-14 w-auto invert opacity-90" />
+                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={152} height={54} className="h-12 sm:h-16 w-auto invert opacity-90" />
                         </div>
                     </div>
                 </div>
@@ -321,7 +321,7 @@ export function StateLandingPage({ config }: Props) {
                             <div className="w-px h-8 bg-white/15" />
                             <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-8 sm:h-10 w-auto invert opacity-80" />
                             <div className="w-px h-8 bg-white/15" />
-                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={342} height={220} className="h-8 sm:h-10 w-auto invert opacity-80" />
+                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={152} height={54} className="h-10 sm:h-12 w-auto invert opacity-80" />
                         </div>
 
                         <p className="text-white/20 text-xs">
