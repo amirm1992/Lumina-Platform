@@ -177,11 +177,11 @@ export function Hero() {
 
                         {/* Trust Badges */}
                         <div className="flex items-center justify-center gap-6 sm:gap-10 mb-16">
-                            <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={120} height={40} className="h-8 sm:h-10 w-auto brightness-0 invert opacity-70" />
+                            <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={225} height={225} className="h-9 sm:h-11 w-auto invert opacity-80" />
                             <div className="w-px h-8 bg-white/20" />
-                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={100} height={40} className="h-8 sm:h-10 w-auto brightness-0 invert opacity-70" />
+                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={840} height={859} className="h-9 sm:h-11 w-auto invert opacity-80" />
                             <div className="w-px h-8 bg-white/20" />
-                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={120} height={40} className="h-8 sm:h-10 w-auto brightness-0 invert opacity-70" />
+                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={840} height={859} className="h-9 sm:h-11 w-auto invert opacity-80" />
                         </div>
 
                         {/* Live Rate Dashboard */}
