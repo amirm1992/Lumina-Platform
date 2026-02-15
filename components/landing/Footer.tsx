@@ -130,12 +130,18 @@ export function Footer() {
 
                     {/* Trust Badge Banner */}
                     <div className="mt-8 pt-8 border-t border-white/10">
-                        <div className="flex items-center justify-center gap-8 sm:gap-12 py-6 px-4 mx-auto max-w-2xl rounded-2xl bg-[#1B5E3A]/40 border border-[#2D7A4F]/30">
-                            <Image src="/logos/fannie-mae.png" alt="Fannie Mae" width={1169} height={212} className="h-7 sm:h-9 w-auto invert opacity-90" />
+                        <div className="flex items-center justify-center gap-8 sm:gap-12 py-6 px-6 mx-auto max-w-lg">
+                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-14 w-auto invert opacity-80" />
                             <div className="w-px h-10 bg-white/20" />
-                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-14 w-auto invert opacity-90" />
-                            <div className="w-px h-10 bg-white/20" />
-                            <Image src="/logos/freddie-mac.png" alt="Freddie Mac" width={1173} height={297} className="h-12 sm:h-16 w-auto invert opacity-90" />
+                            <div className="flex items-center gap-2.5 text-white/70">
+                                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                </svg>
+                                <div>
+                                    <div className="text-sm sm:text-base font-semibold tracking-wide">NMLS #1631748</div>
+                                    <div className="text-[10px] sm:text-xs text-white/40">Federally Registered</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
