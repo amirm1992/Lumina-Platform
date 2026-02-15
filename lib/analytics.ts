@@ -78,6 +78,17 @@ export function trackStepComplete(stepNumber: number) {
 }
 
 /**
+ * Fired when a user completes Step 6 (PersonalIdentity) — the transition
+ * from property info to personal info. This signals real intent and gives
+ * Google Ads a mid-funnel conversion for faster algorithm learning.
+ */
+export function trackQualifiedLead() {
+    pushToDataLayer({
+        event: 'application_qualified_lead',
+    })
+}
+
+/**
  * Fired once when the application is successfully saved to the database
  * and the user is sent to their dashboard. This is the primary conversion.
  */
