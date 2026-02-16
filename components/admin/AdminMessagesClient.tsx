@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, MessageSquare, Send, ArrowLeft, Reply, Loader2, User } from 'lucide-react'
+import { Search, MessageSquare, Send, ArrowLeft, Reply, Loader2, User, Trash2 } from 'lucide-react'
 
 /* ──────────────────── Types ──────────────────── */
 interface AdminMessageReply {
@@ -210,14 +210,18 @@ function ThreadList({
 function ConversationDetail({
     thread,
     onReply,
+    onDelete,
     onBack,
 }: {
     thread: AdminMessageThread | null
     onReply: (threadId: string, message: string) => Promise<void>
+    onDelete: (threadId: string) => Promise<void>
     onBack: () => void
 }) {
     const [replyText, setReplyText] = useState('')
     const [sending, setSending] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [deleting, setDeleting] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -251,8 +255,46 @@ function ConversationDetail({
         }
     }
 
+    const handleDelete = async () => {
+        setDeleting(true)
+        try {
+            await onDelete(thread.id)
+        } finally {
+            setDeleting(false)
+            setShowDeleteConfirm(false)
+        }
+    }
+
     return (
         <div className="flex-1 flex flex-col h-full bg-white/50 backdrop-blur-sm overflow-hidden">
+            {/* Delete confirmation modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
+                    <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Delete conversation?</h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                            This will permanently delete this thread and all its messages. This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                {deleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-gray-100 bg-white/80 backdrop-blur-md">
                 <button
@@ -271,6 +313,13 @@ function ConversationDetail({
                         {thread.replies.length} message{thread.replies.length !== 1 ? 's' : ''}
                     </p>
                 </div>
+                <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    title="Delete thread"
+                >
+                    <Trash2 className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Messages */}
@@ -396,6 +445,18 @@ export function AdminMessagesClient() {
         }
     }
 
+    const handleDeleteThread = async (threadId: string) => {
+        try {
+            const res = await fetch(`/api/admin/messages/${threadId}`, { method: 'DELETE' })
+            if (res.ok) {
+                setThreads((prev) => prev.filter((t) => t.id !== threadId))
+                if (selectedId === threadId) setSelectedId(null)
+            }
+        } catch (err) {
+            console.error('Failed to delete thread:', err)
+        }
+    }
+
     const handleReply = async (threadId: string, message: string) => {
         try {
             const res = await fetch(`/api/admin/messages/${threadId}/replies`, {
@@ -467,6 +528,7 @@ export function AdminMessagesClient() {
                 <ConversationDetail
                     thread={selectedThread}
                     onReply={handleReply}
+                    onDelete={handleDeleteThread}
                     onBack={() => setSelectedId(null)}
                 />
             </div>

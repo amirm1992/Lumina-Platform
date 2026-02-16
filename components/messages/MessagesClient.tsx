@@ -83,6 +83,18 @@ export function MessagesClient({ user }: MessagesClientProps) {
         }
     }
 
+    const handleDeleteThread = async (threadId: string) => {
+        try {
+            const res = await fetch(`/api/messages/${threadId}`, { method: 'DELETE' })
+            if (res.ok) {
+                setThreads(prev => prev.filter(t => t.id !== threadId))
+                if (selectedId === threadId) setSelectedId(null)
+            }
+        } catch (err) {
+            console.error('Failed to delete thread:', err)
+        }
+    }
+
     const handleReply = async (threadId: string, message: string) => {
         try {
             const res = await fetch(`/api/messages/${threadId}/replies`, {
@@ -150,6 +162,7 @@ export function MessagesClient({ user }: MessagesClientProps) {
                         thread={selectedThread}
                         currentUserId={user?.id || ''}
                         onReply={handleReply}
+                        onDelete={handleDeleteThread}
                         onBack={() => setSelectedId(null)}
                     />
                 </div>
