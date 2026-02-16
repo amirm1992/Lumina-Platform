@@ -4,11 +4,11 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useClerk, useUser } from '@clerk/nextjs'
 import { useRouter, usePathname } from 'next/navigation'
 
-const INACTIVITY_TIMEOUT_MS = 3 * 60 * 1000 // 3 minutes
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
 
 /**
  * Monitors user activity (mouse, keyboard, touch, scroll).
- * Signs the user out after 3 minutes of inactivity.
+ * Signs the user out after 30 minutes of inactivity.
  * Only active when the user is signed in.
  */
 export function InactivityLogout(): null {
