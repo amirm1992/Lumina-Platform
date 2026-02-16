@@ -117,7 +117,7 @@ export function MessagesClient({ user }: MessagesClientProps) {
                         <h2 className="text-lg font-bold text-black">Inbox</h2>
                         <button
                             onClick={() => setIsComposeOpen(true)}
-                            className="p-2 rounded-full bg-black hover:bg-gray-800 text-white transition-all shadow-md"
+                            className="p-2 rounded-full bg-violet-600 hover:bg-violet-700 text-white transition-all shadow-md shadow-violet-900/20"
                             title="Compose New Message"
                         >
                             <Plus className="w-5 h-5" />

@@ -86,7 +86,7 @@ export function MessageDetail({ thread, currentUserId, onReply, onBack }: Messag
                             <div className={`max-w-[75%] ${isMe ? 'order-2' : 'order-1'}`}>
                                 <div className={`rounded-2xl px-4 py-3 shadow-sm ${
                                     isMe
-                                        ? 'bg-black text-white rounded-br-md'
+                                        ? 'bg-violet-600 text-white rounded-br-md shadow-md shadow-violet-900/20'
                                         : 'bg-white text-gray-900 border border-gray-200 rounded-bl-md'
                                 }`}>
                                     {!isMe && (
@@ -126,7 +126,7 @@ export function MessageDetail({ thread, currentUserId, onReply, onBack }: Messag
                     <button
                         onClick={handleSendReply}
                         disabled={!replyText.trim() || sending}
-                        className="p-3 rounded-xl bg-black hover:bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shrink-0"
+                        className="p-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-violet-900/20 shrink-0"
                     >
                         <Send className="w-4 h-4" />
                     </button>
