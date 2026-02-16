@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ClipboardList, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, MessageSquare, LogOut, X } from 'lucide-react'
 import { useEffect } from 'react'
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/applications', label: 'Applications', icon: ClipboardList },
+    { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
 ]
 
 interface AdminSidebarProps {
