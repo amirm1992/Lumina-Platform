@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import type { Application, LenderOffer } from '@/types/database'
 import type { UserProfile, Lender } from '../types'
 import type { AuthUser } from '@/types/auth'
-import { CONSTANT_LENDERS, getPlaceholderLenders, getLenderLogo } from '@/constants/lenders'
+import { getLenderLogo } from '@/constants/lenders'
 
 // ============================================
 // Helpers (pure functions, no side effects)
@@ -15,18 +15,6 @@ function calculateMonthlyPayment(principal: number, annualRate: number, years: n
     const n = years * 12
     if (!principal || !r || !n) return 0
     return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-}
-
-function normalizeLenderName(name: string): string {
-    return (name || '').toLowerCase().trim().replace(/\s+/g, ' ')
-}
-
-function dbOfferMatchesConstant(dbName: string, constantName: string): boolean {
-    const d = normalizeLenderName(dbName)
-    const c = normalizeLenderName(constantName)
-    if (d === c) return true
-    if (c === 'uwm' && (d.includes('united wholesale') || d.includes('uwm') || d === 'u.w.m.')) return true
-    return false
 }
 
 function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
@@ -51,32 +39,8 @@ function offerToLender(offer: LenderOffer, loanAmount: number): Lender {
     }
 }
 
-function mergeOffersWithConstants(dbOffers: Lender[]): Lender[] {
-    const mergedOffers = CONSTANT_LENDERS.map((constant, index) => {
-        const match = dbOffers.find((o) => dbOfferMatchesConstant(o.name, constant.name))
-        if (match) return match
-        return {
-            id: `placeholder-${index}`,
-            name: constant.name,
-            logo: constant.logo,
-            rate: 0,
-            apr: 0,
-            monthlyPayment: 0,
-            loanTerm: 30,
-            loanType: 'CONVENTIONAL',
-            points: 0,
-            closingCosts: 0,
-            isRecommended: false,
-            isPlaceholder: true,
-        } as Lender
-    })
-
-    // Only show lenders that are in CONSTANT_LENDERS — hide legacy/removed lenders
-    return mergedOffers.sort((a, b) => {
-        if (a.isPlaceholder && !b.isPlaceholder) return 1
-        if (!a.isPlaceholder && b.isPlaceholder) return -1
-        return a.rate - b.rate
-    })
+function sortOffersByRate(dbOffers: Lender[]): Lender[] {
+    return [...dbOffers].sort((a, b) => a.rate - b.rate)
 }
 
 // ============================================
@@ -99,7 +63,7 @@ interface UseDashboardDataReturn {
 
 export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn {
     const [application, setApplication] = useState<Application | null>(null)
-    const [offers, setOffers] = useState<Lender[]>(getPlaceholderLenders())
+    const [offers, setOffers] = useState<Lender[]>([])
     const [loading, setLoading] = useState(true)
     const [fetchError, setFetchError] = useState<string | null>(null)
     const [selectedLenderId, setSelectedLenderId] = useState<string>('')
@@ -158,9 +122,9 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
                         const dbOffers = app.lender_offers.map((o) =>
                             offerToLender(o, app.loan_amount || 0)
                         )
-                        setOffers(mergeOffersWithConstants(dbOffers))
+                        setOffers(sortOffersByRate(dbOffers))
                     } else {
-                        setOffers(getPlaceholderLenders())
+                        setOffers([])
                     }
                 }
             } catch (error) {
@@ -180,11 +144,10 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
         }
     }, [])
 
-    // Auto-select first real offer
+    // Auto-select first offer
     useEffect(() => {
         if (offers.length > 0 && !selectedLenderId) {
-            const firstReal = offers.find((o) => !o.isPlaceholder)
-            setSelectedLenderId(firstReal?.id || offers[0].id)
+            setSelectedLenderId(offers[0].id)
         }
     }, [offers, selectedLenderId])
 
@@ -194,7 +157,7 @@ export function useDashboardData(user: AuthUser | null): UseDashboardDataReturn 
     )
 
     const hasRealOffers = useMemo(
-        () => offers.some((o) => !o.isPlaceholder),
+        () => offers.length > 0,
         [offers]
     )
 

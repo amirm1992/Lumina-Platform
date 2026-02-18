@@ -36,6 +36,21 @@ export const CONSTANT_LENDERS: LenderMeta[] = [
         name: 'New American Funding',
         logo: '/logos/new-american-funding.png',
         description: 'Independent mortgage lender'
+    },
+    {
+        name: 'Equity Prime Mortgage',
+        logo: '/logos/equity-prime-mortgage.png',
+        description: 'Full-service mortgage lender'
+    },
+    {
+        name: 'NewRez',
+        logo: '/logos/newrez.png',
+        description: 'Residential mortgage lender & servicer'
+    },
+    {
+        name: 'Plaza Home Mortgage',
+        logo: '/logos/plaza-home-mortgage.png',
+        description: 'Wholesale & correspondent lender'
     }
 ];
 

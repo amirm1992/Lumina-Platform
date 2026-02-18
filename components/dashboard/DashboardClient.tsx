@@ -92,9 +92,6 @@ export function DashboardClient({ user }: DashboardClientProps) {
         )
     }
 
-    // Only show real (non-placeholder) offers in the cards
-    const realOffers = offers.filter(o => !o.isPlaceholder)
-
     return (
         <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
             <DashboardSidebar />
@@ -155,8 +152,8 @@ export function DashboardClient({ user }: DashboardClientProps) {
                                         <button className="text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors">Lowest Rate</button>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {realOffers.map(lender => (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {offers.map(lender => (
                                         <LenderCard
                                             key={lender.id}
                                             lender={lender}
