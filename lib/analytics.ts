@@ -2,6 +2,7 @@
 // Google Analytics / GTM event helpers
 // All dataLayer pushes go through here for consistency.
 // No PII (email, name, phone, SSN) should ever be passed.
+// Meta Pixel fires via GTM (triggers on application_qualified_lead / application_submitted).
 // ============================================
 
 // Step metadata used by funnel events

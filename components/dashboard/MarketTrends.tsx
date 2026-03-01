@@ -77,19 +77,19 @@ export function MarketTrends() {
     const change = calculateChange()
 
     return (
-        <div className="glass p-6 rounded-2xl border border-white/50 bg-white/70 backdrop-blur-md relative min-h-[300px] flex flex-col shadow-lg">
+        <div className="glass p-6 rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl relative min-h-[300px] flex flex-col shadow-sm transition-shadow hover:shadow-md">
             <div className="flex justify-between items-center mb-6 px-2">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Market Rate Trends</h3>
+                <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Market Rate Trends</h3>
 
                 {/* Time Range Tabs */}
-                <div className="flex bg-gray-100 rounded-lg p-1 border border-gray-200">
+                <div className="flex bg-slate-100 rounded-lg p-1 border border-slate-200">
                     {(['1W', '6W', '6M'] as TimeRange[]).map((r) => (
                         <button
                             key={r}
                             onClick={() => setRange(r)}
-                            className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${range === r
-                                ? 'bg-black text-white shadow-md'
-                                : 'text-gray-500 hover:text-black hover:bg-white/50'
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all ${range === r
+                                ? 'bg-[#2563EB] text-white shadow-sm'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-white/60'
                                 }`}
                         >
                             {r === '1W' ? 'Daily' : r === '6W' ? 'Weekly' : 'Monthly'}
@@ -99,9 +99,9 @@ export function MarketTrends() {
             </div>
 
             {loading ? (
-                <div className="flex-1 flex items-center justify-center text-gray-400 gap-2">
+                <div className="flex-1 flex items-center justify-center text-slate-400 gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span className="text-xs">Loading data...</span>
+                    <span className="text-xs font-semibold tracking-wide">Loading data...</span>
                 </div>
             ) : (
                 <div className="flex-1 w-full min-h-[200px]" style={{ minHeight: '200px' }}>
@@ -111,8 +111,8 @@ export function MarketTrends() {
                         <LineChart data={filteredData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
                             <defs>
                                 <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor="#7e22ce" stopOpacity={0.8} />
-                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.8} />
+                                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.8} />
+                                    <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.8} />
                                 </linearGradient>
                             </defs>
                             <XAxis
@@ -127,23 +127,24 @@ export function MarketTrends() {
                             />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: '#ffffff',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    backdropFilter: 'blur(8px)',
+                                    border: '1px solid rgba(255,255,255,0.6)',
+                                    borderRadius: '16px',
+                                    boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)'
                                 }}
-                                itemStyle={{ color: '#000', fontSize: '12px', fontWeight: 'bold' }}
+                                itemStyle={{ color: '#0F172A', fontSize: '14px', fontWeight: '800' }}
                                 formatter={(value: number) => [`${value.toFixed(2)}%`, 'Rate']}
-                                labelStyle={{ color: '#64748b', marginBottom: '4px', fontSize: '11px' }}
+                                labelStyle={{ color: '#64748B', marginBottom: '6px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                                 labelFormatter={(label) => new Date(label).toLocaleDateString()}
                             />
                             <Line
                                 type="monotone"
                                 dataKey="rate"
-                                stroke="#7e22ce"
-                                strokeWidth={3}
-                                dot={{ r: 4, fill: '#7e22ce', strokeWidth: 0 }}
-                                activeDot={{ r: 6, fill: '#fff', stroke: '#7e22ce', strokeWidth: 2 }}
+                                stroke="#2563EB"
+                                strokeWidth={4}
+                                dot={{ r: 4, fill: '#2563EB', strokeWidth: 0 }}
+                                activeDot={{ r: 6, fill: '#fff', stroke: '#2563EB', strokeWidth: 3 }}
                                 isAnimationActive={false} // Disable animation to rule out render lag
                             />
                         </LineChart>
@@ -152,17 +153,17 @@ export function MarketTrends() {
             )}
 
             {!loading && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-[10px] text-gray-500 text-center mb-1">
-                        Rates have <span className={change > 0 ? "text-red-500 font-bold" : "text-green-500 font-bold"}>
+                <div className="mt-4 pt-5 border-t border-slate-200/50">
+                    <p className="text-[11px] text-slate-500 text-center mb-2 font-medium">
+                        Rates have <span className={change > 0 ? "text-rose-500 font-bold" : "text-emerald-500 font-bold"}>
                             {change > 0 ? 'increased' : 'decreased'} by {Math.abs(change).toFixed(3)}%
                         </span> over this period.
                     </p>
                     <div className="flex justify-between items-center px-2">
-                        <p className="text-[9px] text-gray-400 uppercase tracking-wider">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
                             Source: {metadata.source || 'FRED'}
                         </p>
-                        <p className="text-[9px] text-gray-400 uppercase tracking-wider">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
                             As of: {metadata.date}
                         </p>
                     </div>
@@ -170,8 +171,8 @@ export function MarketTrends() {
             )}
 
             {/* Chat fab */}
-            <button className="absolute -bottom-3 -right-3 w-10 h-10 bg-black rounded-full flex items-center justify-center text-white shadow-lg shadow-black/20 hover:scale-110 transition-transform z-10 hover:bg-gray-800">
-                <MessageSquare className="w-4 h-4" />
+            <button className="absolute -bottom-3 -right-3 w-12 h-12 bg-[#2563EB] rounded-full flex items-center justify-center text-white shadow-lg shadow-[#2563EB]/30 hover:scale-110 transition-transform z-10 hover:bg-[#1D4ED8]">
+                <MessageSquare className="w-5 h-5" />
             </button>
         </div>
     )

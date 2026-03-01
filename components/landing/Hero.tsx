@@ -1,14 +1,29 @@
 'use client'
 
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'spline-viewer': any;
+        }
+    }
+}
+
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import Script from 'next/script'
 import dynamic from 'next/dynamic'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { ChevronRight } from 'lucide-react'
 
 // Dynamic import for Lottie to avoid SSR issues
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
 
+// Dynamic import for 3D Scene
+const SceneClient = dynamic(() => import('./Scene').then(mod => mod.Scene), {
+    ssr: false,
+    loading: () => <div className="w-full h-full flex items-center justify-center text-slate-400 font-medium">Loading 3D Scene...</div>
+})
 interface MortgageRate {
     rate: number
     date: string
@@ -28,6 +43,30 @@ export function Hero() {
     const [chartView, setChartView] = useState<ChartView>('W')
     const [lottieData, setLottieData] = useState<Record<string, unknown> | null>(null)
     const [lottieDataLoan, setLottieDataLoan] = useState<Record<string, unknown> | null>(null)
+    const [splineLoaded, setSplineLoaded] = useState(false)
+
+    // Skip Spline on mobile / low-end devices
+    const [shouldLoadSpline, setShouldLoadSpline] = useState(false)
+
+    useEffect(() => {
+        const checkDeviceCapability = () => {
+            const isMobile = window.innerWidth < 768
+            const isLowEnd = (navigator.hardwareConcurrency || 4) <= 2
+
+            // Optional WebGL check
+            try {
+                const canvas = document.createElement('canvas')
+                const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
+                if (!gl) return false
+            } catch (e) {
+                return false
+            }
+
+            return !isMobile && !isLowEnd
+        }
+
+        setShouldLoadSpline(checkDeviceCapability())
+    }, [])
 
     useEffect(() => {
         // Fetch Lottie animation data
@@ -119,164 +158,154 @@ export function Hero() {
 
     return (
         <>
-            {/* Hero Section with Dark Navy Blue Background */}
+            {/* Hero Section with Light Background */}
             <section
                 aria-label="Hero — mortgage rate comparison"
-                className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-br from-[#1E3A5F] via-[#1A3353] to-[#0F172A]"
+                className="relative min-h-screen bg-gradient-to-br from-[#eef5fb] via-[#e0eaf5] to-[#d1e0f0] flex flex-col justify-center overflow-hidden font-sans text-[#1a202c] pt-24 pb-8"
             >
-                {/* Decorative Elements */}
-                <div className="absolute inset-0 z-0 overflow-hidden">
-                    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#3B82F6]/10 rounded-full blur-[150px]" />
-                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#60A5FA]/5 rounded-full blur-[100px]" />
-                    {/* Animated line graph */}
-                    <svg className="absolute bottom-20 left-0 right-0 w-full h-32 opacity-30" viewBox="0 0 1200 100" preserveAspectRatio="none">
-                        <path
-                            d="M0,80 Q150,60 300,70 T600,50 T900,60 T1200,40"
-                            stroke="#3B82F6"
-                            strokeWidth="2"
-                            fill="none"
-                            className="animate-pulse"
-                        />
-                    </svg>
-                </div>
+                {/* Main Content Area */}
+                <main className="flex-1 flex flex-col lg:flex-row items-center justify-between px-6 lg:px-24 w-full max-w-7xl mx-auto relative z-10">
 
-                <div className="relative z-10 container mx-auto px-6">
-                    <div className="text-center max-w-4xl mx-auto">
+                    {/* Left Column - Text */}
+                    <div className="w-full lg:w-[55%] flex flex-col justify-center gap-6 z-10 mt-12 lg:mt-0">
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-white/90 mb-8">
-                            <span className="flex h-2 w-2 rounded-full bg-[#3B82F6] animate-pulse"></span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white/60 text-sm font-medium text-slate-700 w-fit shadow-sm">
+                            <span className="flex h-2 w-2 rounded-full bg-[#2563EB] animate-pulse"></span>
                             AI-Powered Mortgage Platform
                         </div>
 
-                        {/* Headline */}
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
-                            A smarter way to find
-                            <br />
-                            <span className="text-[#60A5FA]">your perfect mortgage</span>
+                        <h1 className="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-slate-900">
+                            A smarter way to find<br />
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] to-[#60A5FA]">your perfect mortgage</span>
                         </h1>
-
-                        {/* Subtitle */}
-                        <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/70 mb-10 leading-relaxed">
-                            Compare rates from top lenders instantly. Our AI analyzes your profile
-                            to find the best loan options tailored just for you.
+                        <p className="text-xl text-slate-600 max-w-lg leading-relaxed mt-2">
+                            Compare rates from top lenders instantly. Our AI analyzes your profile to find the best loan options tailored just for you.
                         </p>
 
-                        {/* CTAs */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                        <div className="flex flex-wrap gap-4 mt-6">
                             <Link href="/apply">
-                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all duration-300 shadow-lg shadow-[#2563EB]/25 hover:shadow-xl hover:shadow-[#2563EB]/30 min-w-[200px]">
-                                    Get Started
+                                <button className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-8 py-4 rounded-full font-semibold transition-colors shadow-lg shadow-[#2563EB]/25 w-full sm:w-auto">
+                                    Get It For Your Home
+                                    <ChevronRight className="w-5 h-5" />
                                 </button>
                             </Link>
                             <Link href="#calculator">
-                                <button className="px-8 py-4 rounded-full text-lg font-semibold bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 transition-all min-w-[200px]">
-                                    Calculate Payment
+                                <button className="flex items-center justify-center gap-2 bg-white/50 hover:bg-white/80 text-[#2563EB] border border-[#BFDBFE] px-8 py-4 rounded-full font-semibold transition-colors backdrop-blur-sm shadow-sm ring-1 ring-white/60 w-full sm:w-auto">
+                                    Discover More
+                                    <ChevronRight className="w-5 h-5" />
                                 </button>
                             </Link>
                         </div>
 
                         {/* Trust Badges */}
-                        <div className="flex items-center justify-center gap-8 sm:gap-12 mb-16">
-                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-14 w-auto invert opacity-90" />
-                            <div className="w-px h-10 bg-white/20" />
-                            <div className="flex items-center gap-2.5 text-white/80">
-                                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <div className="flex items-center gap-6 sm:gap-8 mt-10">
+                            <Image src="/logos/equal-housing.png" alt="Equal Housing Opportunity" width={500} height={500} className="h-10 sm:h-12 w-auto opacity-70" />
+                            <div className="w-px h-10 bg-slate-300" />
+                            <div className="flex items-center gap-2.5 text-slate-600">
+                                <svg className="w-6 h-6 sm:w-7 sm:h-7 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                                 </svg>
                                 <div>
-                                    <div className="text-sm sm:text-base font-semibold tracking-wide">NMLS #1631748</div>
-                                    <div className="text-[10px] sm:text-xs text-white/50">Federally Registered</div>
+                                    <div className="text-sm font-bold tracking-wide text-slate-800">NMLS #1631748</div>
+                                    <div className="text-[10px] text-slate-500 font-medium tracking-wide">Federally Registered</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Live Rate Dashboard */}
-                        <div className="mt-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 max-w-4xl mx-auto shadow-xl">
-                            <div className="grid md:grid-cols-3 gap-8">
-                                {/* Rate Column */}
-                                <div className="md:col-span-1 flex flex-col justify-center text-center md:text-left">
-                                    <h3 className="text-white/80 text-lg font-medium mb-1">Current 30-Year Fixed</h3>
-                                    <div className="text-6xl font-bold text-white tracking-tighter mb-4">
-                                        {loading ? '---' : `${rateData?.rate?.toFixed(2)}%`}
-                                    </div>
-                                    <div className="text-white/40 text-xs">
-                                        Source: FRED • Updated {new Date().toLocaleDateString()}
-                                    </div>
+                    {/* Right Column - 3D Canvas */}
+                    <div className="w-full lg:w-1/2 h-[400px] lg:h-[600px] absolute lg:relative right-0 opacity-30 lg:opacity-100 pointer-events-none lg:pointer-events-auto">
+                        {shouldLoadSpline ? <SceneClient /> : null}
+                    </div>
+                </main>
+
+                <div className="container mx-auto px-6 lg:px-24 mb-6 relative z-10 w-full max-w-7xl">
+                    {/* Live Rate Dashboard (Moved Below) */}
+                    <div className="mt-8 bg-white/60 backdrop-blur-xl border border-white/40 rounded-3xl p-6 md:p-8 w-full shadow-lg">
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {/* Rate Column */}
+                            <div className="md:col-span-1 flex flex-col justify-center text-center md:text-left">
+                                <h3 className="text-gray-600 text-lg font-semibold mb-1">Current 30-Year Fixed</h3>
+                                <div className="text-6xl font-extrabold text-[#0F172A] tracking-tighter mb-4">
+                                    {loading ? '---' : `${rateData?.rate?.toFixed(2)}%`}
+                                </div>
+                                <div className="text-gray-500 text-xs font-medium">
+                                    Source: FRED • Updated {new Date().toLocaleDateString()}
+                                </div>
+                            </div>
+
+                            {/* Chart Area */}
+                            <div className="md:col-span-2 min-h-[220px] w-full bg-white/40 rounded-2xl p-4 border border-white/60 relative group shadow-sm">
+                                {/* Glassmorphic Grid Overlay */}
+                                <div className="absolute inset-x-4 bottom-4 top-4 border-b border-gray-200/50 pointer-events-none" />
+
+                                {/* Controls */}
+                                <div className="absolute top-4 right-4 z-10 flex p-1 bg-white/60 rounded-full border border-gray-200 backdrop-blur-md">
+                                    {(['D', 'M', 'W'] as const).map((view) => {
+                                        const labels: Record<string, string> = { D: 'Daily', M: 'Monthly', W: 'Weekly' }
+                                        return (
+                                            <button
+                                                key={view}
+                                                onClick={() => setChartView(view)}
+                                                aria-label={`Show ${labels[view]} rate trend`}
+                                                aria-pressed={chartView === view}
+                                                className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${chartView === view
+                                                    ? 'bg-white text-[#2563EB] shadow-sm ring-1 ring-gray-200'
+                                                    : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+                                                    }`}
+                                            >
+                                                {view}
+                                            </button>
+                                        )
+                                    })}
                                 </div>
 
-                                {/* Chart Area */}
-                                <div className="md:col-span-2 min-h-[220px] w-full bg-black/10 rounded-2xl p-4 border border-white/5 relative group">
-                                    {/* Glassmorphic Grid Overlay */}
-                                    <div className="absolute inset-x-4 bottom-4 top-4 border-b border-white/5 pointer-events-none" />
-
-                                    {/* Controls (Moved Inside) */}
-                                    <div className="absolute top-4 right-4 z-10 flex gap-2">
-                                        {(['D', 'M', 'W'] as const).map((view) => {
-                                            const labels: Record<string, string> = { D: 'Daily', M: 'Monthly', W: 'Weekly' }
-                                            return (
-                                                <button
-                                                    key={view}
-                                                    onClick={() => setChartView(view)}
-                                                    aria-label={`Show ${labels[view]} rate trend`}
-                                                    aria-pressed={chartView === view}
-                                                    className={`w-8 h-8 rounded-full text-xs font-bold transition-all border ${chartView === view
-                                                        ? 'bg-white text-[#1E3A5F] border-white'
-                                                        : 'bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
-                                                        }`}
-                                                >
-                                                    {view}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
-                                            <defs>
-                                                <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.6} />
-                                                    <stop offset="95%" stopColor="#60A5FA" stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <XAxis
-                                                dataKey="label"
-                                                stroke="rgba(255,255,255,0.3)"
-                                                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10, dy: 10 }}
-                                                tickLine={false}
-                                                axisLine={false}
-                                            />
-                                            <YAxis
-                                                hide={true}
-                                                domain={['dataMin - 0.2', 'dataMax + 0.2']}
-                                            />
-                                            <Tooltip
-                                                contentStyle={{
-                                                    backgroundColor: 'rgba(20, 30, 60, 0.90)',
-                                                    backdropFilter: 'blur(8px)',
-                                                    borderRadius: '12px',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                                                    padding: '12px'
-                                                }}
-                                                itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}
-                                                labelStyle={{ color: '#9CA3AF', marginBottom: '4px', fontSize: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}
-                                                formatter={(value: number) => [`${value.toFixed(2)}%`, 'Rate']}
-                                                labelFormatter={(_, payload) => payload[0]?.payload?.fullDate || ''}
-                                                cursor={{ stroke: 'rgba(255,255,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
-                                            />
-                                            <Area
-                                                type="monotone"
-                                                dataKey="rate"
-                                                stroke="#60A5FA"
-                                                strokeWidth={3}
-                                                fillOpacity={1}
-                                                fill="url(#colorRate)"
-                                                dot={{ r: 4, strokeWidth: 2, stroke: '#60A5FA', fill: '#1E3A5F' }}
-                                                activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }}
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </div>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#2563EB" stopOpacity={0.2} />
+                                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <XAxis
+                                            dataKey="label"
+                                            stroke="rgba(15, 23, 42, 0.2)"
+                                            tick={{ fill: 'rgba(15, 23, 42, 0.5)', fontSize: 10, dy: 10, fontWeight: 500 }}
+                                            tickLine={false}
+                                            axisLine={false}
+                                        />
+                                        <YAxis
+                                            hide={true}
+                                            domain={['dataMin - 0.2', 'dataMax + 0.2']}
+                                        />
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                backdropFilter: 'blur(8px)',
+                                                borderRadius: '12px',
+                                                border: '1px solid rgba(226, 232, 240, 1)',
+                                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                padding: '12px'
+                                            }}
+                                            itemStyle={{ color: '#0F172A', fontWeight: 700, fontSize: '14px' }}
+                                            labelStyle={{ color: '#64748B', marginBottom: '4px', fontSize: '12px', borderBottom: '1px solid #E2E8F0', paddingBottom: '4px', fontWeight: 500 }}
+                                            formatter={(value: number) => [`${value.toFixed(2)}%`, 'Rate']}
+                                            labelFormatter={(_, payload) => payload[0]?.payload?.fullDate || ''}
+                                            cursor={{ stroke: 'rgba(15, 23, 42, 0.1)', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="rate"
+                                            stroke="#2563EB"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorRate)"
+                                            dot={{ r: 4, strokeWidth: 2, stroke: '#2563EB', fill: '#FFFFFF' }}
+                                            activeDot={{ r: 6, fill: '#1D4ED8', stroke: '#BFDBFE', strokeWidth: 4 }}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
                     </div>

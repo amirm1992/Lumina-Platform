@@ -93,12 +93,12 @@ export function DashboardClient({ user }: DashboardClientProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 selection:bg-[#DBEAFE] font-sans text-gray-900">
+        <div className="min-h-screen font-sans text-gray-900 bg-gradient-to-br from-[#F8FAFC] via-[#EEF2F6] to-[#E2E8F0] selection:bg-[#DBEAFE]">
             <DashboardSidebar />
 
-            <main className="container mx-auto px-6 py-10 pt-20">
+            <main className="md:ml-64 min-h-screen px-4 sm:px-6 lg:px-8 py-8 pt-24 md:pt-10 transition-all duration-300">
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
 
                     {/* Left Column: Summary & Controls */}
                     <div className="lg:col-span-8 space-y-8">
@@ -106,30 +106,30 @@ export function DashboardClient({ user }: DashboardClientProps) {
                         {/* Header Summary */}
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">
+                                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2 tracking-tight">
                                     Welcome back, {userProfile.name}
                                 </h1>
-                                <p className="text-gray-500">
+                                <p className="text-slate-500 font-medium">
                                     {hasRealOffers
                                         ? 'Based on your verified credit, here are your personalized offers.'
                                         : 'We are crunching the numbers with our top lenders for you.'}
                                 </p>
                             </div>
                             <div className="flex gap-4">
-                                <div className="px-5 py-3 bg-white border border-gray-200 rounded-2xl text-center min-w-[120px] shadow-sm">
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 font-bold">Credit Score</p>
+                                <div className="px-6 py-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl text-center min-w-[130px] shadow-sm hover:shadow-md transition-shadow">
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1.5 font-bold">Credit Score</p>
                                     {userProfile.creditScore > 0 ? (
-                                        <p className={`text-2xl font-bold ${userProfile.creditScore >= 740 ? 'text-green-600' :
-                                            userProfile.creditScore >= 670 ? 'text-blue-600' :
-                                                userProfile.creditScore >= 580 ? 'text-amber-600' : 'text-red-600'
+                                        <p className={`text-3xl font-bold tracking-tight ${userProfile.creditScore >= 740 ? 'text-emerald-500' :
+                                            userProfile.creditScore >= 670 ? 'text-blue-500' :
+                                                userProfile.creditScore >= 580 ? 'text-amber-500' : 'text-rose-500'
                                             }`}>{userProfile.creditScore}</p>
                                     ) : (
-                                        <p className="text-xl font-medium text-gray-400">Pending</p>
+                                        <p className="text-xl font-medium text-slate-400">Pending</p>
                                     )}
                                 </div>
-                                <div className="px-5 py-3 bg-white border border-gray-200 rounded-2xl text-center min-w-[120px] shadow-sm">
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 font-bold">LTV Ratio</p>
-                                    <p className="text-2xl font-bold text-[#2563EB]">{ltv}%</p>
+                                <div className="px-6 py-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl text-center min-w-[130px] shadow-sm hover:shadow-md transition-shadow">
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1.5 font-bold">LTV Ratio</p>
+                                    <p className="text-3xl font-bold tracking-tight text-[#2563EB]">{ltv}%</p>
                                 </div>
                             </div>
                         </div>
@@ -146,9 +146,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
                         {hasRealOffers ? (
                             <div>
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold text-black">Available Lender Offers</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Available Lender Offers</h2>
                                     <div className="flex gap-2 text-xs">
-                                        <span className="text-gray-500">Sort by:</span>
+                                        <span className="text-slate-500 font-medium">Sort by:</span>
                                         <button className="text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors">Lowest Rate</button>
                                     </div>
                                 </div>
@@ -186,46 +186,47 @@ export function DashboardClient({ user }: DashboardClientProps) {
 
                         {/* Closing Info */}
                         {selectedLender && hasRealOffers && (
-                            <div className="p-6 rounded-2xl bg-white/70 backdrop-blur-md border border-white/50 shadow-lg transition-all hover:shadow-xl">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="p-2 bg-black/90 rounded-lg shadow-lg shadow-black/10">
+                            <div className="p-6 rounded-3xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-sm transition-shadow hover:shadow-md">
+                                <div className="flex items-center gap-4 mb-5">
+                                    <div className="p-2.5 bg-slate-900 rounded-xl shadow-md shadow-slate-900/10">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
-                                    <h4 className="font-bold text-black">Closing Cost Insight</h4>
+                                    <h4 className="font-bold text-slate-900 tracking-tight text-lg">Closing Cost Insight</h4>
                                 </div>
-                                <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-                                    Based on <strong className="text-black">{selectedLender.name}&apos;s</strong> fees, your total estimated closing costs are{' '}
-                                    <strong className="text-black">${(selectedLender.closingCosts ?? 0).toLocaleString()}</strong>.
+                                <p className="text-[13px] text-slate-500 mb-5 leading-relaxed">
+                                    Based on <strong className="text-slate-900">{selectedLender.name}&apos;s</strong> fees, your total estimated closing costs are{' '}
+                                    <strong className="text-slate-900">${(selectedLender.closingCosts ?? 0).toLocaleString()}</strong>.
                                     This includes lender fees, appraisal, and title insurance.
                                 </p>
-                                <button className="text-sm text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors uppercase tracking-wide">
-                                    View detailed cost breakdown &rarr;
+                                <button className="text-[11px] text-[#2563EB] font-bold hover:text-[#1D4ED8] transition-colors uppercase tracking-widest flex items-center gap-1 group">
+                                    View detailed cost breakdown
+                                    <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
                                 </button>
                             </div>
                         )}
 
                         {/* Application Info */}
                         {application && (
-                            <div className="p-6 rounded-2xl bg-white/70 backdrop-blur-md border border-white/50 shadow-lg">
-                                <h4 className="font-bold text-black mb-4">Your Application</h4>
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Loan Purpose</span>
-                                        <span className="text-gray-900 font-medium capitalize">{application.product_type}</span>
+                            <div className="p-6 rounded-3xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-sm transition-shadow hover:shadow-md">
+                                <h4 className="font-bold text-slate-900 mb-5 tracking-tight text-lg">Your Application</h4>
+                                <div className="space-y-4 text-[13px]">
+                                    <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                                        <span className="text-slate-500 font-medium">Loan Purpose</span>
+                                        <span className="text-slate-900 font-bold capitalize bg-slate-100 px-2.5 py-1 rounded-md">{application.product_type}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Property Type</span>
-                                        <span className="text-gray-900 font-medium capitalize">{application.property_type?.replaceAll('_', ' ')}</span>
+                                    <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                                        <span className="text-slate-500 font-medium">Property Type</span>
+                                        <span className="text-slate-900 font-bold capitalize">{application.property_type?.replaceAll('_', ' ')}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">ZIP Code</span>
-                                        <span className="text-gray-900 font-medium">{application.zip_code}</span>
+                                    <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                                        <span className="text-slate-500 font-medium">ZIP Code</span>
+                                        <span className="text-slate-900 font-bold">{application.zip_code}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Submitted</span>
-                                        <span className="text-gray-900 font-medium">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 font-medium">Submitted</span>
+                                        <span className="text-slate-900 font-bold">
                                             {new Date(application.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
@@ -261,7 +262,7 @@ export function DashboardClient({ user }: DashboardClientProps) {
             )}
 
             {/* Extended Compliance Footer */}
-            <footer className="mt-16 border-t border-gray-200 bg-white">
+            <footer className="md:ml-64 mt-16 border-t border-gray-200/50 bg-white/30 backdrop-blur-md">
                 <div className="container mx-auto px-6 py-8">
                     <div className="text-center space-y-3 text-[11px] leading-relaxed max-w-4xl mx-auto text-gray-500">
                         <p>

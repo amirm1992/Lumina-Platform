@@ -163,6 +163,20 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                             Property & Loan Details
                         </h2>
                         <div className="space-y-3">
+                            {application.property_address && (
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase tracking-wide">Property Address</p>
+                                    <p className="text-gray-900 font-medium">
+                                        {application.property_address}
+                                        {application.property_city || application.property_state || application.zip_code
+                                            ? `, ${[application.property_city, application.property_state, application.zip_code].filter(Boolean).join(', ')}`
+                                            : ''}
+                                    </p>
+                                    {application.property_county && (
+                                        <p className="text-xs text-gray-500 mt-0.5">{application.property_county} County</p>
+                                    )}
+                                </div>
+                            )}
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Loan Purpose</p>
                                 <p className="text-gray-900 font-medium capitalize">{application.product_type || 'N/A'}</p>
@@ -175,10 +189,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                                 <p className="text-xs text-gray-500 uppercase tracking-wide">Property Usage</p>
                                 <p className="text-gray-900 capitalize">{application.property_usage || 'N/A'}</p>
                             </div>
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Property Location (ZIP)</p>
-                                <p className="text-gray-900">{application.zip_code || 'N/A'}</p>
-                            </div>
+                            {!application.property_address && (
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase tracking-wide">Property Location (ZIP)</p>
+                                    <p className="text-gray-900">{application.zip_code || 'N/A'}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

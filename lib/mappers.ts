@@ -58,6 +58,9 @@ interface PrismaApplication {
     propertyType: string | null
     propertyUsage: string | null
     propertyState: string | null
+    propertyAddress: string | null
+    propertyCity: string | null
+    propertyCounty: string | null
     propertyValue: { toNumber(): number } | number | null
     loanAmount: { toNumber(): number } | number | null
     zipCode: string | null
@@ -215,6 +218,9 @@ export function mapApplication(a: PrismaApplication): Application {
         property_type: a.propertyType as Application['property_type'],
         property_usage: a.propertyUsage as Application['property_usage'],
         property_state: a.propertyState ?? null,
+        property_address: a.propertyAddress ?? null,
+        property_city: a.propertyCity ?? null,
+        property_county: a.propertyCounty ?? null,
         property_value: toNum(a.propertyValue),
         loan_amount: toNum(a.loanAmount),
         zip_code: a.zipCode,

@@ -54,6 +54,9 @@ export interface Application {
     property_type: PropertyType | null
     property_usage: PropertyUsage | null
     property_state: string | null
+    property_address: string | null
+    property_city: string | null
+    property_county: string | null
     property_value: number | null
     loan_amount: number | null
     zip_code: string | null
